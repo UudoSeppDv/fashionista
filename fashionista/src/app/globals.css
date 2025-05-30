@@ -1,8 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #F1ECE6; 
   --foreground: #171717;
+}
+
+
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/ClashDisplay-Medium.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+
+@layer utilities {
+  .font-montserrat {
+    font-family: var(--font-montserrat), sans-serif;
+  }
 }
 
 @theme inline {
@@ -23,4 +38,18 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+.font-clash {
+  font-family: 'Clash Display', sans-serif;
+}
+@media (max-width: 1330px) {
+  .hide-at-1330 {
+    display: none !important;
+  }
+
+}
+@media (min-width: 1500px) {
+  .ml-56-at-1400 {
+    margin-left: 14rem; /* Tailwind's ml-56 = 224px = 14rem */
+  }
 }

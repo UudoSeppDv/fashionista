@@ -1,20 +1,32 @@
 export const mockListings = [
   {
     id: '1',
-    title: 'Vintage nahkjakk',
-    price: 45,
-    image: '/images/jacket.jpg',
+    title: 'Vélla',
+    price: 79,
+    image: '/images/mockImage/aluspesu.png',
   },
   {
     id: '2',
-    title: '90ndate teksapüksid',
-    price: 30,
-    image: '/images/jeans.jpg',
+    title: 'Stride & Co.',
+    price: 45,
+    image: '/images/mockImage/mantel.png',
   },
   {
     id: '3',
-    title: 'Retro prillid',
-    price: 15,
-    image: '/images/glasses.jpg',
+    title: 'ReNova',
+    price: 20,
+    image: '/images/mockImage/pusa.png',
+  },
+  {
+    id: '4',
+    title: 'Lume Luxe',
+    price: 130,
+    image: '/images/mockImage/kaelakee.png',
+  },
+    {
+    id: '5',
+    title: 'Pacer Originals',
+    price: 130,
+    image: '/images/mockImage/kott.png',
   },
 ]
