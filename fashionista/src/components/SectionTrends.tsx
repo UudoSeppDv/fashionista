@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function SectionTrends() {
   return (
-    <section className="bg-[#F7F1EB] w-full py-20 px-8 flex flex-col md:flex-row items-center justify-center gap-12">
+    <section className="border-b w-full py-20 px-8 flex flex-col md:flex-row items-center justify-center gap-12">
       {/* Left: Image */}
       <div className="flex-shrink-0 border border-pink-100">
         <Image
