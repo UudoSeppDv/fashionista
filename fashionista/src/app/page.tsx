@@ -4,6 +4,7 @@ import SectionFeaturedProducts from '@/components/SectionFeaturedProducts';
 import SectionFeaturedBrands from '@/components/SectionFeaturedBrands';
 import SectionTrends from "@/components/SectionTrends";
 import SectionBanner from "@/components/SectionBanner";
+import SectionRecentlyAdded from '@/components/SectionRecentlyAdded';
 
 export default function Home() {
   return (
@@ -14,6 +15,8 @@ export default function Home() {
         <SectionFeaturedBrands />
         <SectionFeaturedProducts />
         <SectionTrends />
+        <SectionRecentlyAdded />
+
 
 
       {/* FOOTER */}

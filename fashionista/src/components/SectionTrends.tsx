@@ -3,29 +3,31 @@ import Image from "next/image";
 
 export default function SectionTrends() {
   return (
-    <section className="border-b w-full py-20 px-8 flex flex-col md:flex-row items-center justify-center gap-12">
-      {/* Left: Image */}
-      <div className="flex-shrink-0 border border-pink-100">
+    <section className="border-b w-full py-40 px-4 flex flex-col md:flex-row items-start justify-center gap-12">
+      {/* Image */}
+      <div className="w-full md:w-1/2 max-w-2xl mx-auto md:mx-0 py-4">
         <Image
-          src="/images/fashionista.jpg" // replace with your actual image path
+          src="/images/fashionistaTrend.png"
           alt="Fashionista"
-          width={512}
-          height={512}
-          className="object-cover"
+          width={670}
+          height={650}
+          className="w-full h-auto object-cover"
         />
       </div>
 
-      {/* Right: Text content */}
-      <div className="max-w-md text-center md:text-left">
-        <p className="text-sm text-gray-500 mb-2">Fashionista soovitab</p>
-        <h2 className="text-3xl md:text-4xl font-bold text-[#1C2A67] leading-snug mb-6">
+      {/* Text content */}
+      <div className="w-full md:w-1/2 max-w-md text-left md:mt-20 mt-4">
+        <p className="font-montserrat text-sm text-[#2B438D] mb-2">Fashionista soovitab</p>
+        <h2 className="font-montserrat text-3xl md:text-4xl font-bold text-[#2B438D] leading-snug mb-6">
           Avasta Hetke <br /> Moetrendid
         </h2>
 
-        <button className="inline-flex items-center border border-pink-500 text-pink-500 px-5 py-2 rounded-full font-semibold hover:bg-pink-50 transition">
-          VAATA
-          <span className="ml-3 text-xl">→</span>
-        </button>
+        <div className="w-full px-8 md:px-0 md:w-auto">
+          <button className="w-full md:w-auto inline-flex items-center justify-center border border-pink-500 text-pink-500 px-5 py-2 rounded-full font-semibold hover:bg-pink-50 transition">
+            VAATA
+            <span className="ml-3 text-xl">→</span>
+          </button>
+        </div>
       </div>
     </section>
   );

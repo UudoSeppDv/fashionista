@@ -5,16 +5,16 @@
  
 <section className="border-b relative min-h-[553px] flex flex-col md:flex-row items-center justify-center px-6 py-16 bg-[#F1ECE6] overflow-hidden">
 
-  {/* Vasak pilt */}
-  <div className="hidden md:block absolute top-0 bottom-0 left-0 w-[557px]">
-    <Image
-  src="/images/left-image.png"
-  alt="Vasak pilt"
-  fill
-  className="object-contain shadow-lg"
-/>
+{/* Vasak pilt */}
+<div className="relative w-full h-[250px] md:h-auto md:absolute md:top-0 md:bottom-0 md:left-0 md:w-[557px]">
+  <Image
+    src="/images/left-image.png"
+    alt="Vasak pilt"
+    fill
+    className="object-contain shadow-lg"
+  />
+</div>
 
-  </div>
 
      <img
     src="/images/flower-vector.svg"
