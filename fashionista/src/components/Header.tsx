@@ -4,9 +4,47 @@ import { useState, useEffect } from 'react'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import DropdownMenu from './DropdownMenu'
 
-export default function Header() {
+
+export default function Header({ setShowLoginModal }) {
   const [showNav, setShowNav] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+const [isLoggedIn, setIsLoggedIn] = useState(false);
+const [phone, setPhone] = useState("");
+
+useEffect(() => {
+  const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const storedPhone = localStorage.getItem("userPhone");
+
+  if (loggedIn && storedPhone) {
+    setIsLoggedIn(true);
+    setPhone(storedPhone);
+  }
+}, []);
+
+const handleLogout = () => {
+  localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("userPhone");
+  setIsLoggedIn(false);
+  setPhone("");
+};
+
+useEffect(() => {
+  const handleLogin = () => {
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const storedPhone = localStorage.getItem("userPhone");
+    if (loggedIn && storedPhone) {
+      setIsLoggedIn(true);
+      setPhone(storedPhone);
+    }
+  };
+
+  window.addEventListener("user-logged-in", handleLogin);
+
+  return () => {
+    window.removeEventListener("user-logged-in", handleLogin);
+  };
+}, []);
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +61,7 @@ export default function Header() {
   }, [lastScrollY])
 
   return (
+    
     <header className="sticky top-0 z-50">
       {/* Ülemine riba */}
       <div className="z-50 relative flex items-center justify-between px-6 py-3 bg-[#FE9BD4]">
@@ -44,9 +83,27 @@ export default function Header() {
         </div>
 
         <div className="flex items-center space-x-3 w-1/3 justify-end">
-          <button className="px-4 py-2 rounded-full border border-black text-sm hover:bg-gray-100">
-            Logi sisse / Registreeri
-          </button>
+          {isLoggedIn ? (
+  <div className="flex items-center space-x-3">
+    <span className="text-sm text-gray-700">Tere, {phone}</span>
+    <button
+      onClick={handleLogout}
+      className="px-4 py-2 rounded-full border border-red-500 text-sm text-red-500 hover:bg-red-100"
+    >
+      Logi välja
+    </button>
+  </div>
+) : (
+  <button
+    onClick={() => setShowLoginModal(true)}
+    className="px-4 py-2 rounded-full border border-black text-sm hover:bg-gray-100"
+  >
+    Logi sisse / Registreeri
+  </button>
+)}
+
+
+
         </div>
       </div>
 
@@ -90,5 +147,10 @@ export default function Header() {
         </nav>
       </div>
     </header>
+   
+     
   )
 }
+
+
+

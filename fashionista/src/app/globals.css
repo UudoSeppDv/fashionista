@@ -53,3 +53,12 @@ body {
     margin-left: 14rem; /* Tailwind's ml-56 = 224px = 14rem */
   }
 }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}

@@ -8,7 +8,7 @@ export default function SectionRecentlyAdded() {
   const [first, ...rest] = mockListings.slice(0, 5);
 
   return (
-    <section className="bg-[#F1ECE6] py-8">
+    <section className="py-8">
   <h2 className="px-14 text-xl font-bold mb-4">Hiljuti lisatud</h2>
 
   <div className="flex flex-col md:flex-row gap-2 justify-center items-stretch">
