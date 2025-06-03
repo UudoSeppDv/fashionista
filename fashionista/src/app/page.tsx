@@ -13,11 +13,16 @@ import Footer from '@/components/Footer'
 
 export default function Home() {
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('') // ← Lisa see rida
 
   return (
     <>
       <main className="min-h-screen text-gray-800 relative">
-        <Header setShowLoginModal={setShowLoginModal} />
+        <Header
+          setShowLoginModal={setShowLoginModal}
+          searchQuery={searchQuery}           // ← Lisa see
+          setSearchQuery={setSearchQuery}     // ← Ja see
+        />
 
         <LoginModal
           isOpen={showLoginModal}

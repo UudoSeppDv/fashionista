@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 
-window.dispatchEvent(new Event("user-logged-in"));
+
 
 
 export default function LoginModal({ isOpen, onClose }) {

@@ -1,50 +1,63 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import DropdownMenu from './DropdownMenu'
+import UserDropdownMenu from './UserDropdownMenu'
+import SearchBar from './SearchBar'  // <- lisa import siia
 
 
-export default function Header({ setShowLoginModal }) {
-  const [showNav, setShowNav] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
-const [isLoggedIn, setIsLoggedIn] = useState(false);
-const [phone, setPhone] = useState("");
+interface HeaderProps {
+  setShowLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
+  searchQuery: string;
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+}
+export default function Header({ setShowLoginModal, searchQuery, setSearchQuery }: HeaderProps) {
+  const router = useRouter()
 
-useEffect(() => {
-  const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-  const storedPhone = localStorage.getItem("userPhone");
+  const [showNav, setShowNav] = useState<boolean>(true);
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [phone, setPhone] = useState<string>("");
 
-  if (loggedIn && storedPhone) {
-    setIsLoggedIn(true);
-    setPhone(storedPhone);
-  }
-}, []);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const storedPhone = localStorage.getItem("userPhone");
 
-const handleLogout = () => {
-  localStorage.removeItem("isLoggedIn");
-  localStorage.removeItem("userPhone");
-  setIsLoggedIn(false);
-  setPhone("");
-};
-
-useEffect(() => {
-  const handleLogin = () => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    const storedPhone = localStorage.getItem("userPhone");
-    if (loggedIn && storedPhone) {
-      setIsLoggedIn(true);
-      setPhone(storedPhone);
+      if (loggedIn && storedPhone) {
+        setIsLoggedIn(true);
+        setPhone(storedPhone);
+      }
     }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userPhone");
+    setIsLoggedIn(false);
+    setPhone("");
   };
 
-  window.addEventListener("user-logged-in", handleLogin);
+  useEffect(() => {
+    const handleLogin = () => {
+      if (typeof window !== 'undefined') {
+        const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+        const storedPhone = localStorage.getItem("userPhone");
 
-  return () => {
-    window.removeEventListener("user-logged-in", handleLogin);
-  };
-}, []);
+        if (loggedIn && storedPhone) {
+          setIsLoggedIn(true);
+          setPhone(storedPhone);
+        }
+      }
+    };
 
+    window.addEventListener("user-logged-in", handleLogin);
+    return () => {
+      window.removeEventListener("user-logged-in", handleLogin);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,49 +74,54 @@ useEffect(() => {
   }, [lastScrollY])
 
   return (
-    
     <header className="sticky top-0 z-50">
       {/* Ülemine riba */}
       <div className="z-50 relative flex items-center justify-between px-6 py-3 bg-[#FE9BD4]">
         <div className="flex items-center w-1/3">
-          <div className="relative w-full">
-            <span className="absolute left-3 top-2.5 text-gray-400">
-              <MagnifyingGlassIcon className="w-5 h-5" />
-            </span>
-            <input
-              type="text"
-              placeholder="Otsi toote või kategooria järgi"
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
+          {/* Siin nüüd ainult SearchBar */}
+          <SearchBar
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+      onSelectSuggestion={(val) => {
+        const categorySlug = val.toLowerCase().replace(/\s+/g, '-')
+        router.push(`/category/${categorySlug}`)
+      }}
+    />
         </div>
 
-        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold tracking-wide text-gray-800 pointer-events-none select-none">
-          FASHIONISTA
-        </div>
+         <div
+      onClick={() => router.push('/')}
+      className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold tracking-wide text-gray-800 cursor-pointer"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          router.push('/')
+        }
+      }}
+    >
+      FASHIONISTA
+    </div>
 
         <div className="flex items-center space-x-3 w-1/3 justify-end">
           {isLoggedIn ? (
-  <div className="flex items-center space-x-3">
-    <span className="text-sm text-gray-700">Tere, {phone}</span>
-    <button
-      onClick={handleLogout}
-      className="px-4 py-2 rounded-full border border-red-500 text-sm text-red-500 hover:bg-red-100"
-    >
-      Logi välja
-    </button>
-  </div>
-) : (
-  <button
-    onClick={() => setShowLoginModal(true)}
-    className="px-4 py-2 rounded-full border border-black text-sm hover:bg-gray-100"
-  >
-    Logi sisse / Registreeri
-  </button>
-)}
-
-
-
+            <div className="flex items-center space-x-4">
+              <button className="font-semibold font-montserrat bg-black text-white px-5 py-2 rounded-full text-sm">
+                MÜÜ
+              </button>
+              <UserDropdownMenu onLogout={handleLogout} />
+              <span className="font-montserrat text-gray-700">
+                Hei, <span className="font-bold">{phone}</span>.
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="font-montserrat px-4 py-2 rounded-full border border-black text-sm hover:bg-gray-100"
+            >
+              Logi sisse / Registreeri
+            </button>
+          )}
         </div>
       </div>
 
@@ -147,10 +165,5 @@ useEffect(() => {
         </nav>
       </div>
     </header>
-   
-     
   )
 }
-
-
-
