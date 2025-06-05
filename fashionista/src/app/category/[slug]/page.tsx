@@ -55,7 +55,7 @@ export default function CategoryPage() {
     const matchesCategorySlug = item.category.toLowerCase() === slug.toLowerCase()
 
     const matchesSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      item.brand.toLowerCase().includes(searchQuery.toLowerCase())
 
     const matchesCategory =
       selectedCategories.length === 0 ||
@@ -124,7 +124,7 @@ export default function CategoryPage() {
               <ProductCard
                 key={item.id}
                 id={item.id}
-                title={item.title}
+                brand={item.brand}
                 price={item.price}
                 image={item.image}
               />

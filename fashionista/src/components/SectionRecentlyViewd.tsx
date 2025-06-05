@@ -12,7 +12,7 @@ export default function SectionRecentlyViewd() {
           <ProductCard
             key={latestProduct.id}
             id={latestProduct.id}
-            title={latestProduct.title}
+            brand={latestProduct.brand}
             price={latestProduct.price}
             image={latestProduct.image}
           />

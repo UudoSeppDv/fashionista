@@ -17,7 +17,7 @@ export default function SectionRecentlyAdded() {
     <div className="border border-gray-600 relative w-[713px] h-[922px]">
       <Image
         src={first.image}
-        alt={first.title}
+        alt={first.brand}
         fill
         className="object-cover"
       />
@@ -29,7 +29,7 @@ export default function SectionRecentlyAdded() {
         <div key={item.id} className="relative w-[348px] h-[455px]">
           <Image
             src={item.image}
-            alt={item.title}
+            alt={item.brand}
             fill
             className="object-cover border border-gray-600"
           />

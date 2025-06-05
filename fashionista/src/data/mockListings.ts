@@ -1,51 +1,57 @@
-export const mockListings = [
+export interface Listing {
+  id: string
+  brand: string
+  price: number
+  image: string
+  filter: 'Riided' | 'Aksessuaarid' | 'Jalanõud' | 'Sport' | 'Ilu'
+  category: string // nt Mantlid, Joped, Püksid jms
+  size?: string    // valikuline
+}
+
+export const mockListings: Listing[] = [
   {
     id: '1',
-    title: 'Vélla',
+    brand: 'Vélla',
     price: 79,
     image: '/images/mockImage/aluspesu.png',
+    filter: 'Riided',
     category: 'Aluspesu',
-    size: 'M',           // lisatud size
+    size: 'M',
   },
   {
     id: '2',
-    title: 'Stride & Co.',
+    brand: 'Stride & Co.',
     price: 45,
     image: '/images/mockImage/mantel.png',
+    filter: 'Riided',
     category: 'Mantlid',
-    size: 'L',           // lisatud size
+    size: 'L',
   },
   {
     id: '3',
-    title: 'ReNova',
+    brand: 'ReNova',
     price: 20,
     image: '/images/mockImage/pusa.png',
-    category: 'Pusad',
-    size: 'S',           // lisatud size
+    filter: 'Riided',
+    category: 'Üleriided',
+    size: 'S',
   },
   {
     id: '4',
-    title: 'Lume Luxe',
+    brand: 'Lume Luxe',
     price: 130,
     image: '/images/mockImage/kaelakee.png',
+    filter: 'Aksessuaarid',
     category: 'Ehted',
-    // size puudub, sest ei ole riideese
+    // size puudub
   },
   {
     id: '5',
-    title: 'Pacer Originals',
+    brand: 'Pacer Originals',
     price: 130,
     image: '/images/mockImage/kott.png',
+    filter: 'Aksessuaarid',
     category: 'Kotid',
-    // size puudub, sest ei ole riideese
+    // size puudub
   },
 ]
-
-export interface Listing {
-  id: string
-  title: string
-  price: number
-  image: string
-  category: string
-  size?: string    // size on nüüd valikuline
-}

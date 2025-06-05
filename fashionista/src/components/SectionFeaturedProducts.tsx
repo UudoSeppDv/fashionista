@@ -16,7 +16,7 @@ export default function SectionFeaturedProducts() {
           <ProductCard
             key={item.id}
             id={item.id}               // siin lisatud
-            title={item.title}
+            brand={item.brand}
             price={item.price}
             image={item.image}
           />
