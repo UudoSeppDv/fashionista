@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRef } from 'react';
 import { supabase } from '../../lib/supabase'
 import ImageUploader from '@/components/ImageUploader'
 
@@ -9,9 +10,13 @@ type FilterType = 'Riided' | 'Aksessuaarid' | 'Jalanõud' | 'Sport' | 'Ilu' | ''
 const validFilters: FilterType[] = ['Riided', 'Aksessuaarid', 'Jalanõud', 'Sport', 'Ilu', '']
 
 export default function ProductForm() {
+  const formRef = useRef<HTMLFormElement>(null);
   const [images, setImages] = useState<File[]>([])
 
   const [uploading, setUploading] = useState(false)
+  const [formResetKey, setFormResetKey] = useState(0)
+  const [successMessage, setSuccessMessage] = useState('');
+
 
   const [description, setDescription] = useState('')
   const [brand, setBrand] = useState('')
@@ -109,7 +114,9 @@ if (error !== null && error !== undefined) {
     alert('Viga salvestamisel');
     console.error('Supabase veateade:', error);
   } else {
-    alert('Toode lisatud!');
+    setSuccessMessage('Toode on üles laetud! Kuulutus avaldatakse peale administraatori kontrolli, kui kõik nõuded on täidetud.');
+    setTimeout(() => setSuccessMessage(''), 8000); // ← Peidab teate 3 sekundi pärast
+
     // Reset
     setDescription('');
     setBrand('');
@@ -122,22 +129,26 @@ if (error !== null && error !== undefined) {
     setPrice('');
     setDeliveryOptions([]);
     setImages([]);
+    setFormResetKey(prev => prev + 1); // ← See paneb ImageUploaderi uuesti renderdama
+    formRef.current?.reset();
   }
 }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6 text-sm font-montserrat">
-      <ImageUploader onFilesChange={handleFilesChange} />
+    <form ref={formRef} onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6 text-sm font-montserrat">
+      
+      <ImageUploader key={formResetKey} onFilesChange={handleFilesChange} />
+
 
       <div>
-  <h2 className="text-lg font-semibold">Kuulutuse info</h2>
+  <h2 className="text-lg mb-4 font-semibold">Kuulutuse info</h2>
 
   {/* Kirjeldus */}
   <textarea
     value={description}
     onChange={(e) => setDescription(e.target.value)}
     placeholder="Kirjelda toodet võimalikult täpselt"
-    className="w-full border rounded-md p-2 h-24 mb-4"
+    className="w-full border p-2 h-24 mb-4"
   />
 
     {/* Brand */}
@@ -146,7 +157,7 @@ if (error !== null && error !== undefined) {
     value={brand}
     onChange={(e) => setBrand(e.target.value)}
     placeholder="Bränd (ainult brändi nimi)"
-    className="w-full border rounded-md p-2"
+    className="w-full border p-2"
   />
 
   <div className="grid grid-cols-2 gap-4 mt-4">
@@ -160,7 +171,7 @@ if (error !== null && error !== undefined) {
     setFilter(value as FilterType)
   }
 }}
-      className="border p-2 rounded-md"
+      className="border p-2"
     >
       <option value="">Filter</option>
       <option value="Riided">Riided</option>
@@ -174,7 +185,7 @@ if (error !== null && error !== undefined) {
     <select
       value={category}
       onChange={(e) => setCategory(e.target.value)}
-      className="border p-2 rounded-md"
+      className="border p-2"
     >
       <option value="">Kategooria</option>
       <option value="Aluspesu">Aluspesu</option>
@@ -193,7 +204,7 @@ if (error !== null && error !== undefined) {
     <select
       value={condition}
       onChange={(e) => setCondition(e.target.value)}
-      className="border p-2 rounded-md"
+      className="border p-2"
     >
       <option value="">Seisukord</option>
       <option value="Uus">Uus</option>
@@ -205,9 +216,10 @@ if (error !== null && error !== undefined) {
     <select
       value={size}
       onChange={(e) => setSize(e.target.value)}
-      className="border p-2 rounded-md"
+      className="border p-2"
     >
-      <option value="">Suurus</option>
+      
+      <option value="">Suurus (valikuline)</option>
       <option value="XS">XS</option>
       <option value="S">S</option>
       <option value="M">M</option>
@@ -220,7 +232,7 @@ if (error !== null && error !== undefined) {
     <select
       value={quantity}
       onChange={(e) => setQuantity(parseInt(e.target.value))}
-      className="border p-2 rounded-md"
+      className="border p-2"
     >
       {[...Array(10)].map((_, i) => (
         <option key={i + 1} value={i + 1}>{i + 1}</option>
@@ -234,7 +246,7 @@ if (error !== null && error !== undefined) {
     value={location}
     onChange={(e) => setLocation(e.target.value)}
     placeholder="Asukoht"
-    className="border p-2 rounded-md mt-4 w-full"
+    className="border p-2 mt-4 w-full"
   />
 
   {/* Hind */}
@@ -245,39 +257,51 @@ if (error !== null && error !== undefined) {
   value={price}
   onChange={(e) => setPrice(e.target.value)}
   placeholder="Toote hind (€)"
-  className="mt-4 border p-2 rounded-md w-full"
+  className="mt-4 border p-2 w-full"
 />
 
 </div>
 
 
-      <div>
-        <h2 className="text-lg font-semibold mt-6">Kohaletoimetamine</h2>
-        <p className="text-gray-500 mb-2">Ostja tasub pakiautomaadi kulu koos toote hinnaga</p>
-        <div className="space-y-2">
-          {['Ostja tuleb ise järgi', 'DPD', 'Omniva', 'Itella'].map(option => (
-            <label
-              key={option}
-              className="flex items-center justify-between border p-3 rounded-md cursor-pointer"
-            >
-              <span>{option}</span>
-              <input
-                type="checkbox"
-                checked={deliveryOptions.includes(option)}
-                onChange={() => toggleDelivery(option)}
-              />
-            </label>
-          ))}
+     <div className="space-y-2">
+  {['Ostja tuleb ise järgi', 'DPD', 'Omniva', 'Itella'].map(option => {
+    const isActive = deliveryOptions.includes(option)
+    return (
+      <label
+        key={option}
+        className="flex items-center justify-between border p-3 cursor-pointer select-none"
+        onClick={() => toggleDelivery(option)}
+      >
+        <span>{option}</span>
+        {/* Toggle switch */}
+        <div className="relative w-10 h-6">
+          <div
+            className={`absolute inset-0 rounded-full transition-colors duration-300 ${
+             isActive ? 'bg-pink-400' : 'bg-gray-300'
+            }`}
+          ></div>
+          <div
+            className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ${
+              isActive ? 'translate-x-4' : ''
+            }`}
+          ></div>
         </div>
-      </div>
+      </label>
+    )
+  })}
+</div>
 
-      <div className="bg-green-100 text-green-800 text-center p-2 rounded-md text-sm">
-        Kuulutus avaldatakse peale administraatori kontrolli, kui kõik nõuded on täidetud
-      </div>
+
+      {successMessage && (
+  <div className="bg-green-100 text-green-800 text-center p-3">
+    {successMessage}
+  </div>
+)}
+      
 
       <button
         type="submit"
-        className="bg-black text-white w-full py-2 rounded-full hover:bg-gray-800"
+        className="bg-black text-white w-full py-3 mb-10 rounded-full hover:bg-gray-800"
         disabled={uploading}
       >
         {uploading ? 'Laen...' : 'AVALDA'}
