@@ -106,9 +106,14 @@ export default function Header({ setShowLoginModal, searchQuery, setSearchQuery 
         <div className="flex items-center space-x-3 w-1/3 justify-end">
           {isLoggedIn ? (
             <div className="flex items-center space-x-4">
-              <button className="font-semibold font-montserrat bg-black text-white px-5 py-2 rounded-full text-sm">
+              <button 
+              onClick={() => router.push('/add-product')}
+              className="font-semibold font-montserrat bg-black text-white px-5 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors duration-200"
+              >
                 MÜÜ
-              </button>
+                </button>
+
+
               <UserDropdownMenu onLogout={handleLogout} />
               <span className="font-montserrat text-gray-700">
                 Hei, <span className="font-bold">{phone}</span>.
