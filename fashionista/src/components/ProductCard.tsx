@@ -1,43 +1,51 @@
 "use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 type ProductProps = {
   id: string;
   brand: string;
-  price: number;
-  image: string;
+  price: string | number;
+  images: string[]; // pildi URLide massiiv
 };
 
-export default function ProductCard({ id, brand, price, image }: ProductProps) {
+export default function ProductCard({ id, brand, price, images }: ProductProps) {
   const [isFavorited, setIsFavorited] = useState(false);
 
+  // Kui images on olemas ja esimene pilt on URL, muidu placeholder
+  const firstImage =
+    Array.isArray(images) && images.length > 0 && images[0].startsWith("http")
+      ? images[0]
+      : "/placeholder.png";
+
   const handleCardClick = () => {
-    const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+    const viewed = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
     const updated = [id, ...viewed.filter((itemId: string) => itemId !== id)];
-    localStorage.setItem('recentlyViewed', JSON.stringify(updated.slice(0, 5)));
+    localStorage.setItem("recentlyViewed", JSON.stringify(updated.slice(0, 5)));
   };
 
   return (
     <div
-      className="relative w-[250px] group cursor-pointer"
-      onClick={handleCardClick} // <- salvestab localStorage'i
+      className="z-1 relative w-[250px] group cursor-pointer"
+      onClick={handleCardClick}
     >
       {/* Favorite icon */}
       <button
         type="button"
         onClick={(e) => {
-          e.stopPropagation(); // ära lase clickil käivitada handleCardClick
+          e.stopPropagation();
           setIsFavorited(!isFavorited);
         }}
         aria-label="Toggle favorite"
         className="absolute top-3 right-3 p-2 z-20 focus:outline-none"
-        style={{ backgroundColor: 'rgba(75, 85, 99, 0.4)' }}
+        style={{ backgroundColor: "rgba(75, 85, 99, 0.4)" }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className={`h-6 w-6 transition-colors duration-300 ${
-            isFavorited ? 'fill-pink-200 stroke-pink-200' : 'fill-none stroke-white'
+            isFavorited
+              ? "fill-pink-200 stroke-pink-200"
+              : "fill-none stroke-white"
           }`}
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -56,16 +64,21 @@ export default function ProductCard({ id, brand, price, image }: ProductProps) {
       </button>
 
       {/* Image wrapper */}
-      <div className="w-[250px] h-[350px] overflow-hidden border border-gray-600 bg-white relative transition-all duration-300 group-hover:[box-shadow:0_6px_8px_rgba(0,0,0,0.15)]">
-        <img src={image} alt={brand} className="w-full h-full object-cover" />
-        <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-10 pointer-events-none" />
-      </div>
+<div className="w-[250px] h-[350px] overflow-hidden border border-gray-600 bg-white relative transition-all duration-300 group-hover:[box-shadow:0_6px_8px_rgba(0,0,0,0.15)]">
+  <img
+    src={firstImage}
+    alt={brand || "Toote pilt"}
+    className="w-full h-full object-cover mb-0"
+  />
+  <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-10 pointer-events-none" />
+</div>
+
 
       {/* Product info */}
       <div className="py-3">
         <p className="font-montserrat text-sm text-gray-700">{brand}</p>
         <p className="font-montserrat text-black text-2xl font-bold mt-1">
-          {price.toFixed(2)} €
+          {price != null ? `${Number(price).toFixed(2)} €` : "Hind puudub"}
         </p>
       </div>
     </div>
