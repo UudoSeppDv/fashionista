@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import ProductCard from '@/components/ProductCard'
-import Filters from '@/components/Filters'
+import Filters from '@/components/Choises'
 import Header from '@/components/Header'
 import LoginModal from '@/components/LoginModal'
 import Footer from '@/components/Footer'
@@ -37,6 +37,67 @@ export default function ListingsPage() {
   const [showSortDropdown, setShowSortDropdown] = useState(false)
 
   const itemsPerPage = 20
+// võtmed localStorage jaoks
+const LS_KEYS = {
+  selectedSizes: 'selectedSizes',
+  selectedBrands: 'selectedBrands',
+  selectedCategories: 'selectedCategories',
+  selectedFilters: 'selectedFilters',
+  minPrice: 'minPrice',
+  maxPrice: 'maxPrice',
+  customSizes: 'customSizes',
+}
+
+// Lehe laadimisel loe localStorage'st
+useEffect(() => {
+  const storedSizes = localStorage.getItem(LS_KEYS.selectedSizes)
+  if (storedSizes) setSelectedSizes(JSON.parse(storedSizes))
+
+  const storedBrands = localStorage.getItem(LS_KEYS.selectedBrands)
+  if (storedBrands) setSelectedBrands(JSON.parse(storedBrands))
+
+  const storedCategories = localStorage.getItem(LS_KEYS.selectedCategories)
+  if (storedCategories) setSelectedCategories(JSON.parse(storedCategories))
+
+  const storedFilters = localStorage.getItem(LS_KEYS.selectedFilters)
+  if (storedFilters) setSelectedFilters(JSON.parse(storedFilters))
+
+  const storedMinPrice = localStorage.getItem(LS_KEYS.minPrice)
+  if (storedMinPrice) setMinPrice(storedMinPrice)
+
+  const storedMaxPrice = localStorage.getItem(LS_KEYS.maxPrice)
+  if (storedMaxPrice) setMaxPrice(storedMaxPrice)
+
+  const storedCustomSizes = localStorage.getItem(LS_KEYS.customSizes)
+  if (storedCustomSizes) setCustomSizes(storedCustomSizes)
+}, [])
+
+// Iga valiku muutmisel salvesta kohe localStorage'i
+useEffect(() => {
+  localStorage.setItem(LS_KEYS.selectedSizes, JSON.stringify(selectedSizes))
+}, [selectedSizes])
+
+
+
+useEffect(() => {
+  localStorage.setItem(LS_KEYS.selectedCategories, JSON.stringify(selectedCategories))
+}, [selectedCategories])
+
+useEffect(() => {
+  localStorage.setItem(LS_KEYS.selectedFilters, JSON.stringify(selectedFilters))
+}, [selectedFilters])
+
+useEffect(() => {
+  localStorage.setItem(LS_KEYS.minPrice, minPrice)
+}, [minPrice])
+
+useEffect(() => {
+  localStorage.setItem(LS_KEYS.maxPrice, maxPrice)
+}, [maxPrice])
+
+useEffect(() => {
+  localStorage.setItem(LS_KEYS.customSizes, customSizes)
+}, [customSizes])
 
   // Fetch products from Supabase on mount
   useEffect(() => {

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import ProductCard from '@/components/ProductCard'
-import Filters from '@/components/Filters'
+import Filters from '@/components/Choises'
 import { mockListings } from '@/data/mockListings'
 import Header from '@/components/Header'
 import LoginModal from '@/components/LoginModal'
