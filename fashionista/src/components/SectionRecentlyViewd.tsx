@@ -4,15 +4,23 @@ import { useEffect, useState } from 'react'
 import ProductCard from '@/components/ProductCard'
 import { supabase } from '../../lib/supabase'
 
+interface Product {
+  id: number
+  brand: string
+  price: number
+  images: string[]
+  created_at: string
+}
+
 export default function SectionRecentlyViewed() {
-  const [latestProduct, setLatestProduct] = useState<any | null>(null)
+  const [latestProduct, setLatestProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchLatestProduct = async () => {
       const { data, error } = await supabase
-        .from('products')
+        .from<'products', Product>('products')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1)
@@ -42,12 +50,13 @@ export default function SectionRecentlyViewed() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
             <ProductCard
-              key={latestProduct.id}
-              id={latestProduct.id}
-              brand={latestProduct.brand}
-              price={latestProduct.price}
-              images={latestProduct.images || []}
-            />
+  key={latestProduct.id}
+  id={latestProduct.id.toString()}  // teisendame number stringiks
+  brand={latestProduct.brand}
+  price={latestProduct.price}
+  images={latestProduct.images || []}
+/>
+
           </div>
         </div>
       ) : (

@@ -4,23 +4,30 @@ import { useEffect, useState } from 'react'
 import ProductCard from '@/components/ProductCard'
 import { supabase } from '../../lib/supabase'
 
+interface Product {
+  id: number
+  brand: string
+  price: number
+  images: string[]
+}
+
 export default function SectionFeaturedProducts() {
-  const [products, setProducts] = useState<any[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchProducts = async () => {
       const { data, error } = await supabase
-        .from('products')      // <-- tabeli nimi Supabase'is
+        .from<'products', Product>('products')
         .select('*')
-        .limit(5)              // näiteks ainult 8 "featured" toodet
+        .limit(5)
 
       if (error) {
         setError('Andmete laadimine ebaõnnestus.')
         console.error(error)
       } else {
-        setProducts(data)
+        setProducts(data || [])
       }
       setLoading(false)
     }
@@ -44,16 +51,15 @@ export default function SectionFeaturedProducts() {
           }}
         >
           {products.map(product => (
-                      <ProductCard
-                        key={product.id}
-                        id={product.id}
-                        brand={product.brand}
-                        price={product.price}
-                        images={product.images || []}
-                        
-                      />
-                    ))}
-                  </div>
+            <ProductCard
+              key={product.id}
+              id={product.id}
+              brand={product.brand}
+              price={product.price}
+              images={product.images || []}
+            />
+          ))}
+        </div>
       )}
     </section>
   )
