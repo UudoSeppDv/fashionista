@@ -53,7 +53,7 @@ export default function SectionFeaturedProducts() {
           {products.map(product => (
             <ProductCard
               key={product.id}
-              id={product.id}
+              id={String(product.id)}
               brand={product.brand}
               price={product.price}
               images={product.images || []}

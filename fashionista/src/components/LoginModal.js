@@ -5,7 +5,7 @@ import { FaFacebookF, FaGoogle } from "react-icons/fa";
 
 
 export default function LoginModal({ isOpen, onClose }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [setIsLoggedIn] = useState(false);
 
 const [phone, setPhone] = useState("");
 const [email, setEmail] = useState("");

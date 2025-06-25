@@ -1,7 +1,6 @@
 'use client'
 
 import { Menu } from "@headlessui/react";
-import { FaUser } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
 interface Props {

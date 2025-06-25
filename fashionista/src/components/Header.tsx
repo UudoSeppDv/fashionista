@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import DropdownMenu from './DropdownMenu'
 import UserDropdownMenu from './UserDropdownMenu'
 import SearchBar from './SearchBar'  // <- lisa import siia

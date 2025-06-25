@@ -6,7 +6,7 @@ import LoginModal from '@/components/LoginModal';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-type Product = {
+export type Product = {
   id: string;
   brand: string;
   price: number;

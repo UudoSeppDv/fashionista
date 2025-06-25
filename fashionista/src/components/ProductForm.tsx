@@ -40,7 +40,7 @@ async function uploadImage(file: File): Promise<string | null> {
   const fileName = `${Date.now()}.${fileExt}`;
   const filePath = `product-images/${fileName}`;
 
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
   .from('product-images') // ← ÕIGE
   .upload(filePath, file);
 

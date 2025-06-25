@@ -55,6 +55,7 @@ export default function SectionRecentlyViewed() {
   brand={latestProduct.brand}
   price={latestProduct.price}
   images={latestProduct.images || []}
+  
 />
 
           </div>

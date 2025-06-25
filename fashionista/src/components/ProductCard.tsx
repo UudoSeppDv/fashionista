@@ -8,9 +8,10 @@ type ProductProps = {
   brand: string;
   price: string | number;
   images: string[];
+  filter?: string;
 };
 
-export default function ProductCard({ id, brand, price, images }: ProductProps) {
+export default function ProductCard({ id, brand, price, images}: ProductProps) {
   const [isFavorited, setIsFavorited] = useState(false);
 
   const firstImage =

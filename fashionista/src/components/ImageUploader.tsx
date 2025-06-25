@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
+import React, { useState, useRef, useEffect} from 'react'
 
 interface ImageUploaderProps {
   onFilesChange: (files: File[]) => void

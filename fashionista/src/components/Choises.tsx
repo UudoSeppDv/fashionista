@@ -2,7 +2,7 @@
 
 
 import React from 'react'
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import SizeModal from './SizeModal';
 
 type ChoisesProps = {
@@ -44,8 +44,6 @@ export default function Choises({
   toggleBrand,
   setMinPrice,
   setMaxPrice,
-  customSizes,
-  setCustomSizes,
 }: ChoisesProps) {
 
 
