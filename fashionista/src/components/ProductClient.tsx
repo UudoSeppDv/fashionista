@@ -63,7 +63,7 @@ export default function ProductClient({ product }: Props) {
       />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
 
-      <div className="w-full px-[5rem] flex flex-col lg:flex-row gap-8 font-montserrat">
+      <div className="w-full px-[5rem] flex flex-col lg:flex-row gap-8 font-montserrat py-10 border-b">
         <Gallery images={product.images || []} />
 
         <div className="flex-1 flex flex-col gap-4">
