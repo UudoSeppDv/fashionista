@@ -8,16 +8,25 @@ import Footer from '@/components/Footer';
 
 export type Product = {
   id: string;
+  title?: string; // sul pole 'title' päringus, tee valikuline
   brand: string;
-  price: number;
+  description: string;
+  price: number | string; // serverist võib tulla string ka
   images: string[];
-  description?: string;
-  seller_name?: string;
-  seller_avatar?: string;
-  location?: string;
-  followers?: number;
-  sold_count?: number;
+  user_id: string;
+  public_users?: {
+    id: string;
+    display_name?: string | null;
+    avatar_url?: string | null;
+    location?: string | null;
+    bio?: string | null;
+    social_media?: Record<string, any>;
+    sold_products_count?: number | null;
+    created_at?: string;
+  };
 };
+
+
 
 type Props = {
   product: Product;
@@ -26,6 +35,23 @@ type Props = {
 export default function ProductClient({ product }: Props) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const hasAvatar = !!product.public_users?.avatar_url;
+  const [isFavorited, setIsFavorited] = useState(false);
+
+  // Muuda 'user' struktuur vastavaks, mida komponent ootab
+  const user = product.public_users
+    ? {
+        id: product.public_users.id,
+        user_metadata: {
+          display_name: product.public_users.display_name || 'Anonüümne',
+          avatar: product.public_users.avatar_url || '/default-avatar.png',
+          location: product.public_users.location || 'Pole määratud',
+          followers: 0, // lisa hiljem päringust või ignoreeri
+          sold_count: product.public_users.sold_products_count || 0,
+        },
+      }
+    : undefined;
 
   return (
     <>
@@ -36,37 +62,79 @@ export default function ProductClient({ product }: Props) {
       />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
 
-      <div className="max-w-6xl mx-auto p-6 flex gap-8">
+      <div className="max-w-6xl mx-auto p-6 flex flex-col lg:flex-row gap-8 font-montserrat">
         <Gallery images={product.images || []} />
 
         <div className="flex-1 flex flex-col gap-4">
-          <div className="bg-[#D7C0E4] p-4 rounded-md flex items-center gap-4">
-            <img
-              src={product.seller_avatar || '/default-avatar.png'}
-              alt={product.seller_name || 'Müüja'}
-              className="w-14 h-14 rounded-full object-cover"
-            />
-            <div className="flex flex-col flex-grow">
-              <span className="font-semibold">{product.seller_name || 'Laura Lõhmus'}</span>
-              <div className="text-sm text-gray-700">
-                {product.followers ?? 34} Jälgijat · {product.sold_count ?? 40}+ Müüdud
-              </div>
-            </div>
-            <button className="border border-black rounded-full px-4 py-1 text-sm font-medium hover:bg-black hover:text-white transition">
-              SAADA SÕNUM
-            </button>
+          {/* Müüja info */}
+         <div className="bg-[#D7C0E4] p-4 rounded-md flex items-center gap-4">
+  <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-pink-400 text-white font-medium text-4xl select-none">
+    {hasAvatar ? (
+      <img
+        src={product.public_users?.avatar_url!}
+        alt={user?.user_metadata.display_name || 'Müüja'}
+        className="w-full h-full object-cover"
+      />
+    ) : (
+      user?.user_metadata.display_name?.charAt(0).toUpperCase() || '?'
+    )}
+  </div>
+  <div className="flex flex-col flex-grow">
+    <span className="font-semibold">{user?.user_metadata.display_name}</span>
+    <div className="text-sm text-gray-600">
+      {user?.user_metadata.followers ?? 0} Jälgijat · {user?.user_metadata.sold_count ?? 0}+ Müüdud
+    </div>
+  </div>
+  <button className="border border-black rounded-full px-4 py-1 text-sm font-medium hover:bg-black hover:text-white transition">
+    SAADA SÕNUM
+  </button>
           </div>
 
-          <div className="text-sm text-gray-800">{product.location || 'Tallinn, Estonia'}</div>
-          <div>{product.description || 'H&M kott heas korras'}</div>
+          <div className="text-sm text-gray-600">{user?.user_metadata.location}</div>
+          <div className="text-sm font-bold">{product.description || 'Kirjeldus puudub'}</div>
 
-          <div className="text-2xl font-semibold">{Number(product.price).toFixed(2)} €</div>
+          {/* Hind */}
+          <div className="text-2xl font-bold mt-20">{Number(product.price).toFixed(2)} €</div>
 
+          {/* Nupud */}
           <div className="flex gap-2">
-            <button className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-900 transition">
+            <button className="bg-black text-white px-30 py-2 rounded-full hover:bg-gray-900 transition">
               OSTA
             </button>
-            <button className="border border-black rounded-full px-4 py-2">🤍</button>
+             {/* Favorite icon */}
+        <button
+  type="button"
+  onClick={(e) => {
+    e.stopPropagation(); // Et ei navigeeriks
+    setIsFavorited(!isFavorited);
+  }}
+  aria-label="Toggle favorite"
+  className={`rounded-full border-1 p-1 px-4 transition-colors duration-300 ${
+    isFavorited
+      ? "border-gray-900 hover:bg-gray-100"
+      : "border-gray-900 bg-transparent hover:bg-gray-100"
+  }`}
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={`h-6 w-6 ${
+      isFavorited ? "fill-pink-200 stroke-pink-200" : "fill-none stroke-gray-600"
+    }`}
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={1}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path
+      d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+         2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09
+         C13.09 3.81 14.76 3 16.5 3 
+         19.58 3 22 5.42 22 8.5
+         c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+    />
+  </svg>
+</button>
           </div>
         </div>
       </div>

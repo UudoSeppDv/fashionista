@@ -7,11 +7,22 @@ import ProductClient from "@/components/ProductClient";
 
 type Product = {
   id: string;
-  title: string;
+  title?: string;
   brand: string;
   description: string;
-  price: number;
+  price: number | string;
   images: string[];
+  user_id: string;
+  public_users?: {
+    id: string;
+    display_name?: string | null;
+    avatar_url?: string | null;
+    location?: string | null;
+    bio?: string | null;
+    social_media?: Record<string, any>;
+    sold_products_count?: number | null;
+    created_at?: string;
+  };
 };
 
 export default function ProductPage() {
@@ -25,7 +36,16 @@ export default function ProductPage() {
     const fetchProduct = async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select(`
+          *,
+          public_users (
+            id,
+            display_name,
+            avatar_url,
+            location,
+            sold_products_count
+          )
+        `)
         .eq("id", id)
         .single();
 
@@ -42,4 +62,4 @@ export default function ProductPage() {
   if (!product) return <div>Toode ei leitud</div>;
 
   return <ProductClient product={product} />;
-    }
+}
