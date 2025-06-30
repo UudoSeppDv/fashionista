@@ -20,7 +20,7 @@ export type Product = {
     avatar_url?: string | null;
     location?: string | null;
     bio?: string | null;
-    social_media?: Record<string, any>;
+    social_media?: Record<string, { url: string; icon?: string }>;
     sold_products_count?: number | null;
     created_at?: string;
   };
@@ -69,15 +69,16 @@ export default function ProductClient({ product }: Props) {
           {/* Müüja info */}
          <div className="bg-[#D7C0E4] p-4 rounded-md flex items-center gap-4">
   <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-pink-400 text-white font-medium text-4xl select-none">
-    {hasAvatar ? (
-      <img
-        src={product.public_users?.avatar_url!}
-        alt={user?.user_metadata.display_name || 'Müüja'}
-        className="w-full h-full object-cover"
-      />
-    ) : (
-      user?.user_metadata.display_name?.charAt(0).toUpperCase() || '?'
-    )}
+    {hasAvatar && product.public_users?.avatar_url ? (
+  <img
+    src={product.public_users.avatar_url}
+    alt={user?.user_metadata.display_name || 'Müüja'}
+    className="w-full h-full object-cover"
+  />
+) : (
+  user?.user_metadata.display_name?.charAt(0).toUpperCase() || '?'
+)}
+
   </div>
   <div className="flex flex-col flex-grow">
     <span className="font-semibold">{user?.user_metadata.display_name}</span>
