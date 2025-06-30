@@ -5,6 +5,7 @@ import Gallery from '@/components/Gallery';
 import LoginModal from '@/components/LoginModal';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SectionFeaturedProducts from './SectionFeaturedProducts';
 
 export type Product = {
   id: string;
@@ -62,12 +63,12 @@ export default function ProductClient({ product }: Props) {
       />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
 
-      <div className="max-w-6xl mx-auto p-6 flex flex-col lg:flex-row gap-8 font-montserrat">
+      <div className="w-full px-[5rem] flex flex-col lg:flex-row gap-8 font-montserrat">
         <Gallery images={product.images || []} />
 
         <div className="flex-1 flex flex-col gap-4">
           {/* Müüja info */}
-         <div className="bg-[#D7C0E4] p-4 rounded-md flex items-center gap-4">
+         <div className="bg-[#A692C3] p-4 flex items-center gap-4">
   <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-pink-400 text-white font-medium text-4xl select-none">
     {hasAvatar && product.public_users?.avatar_url ? (
   <img
@@ -83,8 +84,9 @@ export default function ProductClient({ product }: Props) {
   <div className="flex flex-col flex-grow">
     <span className="font-semibold">{user?.user_metadata.display_name}</span>
     <div className="text-sm text-gray-600">
-      {user?.user_metadata.followers ?? 0} Jälgijat · {user?.user_metadata.sold_count ?? 0}+ Müüdud
-    </div>
+  <span className="font-bold text-gray-800">{user?.user_metadata.followers ?? 0}</span> Jälgijat ·
+  <span className="font-bold text-gray-800">{user?.user_metadata.sold_count ?? 0}+</span> Müüdud
+</div>
   </div>
   <button className="border border-black rounded-full px-4 py-1 text-sm font-medium hover:bg-black hover:text-white transition">
     SAADA SÕNUM
@@ -139,8 +141,13 @@ export default function ProductClient({ product }: Props) {
           </div>
         </div>
       </div>
+  
+
+    <SectionFeaturedProducts />
+
 
       <Footer />
+      
     </>
   );
 }

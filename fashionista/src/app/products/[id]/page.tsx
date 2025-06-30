@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
 import ProductClient from "@/components/ProductClient";
 
+
 type Product = {
   id: string;
   title?: string;
@@ -61,5 +62,10 @@ export default function ProductPage() {
   if (loading) return <div>Laen...</div>;
   if (!product) return <div>Toode ei leitud</div>;
 
-  return <ProductClient product={product} />;
+return (
+  <>
+    <ProductClient product={product} />
+    
+  </>
+);
 }

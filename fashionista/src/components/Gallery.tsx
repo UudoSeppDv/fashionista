@@ -24,7 +24,7 @@ export default function Gallery({ images }: GalleryProps) {
     <>
       <div className="flex gap-8">
         {/* Suur valitud pilt koos nooltega */}
-        <div className="relative w-[400px] h-[500px]">
+        <div className="relative w-[600px] h-[700px]">
           <img
             src={images[selectedIndex]}
             alt={`Valitud pilt ${selectedIndex + 1}`}
@@ -54,13 +54,13 @@ export default function Gallery({ images }: GalleryProps) {
         </div>
 
         {/* Väike galerii veerg */}
-       <div className="flex flex-col gap-1 max-h-125 overflow-y-auto">
+       <div className="flex flex-col gap-1 max-h-100 overflow-y-auto">
   {images.map((img, i) => (
     <img
       key={i}
       src={img}
       alt={`Pilt ${i + 1}`}
-      className={`w-20 h-24 object-cover cursor-pointer border border-gray-800 hover:opacity-80 ${
+      className={`w-30 h-34 object-cover cursor-pointer border border-gray-800 hover:opacity-80 ${
         i === selectedIndex ? 'ring-2 ring-gray-800' : ''
       }`}
       onClick={() => setSelectedIndex(i)}
