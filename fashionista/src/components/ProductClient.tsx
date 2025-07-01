@@ -12,6 +12,8 @@ export type Product = {
   title?: string; // sul pole 'title' päringus, tee valikuline
   brand: string;
   description: string;
+  category: string;
+  filter: string;
   price: number | string; // serverist võib tulla string ka
   images: string[];
   user_id: string;
@@ -62,8 +64,12 @@ export default function ProductClient({ product }: Props) {
         setSearchQuery={setSearchQuery}
       />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
-
-      <div className="w-full px-[5rem] flex flex-col lg:flex-row gap-8 font-montserrat py-10 border-b">
+      
+  <div className=" w-full px-[5rem] py-4 mt-8 text-m  text-gray-400 font-montserrat">
+  {product.category} &gt; {product.filter}
+</div>
+      <div className="w-full px-[5rem] flex flex-col lg:flex-row gap-8 font-montserrat mt-4 pb-10 border-b">
+      
         <Gallery images={product.images || []} />
 
         <div className="flex-1 flex flex-col gap-4">
