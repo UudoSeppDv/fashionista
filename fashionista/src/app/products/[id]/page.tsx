@@ -11,6 +11,8 @@ type Product = {
   title?: string;
   brand: string;
   description: string;
+  category: string;
+  filter: string;
   price: number | string;
   images: string[];
   user_id: string;

@@ -50,26 +50,22 @@ const handleContinue = () => {
 
         {/* Telefonisisestus */}
         <div className="flex border border-black text-gray-500 mb-6">
-          <select className="px-3 py-2 bg-transparent focus:outline-none border-black">
-            <option value="+372">+372</option>
-            <option value="+358">+358</option>
-            <option value="+370">+370</option>
-          </select>
+          
           <input
-            type="tel"
-            placeholder="Telefoninumber"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            type="email"
+            placeholder="E-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-2 focus:outline-none"
           />
         </div>
         {/* Emailisisestus */}
 <div className="mb-6">
   <input
-    type="email"
+    type="password"
     placeholder="Või sisesta e-mail (nt uudo@quantumhorizon.ee)"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
     className="w-full px-4 py-2 border border-black text-gray-700 focus:outline-none"
   />
 </div>
