@@ -13,15 +13,18 @@ import Footer from '@/components/Footer'
 
 export default function Home() {
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('') // ← Lisa see rida
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // lisa see, et hoida favoriidi muutuste timestampi
+  const [favoritesUpdatedAt, setFavoritesUpdatedAt] = useState(Date.now())
 
   return (
     <>
       <main className="min-h-screen text-gray-800 relative">
         <Header
           setShowLoginModal={setShowLoginModal}
-          searchQuery={searchQuery}           // ← Lisa see
-          setSearchQuery={setSearchQuery}     // ← Ja see
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
         />
 
         <LoginModal
@@ -31,7 +34,11 @@ export default function Home() {
 
         <SectionBanner />
         <SectionFeaturedBrands />
-        <SectionFeaturedProducts />
+
+        <SectionFeaturedProducts
+          favoritesUpdatedAt={favoritesUpdatedAt}
+          onFavoritesChange={() => setFavoritesUpdatedAt(Date.now())}
+        />
 
         <img
           src="/images/flower-vector.svg"
@@ -43,7 +50,12 @@ export default function Home() {
         <div style={{ position: 'relative', zIndex: 10 }}>
           <SectionTrends />
           <SectionRecentlyAdded />
-          <SectionRecentlyViewd />
+
+          <SectionRecentlyViewd
+            favoritesUpdatedAt={favoritesUpdatedAt}
+            onFavoritesChange={() => setFavoritesUpdatedAt(Date.now())}
+          />
+
           <Footer />
         </div>
       </main>

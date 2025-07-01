@@ -1,22 +1,23 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Montserrat } from 'next/font/google';
-
+import ClientProviders from "../components/ClientProviders";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const montserrat = Montserrat({
-  subsets: ['latin'],
-  variable: '--font-montserrat', // määrab CSS custom property
-});
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  variable: '--font-montserrat',
 });
 
 export const metadata: Metadata = {
@@ -26,15 +27,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="et" className={montserrat.variable}>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

@@ -1,17 +1,66 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '../../../lib/supabase'
+import type { Session } from '@supabase/auth-helpers-nextjs'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ProductForm from '@/components/ProductForm'
 import LoginModal from '@/components/LoginModal'
 
 export default function AddProductPage() {
-  // State modaalakna avamiseks/sulgemiseks
-  const [showLoginModal, setShowLoginModal] = useState(false)
+  const router = useRouter()
 
-  // State otsinguküsimuse jaoks
+  const [, setShowLoginModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [session, setSession] = useState<Session | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+ useEffect(() => {
+  const checkSession = async () => {
+    const { data } = await supabase.auth.getSession()
+    setSession(data.session)
+    setIsLoading(false)
+
+    if (!data.session) {
+      setShowLoginModal(true)
+    }
+  }
+  checkSession()
+
+  const { data: subscriptionData } = supabase.auth.onAuthStateChange((_event, session) => {
+    setSession(session)
+    if (!session) {
+      setShowLoginModal(true)
+      router.push('/')
+    } else {
+      setShowLoginModal(false)
+    }
+  })
+
+  return () => {
+    subscriptionData.subscription.unsubscribe()
+  }
+}, [router])
+
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen text-xl">
+        Kontrollin kasutaja õiguseid...
+      </div>
+    )
+  }
+
+  if (!session) {
+    return (
+      <LoginModal
+        isOpen={true}
+        onClose={() => setShowLoginModal(false)}
+      />
+    )
+  }
 
   return (
     <>
@@ -20,12 +69,7 @@ export default function AddProductPage() {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
       />
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-      />
       <main className="p-6">
-        
         <ProductForm />
       </main>
       <Footer />

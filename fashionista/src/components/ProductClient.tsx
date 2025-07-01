@@ -6,6 +6,9 @@ import LoginModal from '@/components/LoginModal';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SectionFeaturedProducts from './SectionFeaturedProducts';
+import { useFavorites } from '@/context/FavoritesContext' 
+
+
 
 export type Product = {
   id: string;
@@ -17,11 +20,11 @@ export type Product = {
   price: number | string; // serverist võib tulla string ka
   images: string[];
   user_id: string;
+  location?: string | null;
   public_users?: {
     id: string;
     display_name?: string | null;
     avatar_url?: string | null;
-    location?: string | null;
     bio?: string | null;
     social_media?: Record<string, { url: string; icon?: string }>;
     sold_products_count?: number | null;
@@ -35,12 +38,14 @@ type Props = {
   product: Product;
 };
 
-export default function ProductClient({ product }: Props) {
+export default function ProductClient({ product}: Props) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
+  const [favoritesUpdatedAt, setFavoritesUpdatedAt] = useState(Date.now())
   const hasAvatar = !!product.public_users?.avatar_url;
-  const [isFavorited, setIsFavorited] = useState(false);
+  const { favorites, toggleFavorite } = useFavorites();
+  const isFavorited = favorites.has(product.id);
+
 
   // Muuda 'user' struktuur vastavaks, mida komponent ootab
   const user = product.public_users
@@ -49,7 +54,6 @@ export default function ProductClient({ product }: Props) {
         user_metadata: {
           display_name: product.public_users.display_name || 'Anonüümne',
           avatar: product.public_users.avatar_url || '/default-avatar.png',
-          location: product.public_users.location || 'Pole määratud',
           followers: 0, // lisa hiljem päringust või ignoreeri
           sold_count: product.public_users.sold_products_count || 0,
         },
@@ -62,6 +66,7 @@ export default function ProductClient({ product }: Props) {
         setShowLoginModal={setShowLoginModal}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        
       />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
       
@@ -90,7 +95,7 @@ export default function ProductClient({ product }: Props) {
   <div className="flex flex-col flex-grow">
     <span className="font-semibold">{user?.user_metadata.display_name}</span>
     <div className="text-sm text-gray-600">
-  <span className="font-bold text-gray-800">{user?.user_metadata.followers ?? 0}</span> Jälgijat ·
+  <span className="font-bold text-gray-800">{user?.user_metadata.followers ?? 0}</span> Jälgijat &nbsp;
   <span className="font-bold text-gray-800">{user?.user_metadata.sold_count ?? 0}+</span> Müüdud
 </div>
   </div>
@@ -99,7 +104,7 @@ export default function ProductClient({ product }: Props) {
   </button>
           </div>
 
-          <div className="text-sm text-gray-600">{user?.user_metadata.location}</div>
+          <div className="text-sm text-gray-600">{product.location}</div>
           <div className="text-sm font-bold">{product.description || 'Kirjeldus puudub'}</div>
 
           {/* Hind */}
@@ -114,20 +119,19 @@ export default function ProductClient({ product }: Props) {
         <button
   type="button"
   onClick={(e) => {
-    e.stopPropagation(); // Et ei navigeeriks
-    setIsFavorited(!isFavorited);
+    e.stopPropagation();
+    toggleFavorite(product.id);
   }}
   aria-label="Toggle favorite"
-  className={`rounded-full border-1 p-1 px-4 transition-colors duration-300 ${
-    isFavorited
-      ? "border-gray-900 hover:bg-gray-100"
-      : "border-gray-900 bg-transparent hover:bg-gray-100"
+  className={`rounded-full border p-1 px-4 transition-colors duration-300 hover:bg-gray-100 ${
+    isFavorited ? 'border-gray-900 bg-transparent' : 'border-gray-900 bg-transparent hover:bg-gray-100'
   }`}
+  
 >
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={`h-6 w-6 ${
-      isFavorited ? "fill-pink-200 stroke-pink-200" : "fill-none stroke-gray-600"
+      isFavorited ? 'fill-pink-200 stroke-pink-200' : 'fill-none stroke-gray-600'
     }`}
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -144,12 +148,16 @@ export default function ProductClient({ product }: Props) {
     />
   </svg>
 </button>
+
           </div>
         </div>
       </div>
   
 
-    <SectionFeaturedProducts />
+     <SectionFeaturedProducts
+              favoritesUpdatedAt={favoritesUpdatedAt}
+              onFavoritesChange={() => setFavoritesUpdatedAt(Date.now())}
+            />
 
 
       <Footer />

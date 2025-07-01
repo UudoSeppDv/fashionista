@@ -16,11 +16,11 @@ type Product = {
   price: number | string;
   images: string[];
   user_id: string;
+  location?: string | null;
   public_users?: {
     id: string;
     display_name?: string | null;
     avatar_url?: string | null;
-    location?: string | null;
     bio?: string | null;
     social_media?: Record<string, { url: string; icon?: string }>;
     sold_products_count?: number | null;

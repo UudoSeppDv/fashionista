@@ -5,60 +5,108 @@ import ProductCard from '@/components/ProductCard'
 import { supabase } from '../../lib/supabase'
 
 interface Product {
-  id: number
+  id: string
   brand: string
   price: number
   images: string[]
   created_at: string
 }
+interface Props {
+  favoritesUpdatedAt: number
+  onFavoritesChange: () => void
+}
 
-export default function SectionRecentlyViewed() {
-  const [latestProduct, setLatestProduct] = useState<Product | null>(null)
+
+export default function SectionRecentlyViewed({
+  favoritesUpdatedAt
+ 
+}: Props) {
+
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+ 
 
   useEffect(() => {
-    const fetchLatestProduct = async () => {
-      const { data, error } = await supabase
-        .from<'products', Product>('products')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
+    const fetchRecentlyViewedProducts = async () => {
+      setLoading(true)
+      try {
+        const viewedIdsRaw = localStorage.getItem('recentlyViewed') || '[]'
+        let viewedIds = JSON.parse(viewedIdsRaw) as string[]
 
-      if (error) {
-        setError('Toote laadimine ebaõnnestus.')
-        console.error(error)
-      } else {
-        setLatestProduct(data?.[0] || null)
+        const uuidRegex =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        viewedIds = viewedIds.filter(id => id && id !== 'NaN' && uuidRegex.test(id))
+
+        if (viewedIds.length === 0) {
+          const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(5)
+
+          if (error) {
+            setError('Toodete laadimine ebaõnnestus.')
+            setLoading(false)
+            return
+          }
+
+          setProducts(data || [])
+          setError(null)
+          setLoading(false)
+          return
+        }
+
+        const { data, error } = await supabase.from('products').select('*').in('id', viewedIds)
+
+        if (error) {
+          setError('Toodete laadimine ebaõnnestus.')
+          setLoading(false)
+          return
+        }
+
+        const sortedProducts = viewedIds
+          .map(id => data?.find(product => product.id === id))
+          .filter(Boolean) as Product[]
+
+        setProducts(sortedProducts)
+        setError(null)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        setError(`Viga: ${message}`)
+      } finally {
+        setLoading(false)
       }
-
-      setLoading(false)
     }
 
-    fetchLatestProduct()
-  }, [])
+    fetchRecentlyViewedProducts()
+  }, [favoritesUpdatedAt]) // uuendab kontekstist tulenevalt
 
   return (
-    <section className="border w-full px-[5rem] py-25">
+    <section className="border w-full px-[5rem] py-6">
       <h3 className="text-2xl font-bold mb-6">Viimati vaadatud</h3>
 
       {loading ? (
         <p>Laadimine...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
-      ) : latestProduct ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1">
+      ) : products.length > 0 ? (
+        <div
+          className="grid gap-[6px]"
+          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}
+        >
+          {products.map(product => (
             <ProductCard
-  key={latestProduct.id}
-  id={latestProduct.id.toString()}  // teisendame number stringiks
-  brand={latestProduct.brand}
-  price={latestProduct.price}
-  images={latestProduct.images || []}
-  
-/>
-
-          </div>
+              key={product.id}
+              id={product.id}
+              brand={product.brand}
+              price={product.price}
+              images={product.images || []}
+              
+              
+            />
+          ))}
         </div>
       ) : (
         <p>Ühtegi toodet ei leitud.</p>

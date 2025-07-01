@@ -9,6 +9,7 @@ import Footer from '@/components/Footer'
 import { ChevronDown } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'  // veendu, et see on õige path
 
+
 type Product = {
   id: number
   brand: string

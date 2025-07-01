@@ -68,7 +68,7 @@ if (error !== null && error !== undefined) {
     )
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+async function handleSubmit(e: React.FormEvent) {
   e.preventDefault();
 
   if (!description || !brand || !filter || !category || !condition || !location || !price) {
@@ -78,12 +78,20 @@ if (error !== null && error !== undefined) {
 
   setUploading(true);
 
-  // Laeme kõik pildid üles ja võtame URLid
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    alert('Pead olema sisse logitud!');
+    setUploading(false);
+    return;
+  }
+
+  const userId = session.user.id;
+
   const uploadedUrls = await Promise.all(
     images.map(file => uploadImage(file))
   );
 
-  // Kui mõni upload null, võid ka errorit käsitleda
   if (uploadedUrls.includes(null)) {
     alert('Piltide üleslaadimine ebaõnnestus');
     setUploading(false);
@@ -94,6 +102,7 @@ if (error !== null && error !== undefined) {
 
   const { error } = await supabase.from('products').insert([
     {
+      user_id: userId, // <--- lisa siia
       description,
       brand,
       filter,
@@ -115,7 +124,7 @@ if (error !== null && error !== undefined) {
     console.error('Supabase veateade:', error);
   } else {
     setSuccessMessage('Toode on üles laetud! Kuulutus avaldatakse peale administraatori kontrolli, kui kõik nõuded on täidetud.');
-    setTimeout(() => setSuccessMessage(''), 8000); // ← Peidab teate 3 sekundi pärast
+    setTimeout(() => setSuccessMessage(''), 8000);
 
     // Reset
     setDescription('');
@@ -129,7 +138,7 @@ if (error !== null && error !== undefined) {
     setPrice('');
     setDeliveryOptions([]);
     setImages([]);
-    setFormResetKey(prev => prev + 1); // ← See paneb ImageUploaderi uuesti renderdama
+    setFormResetKey(prev => prev + 1);
     formRef.current?.reset();
   }
 }

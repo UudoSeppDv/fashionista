@@ -1,62 +1,69 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '../../lib/supabase'
 import DropdownMenu from './DropdownMenu'
 import UserDropdownMenu from './UserDropdownMenu'
-import SearchBar from './SearchBar'  // <- lisa import siia
-
+import SearchBar from './SearchBar'
 
 interface HeaderProps {
   setShowLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
   searchQuery: string;
+  
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
 }
+
 export default function Header({ setShowLoginModal, searchQuery, setSearchQuery }: HeaderProps) {
   const router = useRouter()
+  const [showNav, setShowNav] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
 
-  const [showNav, setShowNav] = useState<boolean>(true);
-  const [lastScrollY, setLastScrollY] = useState<number>(0);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [phone, setPhone] = useState<string>("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userName, setUserName] = useState<string | null>(null)
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-      const storedPhone = localStorage.getItem("userPhone");
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
 
-      if (loggedIn && storedPhone) {
-        setIsLoggedIn(true);
-        setPhone(storedPhone);
+      if (session?.user) {
+        setIsLoggedIn(true)
+
+        // kui tahad nime profiilist, eeldades et sul on näiteks
+        // public.profiles tabel kus on `full_name`:
+        const { data } = await supabase
+          .from('public_users')
+          .select('display_name')
+          .eq('id', session.user.id)
+          .single()
+
+        if (data?.display_name) {
+          setUserName(data.display_name)
+        } else {
+          setUserName(session.user.email ?? null); // fallback
+        }
+
+      } else {
+        setIsLoggedIn(false)
+        setUserName(null)
       }
     }
-  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userPhone");
-    setIsLoggedIn(false);
-    setPhone("");
-  };
+    checkSession()
 
-  useEffect(() => {
-    const handleLogin = () => {
-      if (typeof window !== 'undefined') {
-        const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-        const storedPhone = localStorage.getItem("userPhone");
+    // kuula auth state muutusi
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      checkSession()
+    })
 
-        if (loggedIn && storedPhone) {
-          setIsLoggedIn(true);
-          setPhone(storedPhone);
-        }
-      }
-    };
-
-    window.addEventListener("user-logged-in", handleLogin);
     return () => {
-      window.removeEventListener("user-logged-in", handleLogin);
-    };
-  }, []);
+      listener.subscription.unsubscribe()
+    }
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setIsLoggedIn(false)
+    setUserName(null)
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,55 +74,44 @@ export default function Header({ setShowLoginModal, searchQuery, setSearchQuery 
       }
       setLastScrollY(window.scrollY)
     }
-
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Ülemine riba */}
       <div className="z-50 relative flex items-center justify-between px-6 py-3 bg-[#FE9BD4]">
         <div className="flex items-center w-1/3">
-          {/* Siin nüüd ainult SearchBar */}
           <SearchBar
-      searchQuery={searchQuery}
-      setSearchQuery={setSearchQuery}
-      onSelectSuggestion={(val) => {
-        const categorySlug = val.toLowerCase().replace(/\s+/g, '-')
-        router.push(`/category/${categorySlug}`)
-      }}
-    />
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            onSelectSuggestion={(val) => {
+              const categorySlug = val.toLowerCase().replace(/\s+/g, '-')
+              router.push(`/category/${categorySlug}`)
+            }}
+          />
         </div>
 
-         <div
-      onClick={() => router.push('/')}
-      className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold tracking-wide text-gray-800 cursor-pointer"
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          router.push('/')
-        }
-      }}
-    >
-      FASHIONISTA
-    </div>
+        <div
+          onClick={() => router.push('/')}
+          className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold tracking-wide text-gray-800 cursor-pointer"
+        >
+          FASHIONISTA
+        </div>
 
         <div className="flex items-center space-x-3 w-1/3 justify-end">
           {isLoggedIn ? (
             <div className="flex items-center space-x-4">
-              <button 
-              onClick={() => router.push('/add-product')}
-              className="font-semibold font-montserrat bg-black text-white px-5 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors duration-200"
+              <button
+                onClick={() => router.push('/add-product')}
+                className="font-semibold font-montserrat bg-black text-white px-5 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors duration-200"
               >
                 MÜÜ
-                </button>
-
+              </button>
 
               <UserDropdownMenu onLogout={handleLogout} />
               <span className="font-montserrat text-gray-700">
-                Hei, <span className="font-bold">{phone}</span>.
+                Hei, <span className="font-bold">{userName ?? 'Kasutaja'}</span>.
               </span>
             </div>
           ) : (
@@ -129,14 +125,13 @@ export default function Header({ setShowLoginModal, searchQuery, setSearchQuery 
         </div>
       </div>
 
-      {/* Navibar */}
       <div className="overflow-visible relative">
         <nav
           className={`transition-transform duration-300 ease-in-out transform ${
             showNav ? 'translate-y-0' : '-translate-y-full'
           } z-20 border-t border-b border-gray-600 px-6 py-4 text-sm font-semibold text-gray-700 space-x-6 font-montserrat bg-[#F1ECE6] flex`}
         >
-          <DropdownMenu label="UUS" title="UUS" links={[
+           <DropdownMenu label="UUS" title="UUS" links={[
             { label: 'Uus 1', href: '#' },
             { label: 'Uus 2', href: '#' },
             { label: 'Uus 3', href: '#' },
