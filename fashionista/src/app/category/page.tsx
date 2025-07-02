@@ -11,14 +11,15 @@ import { supabase } from '../../../lib/supabase'  // veendu, et see on õige pat
 
 
 type Product = {
-  id: number
+  id: string
   brand: string
   category: string
   size?: string
   price: number
-  popularity: number
+  popularity?: number | null  // <-- tee valikuliseks
   filter: string
   image: string[] // pildi urlide massiiv
+  condition: string; // lisa see
 }
 
 export default function ListingsPage() {
@@ -100,29 +101,61 @@ useEffect(() => {
   localStorage.setItem(LS_KEYS.customSizes, customSizes)
 }, [customSizes])
 
-  // Fetch products from Supabase on mount
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true)
+  const fetchProducts = async () => {
+    setLoading(true)
+    setError(null)
+    try {
       const { data, error } = await supabase
         .from('products')
         .select('*')
 
       if (error) {
-        setError(error.message)
-        setLoading(false)
-      } else {
-        // Eeldame, et 'images' on string[], kui ei, tee konvertimine
-        const normalizedData = data.map(item => ({
-          ...item,
-          image: Array.isArray(item.images) ? item.images : [],
-        }))
-        setProducts(normalizedData)
-        setLoading(false)
+        throw error
       }
+
+      if (!data) {
+        throw new Error('No data returned')
+      }
+
+      const normalizedData: Product[] = data.map(normalizeProduct)
+
+      setProducts(normalizedData)
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    setError(err.message)
+  } else {
+    setError('Something went wrong')
+  }
+} finally {
     }
-    fetchProducts()
-  }, [])
+  }
+
+  fetchProducts()
+}, [])
+
+function normalizeProduct(item: unknown): Product {
+  if (typeof item !== 'object' || item === null) {
+    throw new Error('Invalid product data');
+  }
+
+  // tüübi kindlustamiseks kasutame tüübiühendamist
+  const obj = item as Record<string, unknown>;
+
+  return {
+    id: obj.id != null ? String(obj.id) : '',
+    brand: typeof obj.brand === 'string' ? obj.brand : '',
+    category: typeof obj.category === 'string' ? obj.category : '',
+    size: typeof obj.size === 'string' ? obj.size : '',
+    filter: typeof obj.filter === 'string' ? obj.filter : '',
+    image: Array.isArray(obj.images) && obj.images.every(i => typeof i === 'string') ? obj.images : [],
+    condition: typeof obj.condition === 'string' ? obj.condition : '',
+    price: typeof obj.price === 'number' ? obj.price : 0,
+    popularity: typeof obj.popularity === 'number' ? obj.popularity : 0,
+  };
+}
+
+
 
   // Arvuta kategooriad ja suurused saadud toodete põhjal
   const categories = Array.from(new Set(products.map(item => item.category)))
@@ -191,19 +224,25 @@ const filteredListings = products.filter((item) => {
   return matchesSearch && matchesCategory && matchesBrand &&  matchesFilter && matchesSize && matchesCustomSize && matchesMinPrice && matchesMaxPrice
 })
 
+const sortedListings = [...filteredListings].sort((a, b) => {
+  // Funktsioon väärtuste võrdlemiseks numbritena (tagab 0 kui undefined/null)
+  const safeNumber = (value: number | undefined | null) => value ?? 0
 
-  const sortedListings = [...filteredListings].sort((a, b) => {
-    switch (sortOption) {
-      case 'Madalaim hind':
-        return a.price - b.price
-      case 'Kõrgeim hind':
-        return b.price - a.price
-      case 'Populaarseim':
-        return (b.popularity || 0) - (a.popularity || 0)
-      default:
-        return b.id - a.id
-    }
-  })
+  switch (sortOption) {
+    case 'Madalaim hind':
+      return safeNumber(a.price) - safeNumber(b.price)
+    case 'Kõrgeim hind':
+      return safeNumber(b.price) - safeNumber(a.price)
+    case 'Populaarseim':
+      return safeNumber(b.popularity) - safeNumber(a.popularity)
+    default:
+      // Kui id tüübid on stringid, konverteeri numbriks või võrdle localeCompare’iga
+      const idA = typeof a.id === 'number' ? a.id : parseInt(a.id, 10) || 0
+      const idB = typeof b.id === 'number' ? b.id : parseInt(b.id, 10) || 0
+      return idB - idA
+  }
+})
+
 
   const totalItems = sortedListings.length
   const totalPages = Math.ceil(totalItems / itemsPerPage)

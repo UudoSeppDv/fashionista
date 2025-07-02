@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import ProductCard from '@/components/ProductCard'
 import { supabase } from '../../lib/supabase'
 
-
 interface Product {
   id: string
   brand: string
@@ -19,34 +18,40 @@ interface Props {
 
 export default function SectionFeaturedProducts({
   favoritesUpdatedAt
- 
 }: Props) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5)
+  const fetchProducts = async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('products')
+      .select('id, brand, price, images')
+      .order('created_at', { ascending: false })
+      .limit(5)
 
-      if (error) {
-        console.error(error)
-        setError('Andmete laadimine ebaõnnestus.')
-      } else {
-        setProducts(data || [])
-        setError(null)
-      }
-      setLoading(false)
+    if (error) {
+      console.error(error)
+      setError('Andmete laadimine ebaõnnestus.')
+    } else if (data) {
+      // Puhastame ja teisendame
+      const cleanData = (data || []).map(item => ({
+        id: item.id,
+        brand: item.brand ?? '',
+        price: item.price !== null ? Number(item.price) : 0,
+        images: item.images ?? [],
+      }))
+      setProducts(cleanData)
+      setError(null)
     }
+    setLoading(false)
+  }
 
-    fetchProducts()
-  }, [favoritesUpdatedAt]) // refetch ka siis, kui favorite muutub
+  fetchProducts()
+}, [favoritesUpdatedAt])
+
 
   return (
     <section className="border-b w-full px-[5rem] py-25 ">
@@ -66,12 +71,10 @@ export default function SectionFeaturedProducts({
           {products.map(product => (
             <ProductCard
               key={product.id}
-              
               id={product.id}
               brand={product.brand}
               price={product.price}
-              images={product.images || []}
-             
+              images={product.images}
             />
           ))}
         </div>

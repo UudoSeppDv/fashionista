@@ -11,77 +11,90 @@ interface Product {
   images: string[]
   created_at: string
 }
+
 interface Props {
   favoritesUpdatedAt: number
-  onFavoritesChange: () => void
+  onFavoritesChange?: () => void
 }
 
-
-export default function SectionRecentlyViewed({
-  favoritesUpdatedAt
- 
-}: Props) {
-
+export default function SectionRecentlyViewed({ favoritesUpdatedAt }: Props) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
- 
 
   useEffect(() => {
     const fetchRecentlyViewedProducts = async () => {
       setLoading(true)
+
       try {
         const viewedIdsRaw = localStorage.getItem('recentlyViewed') || '[]'
         let viewedIds = JSON.parse(viewedIdsRaw) as string[]
 
+        // Filterda välja vaid UUID formaadile vastavad id-d
         const uuidRegex =
           /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
         viewedIds = viewedIds.filter(id => id && id !== 'NaN' && uuidRegex.test(id))
 
+        let data, error
+
         if (viewedIds.length === 0) {
-          const { data, error } = await supabase
+          // Kui vaatamisajalugu tühi, too lihtsalt viimased 5 toodet
+          const response = await supabase
             .from('products')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(5)
 
-          if (error) {
-            setError('Toodete laadimine ebaõnnestus.')
-            setLoading(false)
-            return
-          }
+          data = response.data
+          error = response.error
+        } else {
+          // Kui vaatamisajalugu on, too konkreetsed tooted
+          const response = await supabase
+            .from('products')
+            .select('*')
+            .in('id', viewedIds)
 
-          setProducts(data || [])
-          setError(null)
-          setLoading(false)
-          return
+          data = response.data
+          error = response.error
         }
-
-        const { data, error } = await supabase.from('products').select('*').in('id', viewedIds)
 
         if (error) {
           setError('Toodete laadimine ebaõnnestus.')
+          setProducts([])
           setLoading(false)
           return
         }
 
-        const sortedProducts = viewedIds
-          .map(id => data?.find(product => product.id === id))
-          .filter(Boolean) as Product[]
+        // Andmete puhastus ja tüübi kindlustamine
+        const cleanData = (data || []).map(item => ({
+          id: item.id,
+          brand: item.brand ?? '',
+          price: item.price !== null && item.price !== undefined ? Number(item.price) : 0,
+          images: item.images ?? [],
+          created_at: item.created_at ?? '',
+        }))
+
+        // Sorteeri tooted vastavalt vaatamisajaloo järjekorrale (kui on)
+        const sortedProducts = viewedIds.length > 0
+          ? viewedIds
+              .map(id => cleanData.find(product => product.id === id))
+              .filter(Boolean) as Product[]
+          : cleanData
 
         setProducts(sortedProducts)
         setError(null)
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
         setError(`Viga: ${message}`)
+        setProducts([])
       } finally {
         setLoading(false)
       }
     }
 
     fetchRecentlyViewedProducts()
-  }, [favoritesUpdatedAt]) // uuendab kontekstist tulenevalt
+  }, [favoritesUpdatedAt]) // uuenda kui favoriitide muutus
+
 
   return (
     <section className="border w-full px-[5rem] py-6">
@@ -102,9 +115,7 @@ export default function SectionRecentlyViewed({
               id={product.id}
               brand={product.brand}
               price={product.price}
-              images={product.images || []}
-              
-              
+              images={product.images}
             />
           ))}
         </div>

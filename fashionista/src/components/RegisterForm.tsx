@@ -6,7 +6,9 @@ import { supabase } from "../../lib/supabase";
 export default function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"error" | "success" | "">("");
@@ -17,13 +19,32 @@ export default function RegisterForm() {
     setMessage("");
     setMessageType("");
 
-    // 1) Registreeri kasutaja Supabase Auth'is
+    const fullName = `${firstName} ${surname}`;
+
+    // Kontroll username olemasolu kohta Supabase'is (valikuline, aga soovitatav)
+    const { data: existingUser } = await supabase
+      .from("public_users")
+      .select("id")
+      .eq("username", username)
+      .single();
+
+    if (existingUser) {
+      setMessage("See kasutajanimi on juba kasutusel. Palun vali teine.");
+      setMessageType("error");
+      setLoading(false);
+      return;
+    }
+
+    // 1) registreeri Supabase Auth
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
+          first_name: firstName,
+          surname: surname,
           full_name: fullName,
+          username: username,
         },
       },
     });
@@ -35,13 +56,16 @@ export default function RegisterForm() {
       return;
     }
 
-    // 2) Kui kasutaja edukalt loodud, lisa avalik profiil public_users tabelisse
+    // 2) lisa public_users tabelisse
     if (signUpData?.user) {
       const userId = signUpData.user.id;
 
       const { error: profileError } = await supabase.from("public_users").insert({
         id: userId,
+        first_name: firstName,
+        surname: surname,
         display_name: fullName,
+        username: username,
         avatar_url: null,
         location: null,
         bio: null,
@@ -60,10 +84,12 @@ export default function RegisterForm() {
     setMessage("Registreerimine õnnestus! Kontrolli oma e-maili kinnitamiseks.");
     setMessageType("success");
 
-    // Tühjenda vormi väljad
+    // tühjenda vorm
     setEmail("");
     setPassword("");
-    setFullName("");
+    setFirstName("");
+    setSurname("");
+    setUsername("");
     setLoading(false);
   };
 
@@ -90,9 +116,25 @@ export default function RegisterForm() {
 
       <input
         type="text"
-        placeholder="Täisnimi"
-        value={fullName}
-        onChange={(e) => setFullName(e.target.value)}
+        placeholder="Eesnimi"
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+        className="border p-2 rounded"
+        required
+      />
+      <input
+        type="text"
+        placeholder="Perekonnanimi"
+        value={surname}
+        onChange={(e) => setSurname(e.target.value)}
+        className="border p-2 rounded"
+        required
+      />
+      <input
+        type="text"
+        placeholder="Kasutajanimi"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
         className="border p-2 rounded"
         required
       />

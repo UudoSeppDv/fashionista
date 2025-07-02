@@ -8,6 +8,8 @@ import Footer from '@/components/Footer';
 import SectionFeaturedProducts from './SectionFeaturedProducts';
 import { useFavorites } from '@/context/FavoritesContext' 
 
+import { useRouter } from 'next/navigation';
+
 
 
 export type Product = {
@@ -45,6 +47,15 @@ export default function ProductClient({ product}: Props) {
   const hasAvatar = !!product.public_users?.avatar_url;
   const { favorites, toggleFavorite } = useFavorites();
   const isFavorited = favorites.has(product.id);
+  const router = useRouter();
+
+ const handleSendMessageClick = () => {
+  if (!product.public_users?.id) {
+    alert('Müüja info puudub, ei saa sõnumit saata.')
+    return
+  }
+  router.push(`/messages/${product.public_users.id}`)
+}
 
 
   // Muuda 'user' struktuur vastavaks, mida komponent ootab
@@ -99,9 +110,12 @@ export default function ProductClient({ product}: Props) {
   <span className="font-bold text-gray-800">{user?.user_metadata.sold_count ?? 0}+</span> Müüdud
 </div>
   </div>
-  <button className="border border-black rounded-full px-4 py-1 text-sm font-medium hover:bg-black hover:text-white transition">
-    SAADA SÕNUM
-  </button>
+  <button
+        onClick={handleSendMessageClick}
+        className="border border-black rounded-full px-4 py-1 text-sm font-medium hover:bg-black hover:text-white transition"
+      >
+        SAADA SÕNUM
+      </button>
           </div>
 
           <div className="text-sm text-gray-600">{product.location}</div>

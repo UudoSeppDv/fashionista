@@ -98,24 +98,26 @@ async function handleSubmit(e: React.FormEvent) {
     return;
   }
 
-  const parsedPrice = parseFloat(price);
+const { error } = await supabase.from('products').insert([
+  {
+    user_id: userId,
+    description: description || null,
+    brand: brand || null,
+    filter: filter || null,
+    category: category || null,
+    condition: condition || null,
+    size: size || null,
+    quantity: quantity, // number ok
+    location: location || null,
+    price: price || null, // SIIN muudatus
+    delivery: deliveryOptions.length > 0 ? deliveryOptions : null,
+    images: uploadedUrls.filter((url): url is string => url !== null),
+  }
+]);
 
-  const { error } = await supabase.from('products').insert([
-    {
-      user_id: userId, // <--- lisa siia
-      description,
-      brand,
-      filter,
-      category,
-      condition,
-      size,
-      quantity,
-      location,
-      price: parsedPrice,
-      delivery: deliveryOptions,
-      images: uploadedUrls.filter((url): url is string => url !== null),
-    }
-  ]);
+
+
+
 
   setUploading(false);
 
