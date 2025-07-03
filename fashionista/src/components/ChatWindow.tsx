@@ -1,9 +1,11 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
+import Image from 'next/image'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Database } from '../../types/supabase'
 import { useSession } from '@supabase/auth-helpers-react'
+import MessageInput from './MessageInput'
 
 type Props = {
   userId: string | null
@@ -15,24 +17,25 @@ export default function ChatWindow({ userId }: Props) {
   const currentUserId = session?.user.id
 
   const [messages, setMessages] = useState<Database['public']['Tables']['messages']['Row'][]>([])
-  const [newMessage, setNewMessage] = useState('')
   const [sending, setSending] = useState(false)
-
-  // Vestluspartneri info
+  const [imageUrls, setImageUrls] = useState<Record<number, string>>({})
   const [recipientInfo, setRecipientInfo] = useState<{
     first_name: string | null
     surname: string | null
     avatar_url: string | null
   } | null>(null)
-
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // Kontroll, kas kasutaja on sisse logitud
   useEffect(() => {
-    if (!currentUserId || !userId) {
-      setMessages([])
-      setRecipientInfo(null)
-      return
+    if (!session) {
+      alert('Palun logi sisse, et kasutada vestlust.')
+      // Võid siin suunata kasutaja ka logimislehele või kuvada mingi alternatiivse UI
     }
+  }, [session])
+
+  useEffect(() => {
+    if (!currentUserId || !userId) return;
 
     const loadMessages = async () => {
       const { data, error } = await supabase
@@ -53,7 +56,30 @@ export default function ChatWindow({ userId }: Props) {
     loadMessages()
   }, [currentUserId, userId, supabase])
 
-  // Lae vestluspartneri info
+  useEffect(() => {
+    if (!messages.length || !session) return
+
+    const fetchSignedUrls = async () => {
+      const newUrls: Record<number, string> = {}
+      for (const msg of messages) {
+        if (msg.image_url) {
+          const { data, error } = await supabase.storage
+            .from('chat-images')
+            .createSignedUrl(msg.image_url, 60 * 60) // 1 tund kehtiv signed URL
+
+          if (!error && data?.signedUrl) {
+            newUrls[msg.id] = data.signedUrl
+          } else {
+            console.error('Signed URL genereerimise viga:', error)
+          }
+        }
+      }
+      setImageUrls(newUrls)
+    }
+
+    fetchSignedUrls()
+  }, [messages, session, supabase])
+
   useEffect(() => {
     if (!userId) {
       setRecipientInfo(null)
@@ -114,44 +140,87 @@ export default function ChatWindow({ userId }: Props) {
     }
   }, [currentUserId, userId, supabase])
 
-  const handleSend = async () => {
-    if (sending || !newMessage.trim() || !currentUserId || !userId) return
+  const handleSend = async ({
+  text,
+  image,
+}: {
+  text: string
+  image: File | null
+}) => {
+  if (sending || (!text && !image) || !currentUserId || !userId) return
 
-    setSending(true)
-    const messageToSend = newMessage.trim()
+  setSending(true)
+
+  try {
+    let imageUrl: string | null = null
+
+    if (image) {
+      const fileExt = image.name.split('.').pop()
+      const fileName = `${currentUserId}_${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+  .from('chat-images')
+  .upload(fileName, image)
+
+
+      if (uploadError) {
+        console.error('Pildi üleslaadimise viga:', uploadError)
+        alert('Pildi üleslaadimine ebaõnnestus')
+        setSending(false)
+        return
+      }
+
+      // Salvesta sõnumisse ainult failinimi, mitte signed URL
+      imageUrl = fileName
+    }
 
     const { data, error } = await supabase
       .from('messages')
       .insert({
         sender_id: currentUserId,
         receiver_id: userId,
-        content: messageToSend,
+        content: text,
+        image_url: imageUrl,
+        created_at: new Date().toISOString(),
       })
       .select()
       .single()
 
-    setSending(false)
-
     if (error) {
-      console.error('Send message error:', error)
-      alert('Sõnumi saatmisel tekkis viga')
-    } else if (data) {
-      setMessages((prev) => [...prev, data])
-      setNewMessage('')
+      console.error('Sõnumi saatmise viga:', error)
+      alert('Sõnumi saatmine ebaõnnestus')
+      setSending(false)
+      return
     }
-  }
 
-  // Funktsioon esitähtede saamiseks
+    setMessages((prev) => [...prev, data])
+  } catch (err) {
+    console.error('Tundmatu viga sõnumi saatmisel:', err)
+    alert('Sõnumi saatmine ebaõnnestus')
+  } finally {
+    setSending(false)
+  }
+}
+
+
   const getInitials = (firstName: string | null, lastName: string | null) => {
     const firstInitial = firstName ? firstName[0].toUpperCase() : ''
     const lastInitial = lastName ? lastName[0].toUpperCase() : ''
     return firstInitial + lastInitial
   }
 
-  
+  // Kui sessiooni pole, näita kasutajale sõnumit
+  if (!session) {
+    return (
+      <div className="p-4 text-center">
+        Palun logi sisse, et kasutada vestlust.
+      </div>
+    )
+  }
+
+
   return (
     <div className="flex flex-col flex-1 p-4 h-screen">
-      {/* Vestluspartneri info kast */}
       <div className="flex items-center border-b p-2 mb-2">
         {recipientInfo?.avatar_url ? (
           <img
@@ -169,52 +238,45 @@ export default function ChatWindow({ userId }: Props) {
         </div>
       </div>
 
-      {/* Sõnumite ala */}
       <div className="flex-1 overflow-y-auto border rounded p-2 flex flex-col">
-  {messages.length === 0 ? (
-    <div className="text-center text-gray-500 mt-10">Alusta vestlust selle kasutajaga</div>
-  ) : (
-    messages.map((msg) => (
-      <div
-        key={msg.id}
-        className={`p-2 my-1 rounded max-w-[70%] ${
-          msg.sender_id === currentUserId ? 'bg-green-100 ml-auto' : 'bg-gray-200 mr-auto'
-        }`}
-      >
-        {msg.content}
-        <div className="text-xs text-gray-500 text-right">
-          {new Date(msg.created_at).toLocaleTimeString()}
-        </div>
-      </div>
-    ))
-  )}
-  <div ref={messagesEndRef} />
-</div>
+        {messages.length === 0 ? (
+          <div className="text-center text-gray-500 mt-10">Alusta vestlust selle kasutajaga</div>
+        ) : (
+          messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`p-3 my-2 rounded max-w-[70%] flex flex-col ${
+                msg.sender_id === currentUserId ? 'bg-green-100 ml-auto' : 'bg-gray-200 mr-auto'
+              }`}
+            >
+              <div className="font-semibold mb-1 text-sm text-gray-700">
+                {msg.sender_id === currentUserId ? 'Sina' : `${recipientInfo?.first_name || 'Kasutaja'}`}
+              </div>
 
+              <div className="whitespace-pre-wrap">{msg.content}</div>
 
-      {/* Sõnumi sisestus ja nupp */}
-      <div className="flex gap-2 mt-2">
-        <input
-          className="flex-1 border rounded p-2"
-          placeholder="Sisesta sõnum..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={async (e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              await handleSend()
-            }
-          }}
-          disabled={sending}
-        />
-        <button
-          onClick={handleSend}
-          disabled={sending}
-          className={`px-4 rounded text-white ${sending ? 'bg-gray-500 cursor-not-allowed' : 'bg-black hover:bg-gray-800'}`}
-        >
-          {sending ? 'Saadan...' : 'Saada'}
-        </button>
+              {msg.image_url && imageUrls[msg.id] && (
+  <div className="relative mt-2 w-full h-48 rounded overflow-hidden">
+    <Image
+      src={imageUrls[msg.id]}
+      alt="Sõnumi pilt"
+      fill
+      style={{ objectFit: 'contain' }}
+      sizes="(max-width: 768px) 100vw, 50vw"
+    />
+  </div>
+)}
+
+              <div className="text-xs text-gray-500 text-right mt-1">
+                {new Date(msg.created_at).toLocaleTimeString()}
+              </div>
+            </div>
+          ))
+        )}
+        <div ref={messagesEndRef} />
       </div>
+
+      <MessageInput onSend={handleSend} sending={sending} />
     </div>
   )
 }

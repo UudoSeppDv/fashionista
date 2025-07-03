@@ -19,8 +19,8 @@ export default function SearchBar({
   const [suggestions, setSuggestions] = useState<Array<Partial<Listing>>>([])
   const router = useRouter()
 
-  useEffect(() => {
-  if (searchQuery.trim() === '') {
+ useEffect(() => {
+  if (!searchQuery || searchQuery.trim() === '') {
     setSuggestions([])
     return
   }

@@ -45,6 +45,7 @@ export type Database = {
           id: number
           receiver_id: string
           sender_id: string
+          image_url: string | null;  // lisa see
         }
         Insert: {
           content: string

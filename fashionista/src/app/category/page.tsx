@@ -22,6 +22,21 @@ type Product = {
   condition: string; // lisa see
 }
 
+function normalizeProduct(item: Record<string, unknown>): Product {
+  return {
+    id: String(item.id),
+    brand: (item.brand as string) ?? '',
+    category: (item.category as string) ?? '',
+    size: (item.size as string) ?? '',
+    filter: (item.filter as string) ?? '',
+    image: Array.isArray(item.images) ? (item.images as string[]) : [],
+    condition: (item.condition as string) ?? '',
+    price: (item.price as number) ?? 0,
+    popularity: (item.popularity as number) ?? 0,
+  }
+}
+
+
 export default function ListingsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -128,32 +143,14 @@ useEffect(() => {
     setError('Something went wrong')
   }
 } finally {
-    }
+  setLoading(false)
+}
   }
 
   fetchProducts()
 }, [])
 
-function normalizeProduct(item: unknown): Product {
-  if (typeof item !== 'object' || item === null) {
-    throw new Error('Invalid product data');
-  }
 
-  // tüübi kindlustamiseks kasutame tüübiühendamist
-  const obj = item as Record<string, unknown>;
-
-  return {
-    id: obj.id != null ? String(obj.id) : '',
-    brand: typeof obj.brand === 'string' ? obj.brand : '',
-    category: typeof obj.category === 'string' ? obj.category : '',
-    size: typeof obj.size === 'string' ? obj.size : '',
-    filter: typeof obj.filter === 'string' ? obj.filter : '',
-    image: Array.isArray(obj.images) && obj.images.every(i => typeof i === 'string') ? obj.images : [],
-    condition: typeof obj.condition === 'string' ? obj.condition : '',
-    price: typeof obj.price === 'number' ? obj.price : 0,
-    popularity: typeof obj.popularity === 'number' ? obj.popularity : 0,
-  };
-}
 
 
 
