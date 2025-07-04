@@ -4,8 +4,8 @@ import React, { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Database } from '../../types/supabase'
-import { useSession } from '@supabase/auth-helpers-react'
 import MessageInput from './MessageInput'
+import type { Session } from '@supabase/supabase-js' 
 
 type Props = {
   userId: string | null
@@ -13,12 +13,13 @@ type Props = {
 
 export default function ChatWindow({ userId }: Props) {
   const supabase = createClientComponentClient<Database>()
-  const session = useSession()
-  const currentUserId = session?.user.id
+  const [session, setSession] = useState<Session | null>(null)  // <- muudetud tüüp
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   const [messages, setMessages] = useState<Database['public']['Tables']['messages']['Row'][]>([])
   const [sending, setSending] = useState(false)
   const [imageUrls, setImageUrls] = useState<Record<number, string>>({})
+  const [loading, setLoading] = useState(false)
   const [recipientInfo, setRecipientInfo] = useState<{
     first_name: string | null
     surname: string | null
@@ -26,18 +27,35 @@ export default function ChatWindow({ userId }: Props) {
   } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Kontroll, kas kasutaja on sisse logitud
-  useEffect(() => {
-    if (!session) {
-      alert('Palun logi sisse, et kasutada vestlust.')
-      // Võid siin suunata kasutaja ka logimislehele või kuvada mingi alternatiivse UI
-    }
-  }, [session])
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
+    useEffect(() => {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession()
+      setSession(data.session)
+      setCurrentUserId(data.session?.user.id || null)
+    }
+    getSession()
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      setCurrentUserId(session?.user.id || null)
+    })
+
+    return () => {
+      authListener.subscription.unsubscribe()
+    }
+  }, [supabase])
+
+  // Lae esialgsed sõnumid
   useEffect(() => {
-    if (!currentUserId || !userId) return;
+    if (!currentUserId || !userId) return
 
     const loadMessages = async () => {
+      setLoading(true)
+
       const { data, error } = await supabase
         .from('messages')
         .select('*')
@@ -48,14 +66,18 @@ export default function ChatWindow({ userId }: Props) {
 
       if (error) {
         console.error('Load messages error:', error)
+        setMessages([])
       } else {
         setMessages(data || [])
       }
+      setLoading(false)
+      scrollToBottom()
     }
 
     loadMessages()
   }, [currentUserId, userId, supabase])
 
+  // signed URLid
   useEffect(() => {
     if (!messages.length || !session) return
 
@@ -65,7 +87,7 @@ export default function ChatWindow({ userId }: Props) {
         if (msg.image_url) {
           const { data, error } = await supabase.storage
             .from('chat-images')
-            .createSignedUrl(msg.image_url, 60 * 60) // 1 tund kehtiv signed URL
+            .createSignedUrl(msg.image_url, 60 * 60)
 
           if (!error && data?.signedUrl) {
             newUrls[msg.id] = data.signedUrl
@@ -80,6 +102,7 @@ export default function ChatWindow({ userId }: Props) {
     fetchSignedUrls()
   }, [messages, session, supabase])
 
+  // vastaspoole profiil
   useEffect(() => {
     if (!userId) {
       setRecipientInfo(null)
@@ -87,6 +110,7 @@ export default function ChatWindow({ userId }: Props) {
     }
 
     const loadRecipientInfo = async () => {
+      setLoading(true)
       const { data, error } = await supabase
         .from('public_users')
         .select('first_name, surname, avatar_url')
@@ -99,21 +123,23 @@ export default function ChatWindow({ userId }: Props) {
       } else {
         setRecipientInfo(data)
       }
+      setLoading(false)
     }
 
     loadRecipientInfo()
   }, [userId, supabase])
 
+  // automaatne scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // realtime
   useEffect(() => {
     if (!currentUserId || !userId) return
 
     const sortedIds = [currentUserId, userId].sort()
     const channelName = `messages-${sortedIds[0]}-${sortedIds[1]}`
-
     const channel = supabase.channel(channelName)
 
     channel.on(
@@ -140,68 +166,63 @@ export default function ChatWindow({ userId }: Props) {
     }
   }, [currentUserId, userId, supabase])
 
+  // sõnumi saatmine
   const handleSend = async ({
-  text,
-  image,
-}: {
-  text: string
-  image: File | null
-}) => {
-  if (sending || (!text && !image) || !currentUserId || !userId) return
+    text,
+    image,
+  }: {
+    text: string
+    image: File | null
+  }) => {
+    if (sending || (!text && !image) || !currentUserId || !userId) return
 
-  setSending(true)
+    setSending(true)
 
-  try {
-    let imageUrl: string | null = null
+    try {
+      let imageFileName: string | null = null
 
-    if (image) {
-      const fileExt = image.name.split('.').pop()
-      const fileName = `${currentUserId}_${Date.now()}.${fileExt}`
+      if (image) {
+        const fileExt = image.name.split('.').pop()
+        const fileName = `${currentUserId}_${Date.now()}.${fileExt}`
 
-      const { error: uploadError } = await supabase.storage
-  .from('chat-images')
-  .upload(fileName, image)
+        const { error: uploadError } = await supabase.storage
+          .from('chat-images')
+          .upload(fileName, image)
 
+        if (uploadError) {
+          console.error('Pildi üleslaadimise viga:', uploadError.message)
+          alert('Pildi üleslaadimine ebaõnnestus')
+          setSending(false)
+          return
+        }
 
-      if (uploadError) {
-        console.error('Pildi üleslaadimise viga:', uploadError)
-        alert('Pildi üleslaadimine ebaõnnestus')
+        imageFileName = fileName
+      }
+
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          sender_id: currentUserId,
+          receiver_id: userId,
+          content: text,
+          image_url: imageFileName,
+          created_at: new Date().toISOString(),
+        })
+
+      if (error) {
+        console.error('Sõnumi saatmise viga:', error)
+        alert('Sõnumi saatmine ebaõnnestus')
         setSending(false)
         return
       }
-
-      // Salvesta sõnumisse ainult failinimi, mitte signed URL
-      imageUrl = fileName
-    }
-
-    const { data, error } = await supabase
-      .from('messages')
-      .insert({
-        sender_id: currentUserId,
-        receiver_id: userId,
-        content: text,
-        image_url: imageUrl,
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Sõnumi saatmise viga:', error)
+      // realtime hoiab sõnumid ise sünkroonis
+    } catch (err) {
+      console.error('Tundmatu viga sõnumi saatmisel:', err)
       alert('Sõnumi saatmine ebaõnnestus')
+    } finally {
       setSending(false)
-      return
     }
-
-    setMessages((prev) => [...prev, data])
-  } catch (err) {
-    console.error('Tundmatu viga sõnumi saatmisel:', err)
-    alert('Sõnumi saatmine ebaõnnestus')
-  } finally {
-    setSending(false)
   }
-}
-
 
   const getInitials = (firstName: string | null, lastName: string | null) => {
     const firstInitial = firstName ? firstName[0].toUpperCase() : ''
@@ -209,20 +230,12 @@ export default function ChatWindow({ userId }: Props) {
     return firstInitial + lastInitial
   }
 
-  // Kui sessiooni pole, näita kasutajale sõnumit
-  if (!session) {
-    return (
-      <div className="p-4 text-center">
-        Palun logi sisse, et kasutada vestlust.
-      </div>
-    )
-  }
-
-
   return (
     <div className="flex flex-col flex-1 p-4 h-screen">
       <div className="flex items-center border-b p-2 mb-2">
-        {recipientInfo?.avatar_url ? (
+        {loading ? (
+          <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+        ) : recipientInfo?.avatar_url ? (
           <img
             src={recipientInfo.avatar_url}
             alt="Kontopilt"
@@ -234,7 +247,13 @@ export default function ChatWindow({ userId }: Props) {
           </div>
         )}
         <div className="ml-3 font-semibold text-lg">
-          {recipientInfo?.first_name || ''} {recipientInfo?.surname || ''}
+          {loading ? (
+            <span className="bg-gray-200 w-24 h-4 rounded animate-pulse" />
+          ) : (
+            <>
+              {recipientInfo?.first_name || ''} {recipientInfo?.surname || ''}
+            </>
+          )}
         </div>
       </div>
 
@@ -252,21 +271,18 @@ export default function ChatWindow({ userId }: Props) {
               <div className="font-semibold mb-1 text-sm text-gray-700">
                 {msg.sender_id === currentUserId ? 'Sina' : `${recipientInfo?.first_name || 'Kasutaja'}`}
               </div>
-
               <div className="whitespace-pre-wrap">{msg.content}</div>
-
               {msg.image_url && imageUrls[msg.id] && (
-  <div className="relative mt-2 w-full h-48 rounded overflow-hidden">
-    <Image
-      src={imageUrls[msg.id]}
-      alt="Sõnumi pilt"
-      fill
-      style={{ objectFit: 'contain' }}
-      sizes="(max-width: 768px) 100vw, 50vw"
-    />
-  </div>
-)}
-
+                <div className="relative mt-2 w-full h-48 rounded overflow-hidden">
+                  <Image
+                    src={imageUrls[msg.id]}
+                    alt="Sõnumi pilt"
+                    fill
+                    style={{ objectFit: 'contain' }}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </div>
+              )}
               <div className="text-xs text-gray-500 text-right mt-1">
                 {new Date(msg.created_at).toLocaleTimeString()}
               </div>

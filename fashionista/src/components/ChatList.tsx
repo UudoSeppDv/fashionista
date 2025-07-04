@@ -12,61 +12,32 @@ export default function ChatList({ selectedUserId, onSelectUser }: Props) {
   const [contacts, setContacts] = useState<
     { id: string; first_name: string | null; surname: string | null; avatar_url: string | null }[]
   >([])
-  const [sessionUserId, setSessionUserId] = useState<string | null>(null)
 
   useEffect(() => {
-    const getSessionUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      setSessionUserId(data?.user?.id ?? null)
-    }
-    getSessionUser()
-  }, [supabase])
-
-  useEffect(() => {
-    // lae kõik unikaalsed inimesed, kellega on vahetatud sõnumeid
     const loadContacts = async () => {
       const { data, error } = await supabase
-        .from('messages')
-        .select('sender_id, receiver_id')
+        .from('user_contacts_detailed') // VIEW
+        .select('contact_id, first_name, surname, avatar_url')
 
       if (error) {
         console.error(error)
         return
       }
 
-      const userIds = new Set<string>()
-      data?.forEach((msg) => {
-        userIds.add(msg.sender_id)
-        userIds.add(msg.receiver_id)
-      })
-
-      // eemalda iseennast
-      if (sessionUserId) {
-        userIds.delete(sessionUserId)
-      }
-
-      const ids = Array.from(userIds)
-
-      // lae public_users tabelist nimed
-      const { data: users, error: usersError } = await supabase
-        .from('public_users')
-        .select('id, first_name, surname, avatar_url')
-        .in('id', ids)
-
-      if (usersError) {
-        console.error(usersError)
-        return
-      }
-
-      if (users) {
-        setContacts(users)
+      if (data) {
+        setContacts(
+          data.map((c) => ({
+            id: c.contact_id,
+            first_name: c.first_name,
+            surname: c.surname,
+            avatar_url: c.avatar_url,
+          }))
+        )
       }
     }
 
-    if (sessionUserId) {
-      loadContacts()
-    }
-  }, [supabase, sessionUserId])
+    loadContacts()
+  }, [supabase])
 
   return (
     <div className="w-1/3 border-r overflow-y-auto">

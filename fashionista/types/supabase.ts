@@ -164,6 +164,16 @@ export type Database = {
         }
         Relationships: []
       }
+      Views: {
+  user_contacts_detailed: {
+    Row: {
+      contact_id: string;
+      first_name: string | null;
+      surname: string | null;
+      avatar_url: string | null;
+    };
+  };
+}
       user_followers: {
         Row: {
           followed_at: string | null

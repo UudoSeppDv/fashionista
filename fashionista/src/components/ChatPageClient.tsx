@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import ChatList from './ChatList'
 import ChatWindow from './ChatWindow'
-
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Session } from '@supabase/supabase-js'
 

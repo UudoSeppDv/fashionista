@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../../lib/supabase'
+import type { Database } from '..../../../types/supabase' 
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import DropdownMenu from './DropdownMenu'
 import UserDropdownMenu from './UserDropdownMenu'
 import SearchBar from './SearchBar'
@@ -16,7 +17,7 @@ export default function Header({ setShowLoginModal, searchQuery, setSearchQuery 
   const router = useRouter()
   const [showNav, setShowNav] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
-
+  const supabase = createClientComponentClient<Database>();
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
 

@@ -7,7 +7,9 @@ import Header from '@/components/Header'
 import LoginModal from '@/components/LoginModal'
 import Footer from '@/components/Footer'
 import { ChevronDown } from 'lucide-react'
-import { supabase } from '../../../lib/supabase'  // veendu, et see on õige path
+import type { Database } from '..../../../types/supabase' 
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+const supabase = createClientComponentClient<Database>()
 
 
 type Product = {

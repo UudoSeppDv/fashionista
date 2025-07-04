@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../../../lib/supabase'
+import type { Database } from '..../../../types/supabase' 
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Session } from '@supabase/auth-helpers-nextjs'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -16,6 +17,7 @@ export default function AddProductPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClientComponentClient<Database>();
 
  useEffect(() => {
   const checkSession = async () => {
