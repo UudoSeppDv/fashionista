@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Database } from '../../types/supabase'
 import MessageInput from './MessageInput'
-import type { Session } from '@supabase/supabase-js' 
+import type { Session } from '@supabase/supabase-js'
 
 type Props = {
   userId: string | null
@@ -13,13 +13,17 @@ type Props = {
 
 export default function ChatWindow({ userId }: Props) {
   const supabase = createClientComponentClient<Database>()
-  const [session, setSession] = useState<Session | null>(null)  // <- muudetud tüüp
+  const [session, setSession] = useState<Session | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-
-  const [messages, setMessages] = useState<Database['public']['Tables']['messages']['Row'][]>([])
+const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<
+    Database['public']['Tables']['messages']['Row'][]
+  >([])
   const [sending, setSending] = useState(false)
   const [imageUrls, setImageUrls] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(false)
+  const [openImage, setOpenImage] = useState<string | null>(null);
+
   const [recipientInfo, setRecipientInfo] = useState<{
     first_name: string | null
     surname: string | null
@@ -31,7 +35,8 @@ export default function ChatWindow({ userId }: Props) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-    useEffect(() => {
+
+  useEffect(() => {
     const getSession = async () => {
       const { data } = await supabase.auth.getSession()
       setSession(data.session)
@@ -39,10 +44,12 @@ export default function ChatWindow({ userId }: Props) {
     }
     getSession()
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setCurrentUserId(session?.user.id || null)
-    })
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session)
+        setCurrentUserId(session?.user.id || null)
+      }
+    )
 
     return () => {
       authListener.subscription.unsubscribe()
@@ -98,9 +105,51 @@ export default function ChatWindow({ userId }: Props) {
       }
       setImageUrls(newUrls)
     }
+    
 
     fetchSignedUrls()
   }, [messages, session, supabase])
+
+useEffect(() => {
+  const container = messagesContainerRef.current;
+  if (!container) return;
+
+  // Võta timeout, et lasta DOM-il piltide laetamisel kohaneda
+  const timeout = setTimeout(() => {
+    container.scrollTop = container.scrollHeight;
+  }, 100); // 100 ms võib olla piisav
+
+  return () => clearTimeout(timeout);
+}, [messages]);
+
+
+  const [currentUserInfo, setCurrentUserInfo] = useState<{
+  first_name: string | null
+  surname: string | null
+  avatar_url: string | null
+} | null>(null)
+
+useEffect(() => {
+  if (!currentUserId) return
+
+  const loadCurrentUserInfo = async () => {
+    const { data, error } = await supabase
+      .from('public_users')
+      .select('first_name, surname, avatar_url')
+      .eq('id', currentUserId)
+      .single()
+
+    if (error) {
+      console.error('Error loading current user info:', error)
+      setCurrentUserInfo(null)
+    } else {
+      setCurrentUserInfo(data)
+    }
+  }
+
+  loadCurrentUserInfo()
+}, [currentUserId, supabase])
+
 
   // vastaspoole profiil
   useEffect(() => {
@@ -129,10 +178,7 @@ export default function ChatWindow({ userId }: Props) {
     loadRecipientInfo()
   }, [userId, supabase])
 
-  // automaatne scroll
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+
 
   // realtime
   useEffect(() => {
@@ -199,15 +245,13 @@ export default function ChatWindow({ userId }: Props) {
         imageFileName = fileName
       }
 
-      const { error } = await supabase
-        .from('messages')
-        .insert({
-          sender_id: currentUserId,
-          receiver_id: userId,
-          content: text,
-          image_url: imageFileName,
-          created_at: new Date().toISOString(),
-        })
+      const { error } = await supabase.from('messages').insert({
+        sender_id: currentUserId,
+        receiver_id: userId,
+        content: text,
+        image_url: imageFileName,
+        created_at: new Date().toISOString(),
+      })
 
       if (error) {
         console.error('Sõnumi saatmise viga:', error)
@@ -231,10 +275,12 @@ export default function ChatWindow({ userId }: Props) {
   }
 
   return (
-    <div className="flex flex-col flex-1 p-4 h-screen">
-      <div className="flex items-center border-b p-2 mb-2">
+    
+    <div className="flex border-t flex-col flex-1 font-montserrat ">
+      
+      <div className="flex items-center border-b p-4">
         {loading ? (
-          <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+          <div className="w-10 h-10 rounded-full bg-pink-200 animate-pulse" />
         ) : recipientInfo?.avatar_url ? (
           <img
             src={recipientInfo.avatar_url}
@@ -242,7 +288,7 @@ export default function ChatWindow({ userId }: Props) {
             className="w-10 h-10 rounded-full object-cover"
           />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-gray-400 text-white flex items-center justify-center font-bold text-lg">
+          <div className="w-10 h-10 rounded-full bg-pink-400 text-white flex items-center justify-center font-semibold">
             {getInitials(recipientInfo?.first_name || '', recipientInfo?.surname || '')}
           </div>
         )}
@@ -257,37 +303,107 @@ export default function ChatWindow({ userId }: Props) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto border rounded p-2 flex flex-col">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-2 flex flex-col">
         {messages.length === 0 ? (
           <div className="text-center text-gray-500 mt-10">Alusta vestlust selle kasutajaga</div>
         ) : (
-          messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`p-3 my-2 rounded max-w-[70%] flex flex-col ${
-                msg.sender_id === currentUserId ? 'bg-green-100 ml-auto' : 'bg-gray-200 mr-auto'
-              }`}
-            >
-              <div className="font-semibold mb-1 text-sm text-gray-700">
-                {msg.sender_id === currentUserId ? 'Sina' : `${recipientInfo?.first_name || 'Kasutaja'}`}
-              </div>
-              <div className="whitespace-pre-wrap">{msg.content}</div>
-              {msg.image_url && imageUrls[msg.id] && (
-                <div className="relative mt-2 w-full h-48 rounded overflow-hidden">
-                  <Image
-                    src={imageUrls[msg.id]}
-                    alt="Sõnumi pilt"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                </div>
-              )}
-              <div className="text-xs text-gray-500 text-right mt-1">
-                {new Date(msg.created_at).toLocaleTimeString()}
-              </div>
-            </div>
-          ))
+    messages.map((msg, index) => {
+      const isCurrentUser = msg.sender_id === currentUserId;
+
+      const avatarUrl = isCurrentUser
+  ? currentUserInfo?.avatar_url || null
+  : recipientInfo?.avatar_url
+
+const firstName = isCurrentUser
+  ? currentUserInfo?.first_name || ''
+  : recipientInfo?.first_name || ''
+
+const surname = isCurrentUser
+  ? currentUserInfo?.surname || ''
+  : recipientInfo?.surname || ''
+
+      // Kuvame avatari ainult siis, kui see on esimene sõnum või eelmine sõnum oli teisest saatjast
+      const showAvatar =
+        index === 0 || messages[index - 1].sender_id !== msg.sender_id;
+            return (
+              <div
+              
+                key={msg.id}
+                className={`p-3 max-w-[70%] flex items-end ${
+                  isCurrentUser ? 'ml-auto flex-row-reverse' : 'mr-auto'
+                }`}
+              >
+                     {/* Avatar ainult kui showAvatar === true */}
+      {showAvatar ? (
+        <div className="w-10 h-10 rounded-full bg-pink-400 text-white flex items-center justify-center font-semibold flex-shrink-0">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Avatar"
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            (firstName[0]?.toUpperCase() || '') +
+            (surname[0]?.toUpperCase() || '') || '?'
+          )}
+        </div>
+      ) : (
+        // Kui avatarit ei kuvata, siis lisame sama laiusega tühja ruumi, et sõnumid oleksid joondatud
+        <div className="w-10 h-10 flex-shrink-0" />
+      )}
+
+      {/* Sõnumi kast */}
+      <div
+        className={`p-2 ml-2 mr-2 border ${
+          isCurrentUser
+            ? 'bg-pink-100 border-gray-900 ml-2'
+            : 'bg-gray-900 text-white mr-2'
+        } max-w-[calc(100%-56px)]`}
+      >
+        <div className="whitespace-pre-wrap">{msg.content}</div>
+        {msg.image_url && imageUrls[msg.id] && (
+  <>
+    <div
+      className="relative mt-2 w-full h-48 rounded overflow-hidden cursor-pointer"
+      onClick={() => setOpenImage(imageUrls[msg.id])}
+    >
+      <Image
+        src={imageUrls[msg.id]}
+        alt="Sõnumi pilt"
+        fill
+        style={{ objectFit: 'contain' }}
+        sizes="(max-width: 768px) 100vw, 50vw"
+      />
+    </div>
+
+    {/* Modal */}
+    {openImage && (
+      <div className="fixed inset-0 z-50 bg-opacity-80 flex items-center justify-center"
+      style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}>
+        <button
+          className="absolute top-4 right-4 text-white text-3xl font-bold"
+          onClick={() => setOpenImage(null)}
+        >
+          &times;
+        </button>
+        <div className="relative w-[90vw] h-[80vh] max-w-4xl">
+          <Image
+            src={openImage}
+            alt="Avatud pilt"
+            fill
+            style={{ objectFit: 'contain' }}
+            sizes="100vw"
+          />
+        </div>
+      </div>
+    )}
+  </>
+
+        )}
+      </div>
+    </div>
+  )
+})
         )}
         <div ref={messagesEndRef} />
       </div>

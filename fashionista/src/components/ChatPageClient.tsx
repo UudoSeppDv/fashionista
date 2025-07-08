@@ -56,11 +56,15 @@ export default function ChatPageClient() {
   }
 
   return (
-    <div className="flex h-screen">
+    
+    <div className="flex max-h-[85vh]">
+      
       <ChatList
+
         onSelectUser={handleSelectUser}
         selectedUserId={selectedUserId}
       />
+      
       <ChatWindow userId={selectedUserId} />
     </div>
   )
