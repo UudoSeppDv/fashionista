@@ -31,9 +31,7 @@ const messagesContainerRef = useRef<HTMLDivElement>(null);
   } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+ 
 
 
   useEffect(() => {
@@ -78,7 +76,7 @@ const messagesContainerRef = useRef<HTMLDivElement>(null);
         setMessages(data || [])
       }
       setLoading(false)
-      scrollToBottom()
+      
     }
 
     loadMessages()
