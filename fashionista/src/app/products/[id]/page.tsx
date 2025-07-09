@@ -78,7 +78,8 @@ export default function ProductPage() {
           *,
           public_users (
             id,
-            display_name,
+            first_name,
+            surname, 
             avatar_url,
             location,
             sold_products_count

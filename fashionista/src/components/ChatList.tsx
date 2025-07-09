@@ -4,10 +4,15 @@ import type { Database } from '../../types/supabase'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
+import { ContactType } from '../../types/contact'
+
+
 
 type Props = {
+  contacts: ContactType[]
   selectedUserId: string | null
   onSelectUser: (id: string) => void
+  className?: string
 }
 
 type Contact = {
@@ -24,50 +29,72 @@ export default function ChatList({ selectedUserId, onSelectUser }: Props) {
   const [contacts, setContacts] = useState<Contact[]>([])
 
   useEffect(() => {
-    const loadContacts = async () => {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser()
+  const loadContacts = async () => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
 
-      if (userError) {
-        console.error(userError)
-        return
-      }
-
-      const myId = user?.id
-
-      const { data, error } = await supabase
-        .from('user_contacts_detailed')
-        .select('contact_id, first_name, surname, avatar_url, last_message_text, last_message_timestamp')
-
-      if (error) {
-        console.error(error)
-        return
-      }
-
-      if (data && myId) {
-        setContacts(
-          data
-            .filter((c) => c.contact_id !== myId)
-            .map((c) => ({
-              id: c.contact_id,
-              first_name: c.first_name,
-              surname: c.surname,
-              avatar_url: c.avatar_url,
-              last_message_text: c.last_message_text,
-              last_message_timestamp: c.last_message_timestamp,
-            }))
-        )
-      }
+    if (userError) {
+      console.error(userError)
+      return
     }
 
-    loadContacts()
-  }, [supabase])
+    const myId = user?.id
+    if (!myId) return
+
+    const { data, error } = await supabase
+      .from('user_contacts_detailed')
+      .select('contact_id, first_name, surname, avatar_url, last_message_text, last_message_timestamp')
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    if (data) {
+      setContacts(
+        data
+          .filter((c) => c.contact_id !== myId)
+          .map((c) => ({
+            id: c.contact_id,
+            first_name: c.first_name,
+            surname: c.surname,
+            avatar_url: c.avatar_url,
+            last_message_text: c.last_message_text,
+            last_message_timestamp: c.last_message_timestamp,
+          }))
+      )
+    }
+  }
+
+  loadContacts()
+
+  // Subscribe to changes in 'messages' table
+  const channel = supabase
+    .channel('messages-updates')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'messages',
+      },
+      (payload) => {
+        console.log('Realtime message change:', payload)
+        loadContacts() // Reload contacts when message is inserted/updated
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}, [supabase])
 
   return (
     
-    <div className="w-1/3 border-r border-t overflow-y-auto font-montserrat">
+   <div className="w-1/3 h-full border-r border-t overflow-y-auto font-montserrat">
       <div className="flex items-center border-b py-5.5 pl-4">
         <h2 className="font-semibold text-lg">Messages</h2>
       </div>

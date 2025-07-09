@@ -6,6 +6,8 @@ import ChatList from './ChatList'
 import ChatWindow from './ChatWindow'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Session } from '@supabase/supabase-js'
+import { ContactType } from '../../types/contact'
+
 
 export default function ChatPageClient() {
   const supabase = createClientComponentClient()
@@ -34,7 +36,7 @@ export default function ChatPageClient() {
   // selectedUserId URL-ist
   const userIdFromUrl = pathname?.split('/').pop() || null
   const [selectedUserId, setSelectedUserId] = useState<string | null>(userIdFromUrl)
-
+  const [contacts] = useState<ContactType[]>([])
   useEffect(() => {
     setSelectedUserId(userIdFromUrl)
   }, [userIdFromUrl])
@@ -57,13 +59,13 @@ export default function ChatPageClient() {
 
   return (
     
-    <div className="flex max-h-[85vh]">
+    <div className="flex h-[85vh]">
       
       <ChatList
-
-        onSelectUser={handleSelectUser}
-        selectedUserId={selectedUserId}
-      />
+                    contacts={contacts}
+                    onSelectUser={handleSelectUser}
+                    selectedUserId={selectedUserId}
+                  />
       
       <ChatWindow userId={selectedUserId} />
     </div>

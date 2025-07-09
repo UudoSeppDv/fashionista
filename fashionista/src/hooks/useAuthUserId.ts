@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import type { Database } from '..../../../types/supabase' 
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export default function useAuthUserId() {
   const [userId, setUserId] = useState<string | null>(null)
+  const supabase = createClientComponentClient<Database>();
 
   useEffect(() => {
     const fetchUser = async () => {

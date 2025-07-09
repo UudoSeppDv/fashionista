@@ -25,6 +25,8 @@ export type Product = {
   location?: string | null;
   public_users?: {
     id: string;
+    first_name?: string | null;
+    surname?: string | null;
     display_name?: string | null;
     avatar_url?: string | null;
     bio?: string | null;
@@ -59,17 +61,21 @@ export default function ProductClient({ product}: Props) {
 
 
   // Muuda 'user' struktuur vastavaks, mida komponent ootab
-  const user = product.public_users
-    ? {
-        id: product.public_users.id,
-        user_metadata: {
-          display_name: product.public_users.display_name || 'Anonüümne',
-          avatar: product.public_users.avatar_url || '/default-avatar.png',
-          followers: 0, // lisa hiljem päringust või ignoreeri
-          sold_count: product.public_users.sold_products_count || 0,
-        },
-      }
-    : undefined;
+const user = product.public_users
+  ? {
+      id: product.public_users.id,
+      user_metadata: {
+        full_name:
+          (product.public_users.first_name || '') +
+          (product.public_users.surname
+            ? ' ' + product.public_users.surname
+            : ''),
+        avatar: product.public_users.avatar_url || '/default-avatar.png',
+        followers: 0,
+        sold_count: product.public_users.sold_products_count || 0,
+      },
+    }
+  : undefined;
 
   return (
     <>
@@ -95,16 +101,18 @@ export default function ProductClient({ product}: Props) {
     {hasAvatar && product.public_users?.avatar_url ? (
   <img
     src={product.public_users.avatar_url}
-    alt={user?.user_metadata.display_name || 'Müüja'}
+    alt={user?.user_metadata.full_name || 'Müüja'}
     className="w-full h-full object-cover"
   />
 ) : (
-  user?.user_metadata.display_name?.charAt(0).toUpperCase() || '?'
+  user?.user_metadata.full_name?.charAt(0).toUpperCase() || '?'
 )}
 
   </div>
   <div className="flex flex-col flex-grow">
-    <span className="font-semibold">{user?.user_metadata.display_name}</span>
+    <span className="font-semibold">
+  {user?.user_metadata.full_name || 'Anonüümne'}
+</span>
     <div className="text-sm text-gray-600">
   <span className="font-bold text-gray-800">{user?.user_metadata.followers ?? 0}</span> Jälgijat &nbsp;
   <span className="font-bold text-gray-800">{user?.user_metadata.sold_count ?? 0}+</span> Müüdud
