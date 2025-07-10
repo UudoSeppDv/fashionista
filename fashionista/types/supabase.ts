@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      user_private_data: {
+  Row: {
+    user_id: string
+    phone: string | null
+    email: string | null
+    iban: string | null
+    updated_at: string | null
+  }
+  Insert: {
+    user_id: string
+    phone?: string | null
+    email?: string | null
+    iban?: string | null
+    updated_at?: string | null
+  }
+  Update: {
+    user_id?: string
+    phone?: string | null
+    email?: string | null
+    iban?: string | null
+    updated_at?: string | null
+  }
+  Relationships: [
+    {
+      foreignKeyName: "user_private_data_user_id_fkey"
+      columns: ["user_id"]
+      isOneToOne: true
+      referencedRelation: "public_users"
+      referencedColumns: ["id"]
+    }
+  ]
+}
       favorites: {
         Row: {
           created_at: string | null

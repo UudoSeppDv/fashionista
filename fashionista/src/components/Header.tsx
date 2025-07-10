@@ -34,12 +34,12 @@ export default function Header({ setShowLoginModal, searchQuery, setSearchQuery 
         // public.profiles tabel kus on `full_name`:
         const { data } = await supabase
           .from('public_users')
-          .select('display_name')
+          .select('first_name')
           .eq('id', session.user.id)
           .single()
 
-        if (data?.display_name) {
-          setUserName(data.display_name)
+        if (data?.first_name) {
+          setUserName(data.first_name)
         } else {
           setUserName(session.user.email ?? null); // fallback
         }
