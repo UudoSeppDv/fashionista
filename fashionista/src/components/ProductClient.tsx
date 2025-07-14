@@ -49,15 +49,27 @@ export default function ProductClient({ product}: Props) {
   const hasAvatar = !!product.public_users?.avatar_url;
   const { favorites, toggleFavorite } = useFavorites();
   const isFavorited = favorites.has(product.id);
+  
   const router = useRouter();
+  const [currentUserId] = useState<string | null>(null);
+  
 
- const handleSendMessageClick = () => {
-  if (!product.public_users?.id) {
-    alert('Müüja info puudub, ei saa sõnumit saata.')
-    return
-  }
-  router.push(`/messages/${product.public_users.id}`)
-}
+
+
+
+  const isOwner = currentUserId === product.user_id;
+
+  const handleSendMessageClick = () => {
+    if (!product.public_users?.id) {
+      alert('Müüja info puudub, ei saa sõnumit saata.');
+      return;
+    }
+    router.push(`/messages/${product.public_users.id}`);
+  };
+
+  const handleEditClick = () => {
+    router.push(`/edit-product/${product.id}`);
+  };
 
 
   // Muuda 'user' struktuur vastavaks, mida komponent ootab
@@ -119,11 +131,11 @@ const user = product.public_users
 </div>
   </div>
   <button
-        onClick={handleSendMessageClick}
-        className="border border-black rounded-full px-4 py-1 text-sm font-medium hover:bg-black hover:text-white transition"
-      >
-        SAADA SÕNUM
-      </button>
+          onClick={isOwner ? handleEditClick : handleSendMessageClick}
+          className="border border-black rounded-full px-4 py-1 text-sm font-medium hover:bg-black hover:text-white transition"
+        >
+          {isOwner ? 'MUUDA' : 'SAADA SÕNUM'}
+        </button>
           </div>
 
           <div className="text-sm text-gray-600">{product.location}</div>

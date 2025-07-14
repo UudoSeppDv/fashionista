@@ -28,7 +28,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, sending }) => {
     <div className="flex flex-col gap-2 m-2">
       {/* Kui on valitud pilt, näita väikest eelvaadet koos ristiga */}
       {previewUrl && (
-        <div className="relative inline-block w-24 h-24 border rounded overflow-hidden">
+        <div className="relative inline-block w-24 h-24 border border-gray-600 rounded overflow-hidden">
           <img
             src={previewUrl}
             alt="Valitud pilt"
@@ -66,7 +66,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, sending }) => {
 
 <div className="relative w-full">
   <input
-    className="w-full border p-2 pr-10 rounded"
+    className="w-full border border-gray-600 p-2 pr-10 rounded"
     placeholder="Sisesta sõnum..."
     value={newMessage}
     onChange={(e) => setNewMessage(e.target.value)}

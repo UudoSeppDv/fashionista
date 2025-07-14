@@ -20,7 +20,7 @@ export default function SectionRecentlyAdded() {
   useEffect(() => {
     const fetchProducts = async () => {
       const { data, error } = await supabase
-        .from('products')
+        .from('public_products')
         .select('id, brand, images, created_at')
         .order('created_at', { ascending: false })
         .limit(5)

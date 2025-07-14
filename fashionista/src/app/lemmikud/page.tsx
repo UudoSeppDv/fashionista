@@ -167,7 +167,7 @@ useEffect(() => {
 
       // 3) Võta tooted, mille id on favoriteIds sees
       const { data: productsData, error: productsError } = await supabase
-        .from('products')
+        .from('public_products')
         .select('*')
         .in('id', favoriteIds)
 

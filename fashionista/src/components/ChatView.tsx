@@ -126,7 +126,7 @@ const [contacts, setContacts] = useState<ContactType[]>([])
         onSelectUser={handleSelectUser}
         selectedUserId={selectedUserId}
       />
-      <div className="flex-1 flex items-center justify-center border-t">
+      <div className="flex-1 flex items-center justify-center border-gray-600 border-t">
         <p className="text-gray-600 text-lg text-center">
           Alusta vestlust kellegagi vasakult nimekirjast.
         </p>

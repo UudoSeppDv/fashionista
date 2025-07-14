@@ -124,7 +124,7 @@ useEffect(() => {
     setError(null)
     try {
       const { data, error } = await supabase
-        .from('products')
+        .from('public_products')
         .select('*')
 
       if (error) {

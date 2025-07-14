@@ -1,20 +1,36 @@
 'use client'
 
-import React, { useState, useRef, useEffect} from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 interface ImageUploaderProps {
+  existingImages?: string[]
   onFilesChange: (files: File[]) => void
+  onExistingImagesChange?: (urls: string[]) => void
 }
 
-export default function ImageUploader({ onFilesChange }: ImageUploaderProps) {
-  const [images, setImages] = useState<{ file: File; url: string }[]>([])
+
+export default function ImageUploader({ existingImages = [], onFilesChange, onExistingImagesChange }: ImageUploaderProps) {
+  const [images, setImages] = useState<{ file?: File; url: string }[]>([])
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
+  // Lisa olemasolevad pildid esialgu imagesisse
   useEffect(() => {
-    onFilesChange(images.map(i => i.file))
-    // Kui onFilesChange ei ole memoiseeritud, siis jäta sõltuvusteloendisse ainult images:
+    // Kui alguses pole images sees, lisa olemasolevad pildid
+    if (images.length === 0 && existingImages.length > 0) {
+      const imgs = existingImages.map(url => ({ url }))
+      setImages(imgs)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [images])
+  }, [existingImages])
+
+  // Kui muutuvad images, anna üles failid (ainult need, mis on File objektid)
+ useEffect(() => {
+  onFilesChange(images.filter(img => img.file).map(img => img.file!))
+  if (onExistingImagesChange) {
+    onExistingImagesChange(images.filter(img => !img.file).map(img => img.url))
+  }
+}, [images])
+  
 
   function handleImageUpload(files: FileList | null) {
     if (!files) return
@@ -33,7 +49,10 @@ export default function ImageUploader({ onFilesChange }: ImageUploaderProps) {
 
   function handleRemoveImage(index: number) {
     setImages(prev => {
-      URL.revokeObjectURL(prev[index].url)
+      const removed = prev[index]
+      if (removed.file) {
+        URL.revokeObjectURL(removed.url)
+      }
       return prev.filter((_, i) => i !== index)
     })
   }
@@ -46,6 +65,7 @@ export default function ImageUploader({ onFilesChange }: ImageUploaderProps) {
   function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault()
   }
+
   return (
     <div>
       <h2 className="text-lg font-semibold mb-2 mt-4">Lisa pildid</h2>
@@ -107,7 +127,7 @@ export default function ImageUploader({ onFilesChange }: ImageUploaderProps) {
           {images.map((img, i) => (
             <div
               key={i}
-              className="relative w-40 h-40 overflow-hidden group"
+              className="relative w-40 h-40 overflow-hidden group border rounded"
             >
               <img src={img.url} alt={`Upload Preview ${i}`} className="object-cover w-full h-full" />
               <button

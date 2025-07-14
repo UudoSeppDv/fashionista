@@ -27,7 +27,7 @@ export default function SectionFeaturedProducts({
   const fetchProducts = async () => {
     setLoading(true)
     const { data, error } = await supabase
-      .from('products')
+      .from('public_products')
       .select('id, brand, price, images')
       .order('created_at', { ascending: false })
       .limit(5)

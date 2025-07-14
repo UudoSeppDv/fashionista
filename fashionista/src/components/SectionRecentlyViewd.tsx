@@ -40,7 +40,7 @@ export default function SectionRecentlyViewed({ favoritesUpdatedAt }: Props) {
         if (viewedIds.length === 0) {
           // Kui vaatamisajalugu tühi, too lihtsalt viimased 5 toodet
           const response = await supabase
-            .from('products')
+            .from('public_products')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(5)
@@ -50,7 +50,7 @@ export default function SectionRecentlyViewed({ favoritesUpdatedAt }: Props) {
         } else {
           // Kui vaatamisajalugu on, too konkreetsed tooted
           const response = await supabase
-            .from('products')
+            .from('public_products')
             .select('*')
             .in('id', viewedIds)
 

@@ -8,7 +8,9 @@ export type Json =
 
 export type Database = {
   public: {
+
     Tables: {
+      
       user_private_data: {
   Row: {
     user_id: string
@@ -96,64 +98,74 @@ export type Database = {
         Relationships: []
       }
       products: {
-        Row: {
-          brand: string | null
-          category: string | null
-          condition: string | null
-          created_at: string | null
-          delivery: string[] | null
-          description: string | null
-          filter: string | null
-          id: string
-          images: string[] | null
-          location: string | null
-          price: string | null
-          quantity: number | null
-          size: string | null
-          user_id: string
-        }
-        Insert: {
-          brand?: string | null
-          category?: string | null
-          condition?: string | null
-          created_at?: string | null
-          delivery?: string[] | null
-          description?: string | null
-          filter?: string | null
-          id?: string
-          images?: string[] | null
-          location?: string | null
-          price?: string | null
-          quantity?: number | null
-          size?: string | null
-          user_id: string
-        }
-        Update: {
-          brand?: string | null
-          category?: string | null
-          condition?: string | null
-          created_at?: string | null
-          delivery?: string[] | null
-          description?: string | null
-          filter?: string | null
-          id?: string
-          images?: string[] | null
-          location?: string | null
-          price?: string | null
-          quantity?: number | null
-          size?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_user"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
+  Row: {
+    brand: string | null
+    category: string | null
+    condition: string | null
+    created_at: string | null
+    delivery: string[] | null
+    description: string | null
+    filter: string | null
+    id: string
+    images: string[] | null
+    location: string | null
+    price: string | null
+    quantity: number | null
+    size: string | null
+    user_id: string
+
+    visible: boolean | null
+    status: string | null
+  }
+  Insert: {
+    brand?: string | null
+    category?: string | null
+    condition?: string | null
+    created_at?: string | null
+    delivery?: string[] | null
+    description?: string | null
+    filter?: string | null
+    id?: string
+    images?: string[] | null
+    location?: string | null
+    price?: string | null
+    quantity?: number | null
+    size?: string | null
+    user_id: string
+
+    visible?: boolean | null
+    status?: string | null
+  }
+  Update: {
+    brand?: string | null
+    category?: string | null
+    condition?: string | null
+    created_at?: string | null
+    delivery?: string[] | null
+    description?: string | null
+    filter?: string | null
+    id?: string
+    images?: string[] | null
+    location?: string | null
+    price?: string | null
+    quantity?: number | null
+    size?: string | null
+    user_id?: string
+
+    visible?: boolean | null
+    status?: string | null
+  }
+  Relationships: [
+    {
+      foreignKeyName: "fk_user"
+      columns: ["user_id"]
+      isOneToOne: false
+      referencedRelation: "public_users"
+      referencedColumns: ["id"]
+    }
+  ]
+}
+
       public_users: {
         Row: {
           avatar_url: string | null

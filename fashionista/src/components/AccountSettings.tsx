@@ -226,6 +226,7 @@ const handleDelete = async () => {
 {uploading && (
     <p className="text-gray-500 text-sm">Laadimine...</p>
     )}
+
   {/* Avatariga seotud nupud */}
 <div className="space-x-4 text-right">
   {/* Kui pilti pole, siis näita "Lisa pilti" */}

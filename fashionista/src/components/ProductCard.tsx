@@ -7,6 +7,7 @@ type ProductProps = {
   price: string | number;
   filter?: string;
   images: string[];
+  visible?: boolean; // ← uus väli
 };
 
 export default function ProductCard({

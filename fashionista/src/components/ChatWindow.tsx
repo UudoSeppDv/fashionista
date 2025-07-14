@@ -274,9 +274,9 @@ useEffect(() => {
 
   return (
     
-    <div className="flex border-t flex-col flex-1 font-montserrat ">
+    <div className="flex border-gray-600 border-t flex-col flex-1 font-montserrat ">
       
-      <div className="flex items-center border-b p-4">
+      <div className="flex items-center border-gray-600 border-b p-4">
         {loading ? (
           <div className="w-10 h-10 rounded-full bg-pink-200 animate-pulse" />
         ) : recipientInfo?.avatar_url ? (

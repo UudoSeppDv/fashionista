@@ -73,7 +73,7 @@ export default function ProductPage() {
     if (!id) return;
     const fetchProduct = async () => {
       const { data, error } = await supabase
-        .from("products")
+        .from("public_products")
         .select(`
           *,
           public_users (
@@ -89,7 +89,7 @@ export default function ProductPage() {
         .single();
 
       if (!error && data) setProduct(normalizeProductData(data));
-      else console.error("Viga toote laadimisel:", error);
+      else alert("Viga toote laadimisel:");
 
       setLoading(false);
     };
