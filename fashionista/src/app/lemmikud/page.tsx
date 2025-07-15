@@ -76,8 +76,8 @@ useEffect(() => {
   }
 
   checkUser()
-}, [router])
-
+}, [router]) // nüüd hoiatus kaob ja kõik töötab ootuspäraselt
+ 
 React.useEffect(() => {
   const timer = setTimeout(() => setShowEmptyState(true), 2000);
   return () => clearTimeout(timer);
@@ -193,7 +193,7 @@ useEffect(() => {
   }
 
   fetchFavorites()
-}, [])
+}, [router])
 
   // Sinu olemasolev filtrite, otsingu ja sorteerimise loogika
   const categories = Array.from(new Set(products.map(p => p.category)))

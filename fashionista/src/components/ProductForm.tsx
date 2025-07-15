@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient'
-import ImageUploader from '@/components/ImageUploader'
+import ImageUploaderNew from '@/components/ImageUploaderNew'
 
 type FilterType = 'Riided' | 'Aksessuaarid' | 'Jalanõud' | 'Sport' | 'Ilu' | ''
 
@@ -14,7 +14,7 @@ export default function ProductForm() {
   const [images, setImages] = useState<File[]>([])
 
   const [uploading, setUploading] = useState(false)
-  const [formResetKey, setFormResetKey] = useState(0)
+  const [, setFormResetKey] = useState(0)
   const [successMessage, setSuccessMessage] = useState('');
 
 
@@ -28,13 +28,11 @@ export default function ProductForm() {
   const [location, setLocation] = useState('')
   const [price, setPrice] = useState('')
   const [deliveryOptions, setDeliveryOptions] = useState<string[]>([])
+  
 
-  // Failide üleslaadimise funktsioon, mida edastan ImageUploaderile
-function handleFilesChange(files: File[]) {
-  if (files.length === 0) return;
-  setImages(prev => [...prev, ...files]); // siin on nüüd File[] tüüpi massiiv, mitte URL-id
-}
-
+const handleFilesChange = useCallback((files: File[]) => {
+  setImages(files)
+}, [])
 async function uploadImage(file: File): Promise<string | null> {
   const fileExt = file.name.split('.').pop();
   const fileName = `${Date.now()}.${fileExt}`;
@@ -148,7 +146,8 @@ const { error } = await supabase.from('products').insert([
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6 text-sm font-montserrat">
       
-      <ImageUploader key={formResetKey} onFilesChange={handleFilesChange} />
+      <ImageUploaderNew files={images} onFilesChange={handleFilesChange} />
+
 
 
       <div>

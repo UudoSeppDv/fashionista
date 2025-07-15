@@ -27,7 +27,7 @@ export default function LoginAndMessages() {
     return () => {
       listener.subscription.unsubscribe()
     }
-  }, [supabase])
+  }, [])
 
   // Laeme sõnumid, kui on sessioon
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function LoginAndMessages() {
         else setMessages(data ?? [])
         setLoading(false)
       })
-  }, [session, supabase])
+  }, [session])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

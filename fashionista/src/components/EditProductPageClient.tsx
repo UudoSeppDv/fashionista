@@ -74,7 +74,7 @@ export default function EditProductPageClient({ productId }: Props) {
     return () => {
       subscriptionData.subscription.unsubscribe()
     }
-  }, [productId, router, supabase])
+  }, [productId, router])
 
   if (isLoading) {
     return (

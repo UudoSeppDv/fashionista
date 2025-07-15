@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
-
 import MessageInput from './MessageInput'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabaseClient'
@@ -53,7 +52,7 @@ const messagesContainerRef = useRef<HTMLDivElement>(null);
     return () => {
       authListener.subscription.unsubscribe()
     }
-  }, [supabase])
+  }, [])
 
   // Lae esialgsed sõnumid
   useEffect(() => {
@@ -81,7 +80,7 @@ const messagesContainerRef = useRef<HTMLDivElement>(null);
     }
 
     loadMessages()
-  }, [currentUserId, userId, supabase])
+  }, [currentUserId, userId])
 
   // signed URLid
   useEffect(() => {
@@ -107,7 +106,7 @@ const messagesContainerRef = useRef<HTMLDivElement>(null);
     
 
     fetchSignedUrls()
-  }, [messages, session, supabase])
+  }, [messages, session])
 
 useEffect(() => {
   const container = messagesContainerRef.current;
@@ -147,7 +146,7 @@ useEffect(() => {
   }
 
   loadCurrentUserInfo()
-}, [currentUserId, supabase])
+}, [currentUserId])
 
 
   // vastaspoole profiil
@@ -175,7 +174,7 @@ useEffect(() => {
     }
 
     loadRecipientInfo()
-  }, [userId, supabase])
+  }, [userId])
 
 
 
@@ -209,7 +208,7 @@ useEffect(() => {
     return () => {
       channel.unsubscribe()
     }
-  }, [currentUserId, userId, supabase])
+  }, [currentUserId, userId])
 
 const handleSend = async ({
   text,
@@ -321,7 +320,7 @@ const handleSend = async ({
         {loading ? (
           <div className="w-10 h-10 rounded-full bg-pink-200 animate-pulse" />
         ) : recipientInfo?.avatar_url ? (
-          <img
+          <Image
             src={recipientInfo.avatar_url}
             alt="Kontopilt"
             className="w-10 h-10 rounded-full object-cover"
@@ -375,17 +374,19 @@ const surname = isCurrentUser
                      {/* Avatar ainult kui showAvatar === true */}
       {showAvatar ? (
         <div className="w-10 h-10 rounded-full bg-pink-400 text-white flex items-center justify-center font-semibold flex-shrink-0">
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt="Avatar"
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          ) : (
-            (firstName[0]?.toUpperCase() || '') +
-            (surname[0]?.toUpperCase() || '') || '?'
-          )}
-        </div>
+  {avatarUrl ? (
+    <Image
+      src={avatarUrl}
+      alt="Avatar"
+      width={40}
+      height={40}
+      className="rounded-full object-cover"
+    />
+  ) : (
+    ((firstName?.[0]?.toUpperCase() ?? '') + (surname?.[0]?.toUpperCase() ?? '')) || '?'
+  )}
+</div>
+
       ) : (
         // Kui avatarit ei kuvata, siis lisame sama laiusega tühja ruumi, et sõnumid oleksid joondatud
         <div className="w-10 h-10 flex-shrink-0" />
@@ -402,26 +403,29 @@ const surname = isCurrentUser
         <div className="whitespace-pre-wrap">{msg.content}</div>
         {msg.image_url && imageUrls[msg.id] && (
   <>
-    <div
-      className="relative mt-2 w-full h-48 rounded overflow-hidden cursor-pointer"
-      onClick={() => setOpenImage(imageUrls[msg.id])}
-    >
-      <Image
-        src={imageUrls[msg.id]}
-        alt="Sõnumi pilt"
-        fill
-        style={{ objectFit: 'contain' }}
-        sizes="(max-width: 768px) 100vw, 50vw"
-      />
-    </div>
+    <Image
+  src={imageUrls[msg.id]}
+  alt="Sõnumi pilt"
+  width={300}   // pane sobiv laius ja kõrgus vastavalt
+  height={192}  // hoia proportsioonid (või arvuta vastavalt)
+  className="mt-2 rounded cursor-pointer"
+  style={{ objectFit: 'contain', maxHeight: '12rem' }}
+  onClick={() => setOpenImage(imageUrls[msg.id])}
+/>
 
-    {/* Modal */}
+
     {openImage && (
-      <div className="fixed inset-0 z-50 bg-opacity-80 flex items-center justify-center"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}>
+      <div
+        className="fixed inset-0 z-50 bg-opacity-80 flex items-center justify-center"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
+        onClick={() => setOpenImage(null)} // võimalus sulgeda klikkides taustal
+      >
         <button
           className="absolute top-4 right-4 text-white text-3xl font-bold"
-          onClick={() => setOpenImage(null)}
+          onClick={(e) => {
+            e.stopPropagation(); // et ei sulgeks kui klikid nupul
+            setOpenImage(null);
+          }}
         >
           &times;
         </button>
@@ -437,8 +441,8 @@ const surname = isCurrentUser
       </div>
     )}
   </>
+)}
 
-        )}
       </div>
     </div>
   )

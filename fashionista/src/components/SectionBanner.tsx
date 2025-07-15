@@ -16,7 +16,7 @@
 </div>
 
 
-     <img
+     <Image
     src="/images/flower-vector.svg"
     alt="Flower vector"
     width={55}
@@ -24,7 +24,7 @@
     className="absolute -top-3 left-155"
   />
 
-  <img
+  <Image
     src="/images/flower-vector.svg"
     alt="Flower vector"
     width={110}
@@ -32,7 +32,7 @@
     className="absolute top-8 left-130"
   />
 
-    <img
+    <Image
     src="/images/flower-vector.svg"
     alt="Flower vector"
     width={210}
@@ -40,7 +40,7 @@
     className=" z-1 absolute top-100 left-220"
   />
 
-      <img
+      <Image
     src="/images/flower-vector.svg"
     alt="Flower vector"
     width={210}

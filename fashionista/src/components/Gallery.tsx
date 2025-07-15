@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 type GalleryProps = {
   images: string[];
@@ -25,12 +26,14 @@ export default function Gallery({ images }: GalleryProps) {
       <div className="flex gap-8">
         {/* Suur valitud pilt koos nooltega */}
         <div className="relative w-[600px] h-[700px]">
-          <img
-            src={images[selectedIndex]}
-            alt={`Valitud pilt ${selectedIndex + 1}`}
-            className="w-full h-full object-cover cursor-pointer"
-            onClick={() => setModalOpen(true)}
-          />
+          <div className="relative w-full h-full cursor-pointer" onClick={() => setModalOpen(true)}>
+  <Image
+    src={images[selectedIndex]}
+    alt={`Valitud pilt ${selectedIndex + 1}`}
+    fill
+    className="object-cover"
+  />
+</div>
 
           {/* Vasaknool */}
           <button
@@ -56,17 +59,20 @@ export default function Gallery({ images }: GalleryProps) {
         {/* Väike galerii veerg */}
        <div className="flex flex-col gap-1 max-h-100 overflow-y-auto">
   {images.map((img, i) => (
-    <img
+    <Image
       key={i}
       src={img}
       alt={`Pilt ${i + 1}`}
-      className={`w-30 h-34 object-cover cursor-pointer border border-gray-800 hover:opacity-80 ${
+      width={120} // ⬅️ Määra sobivad mõõdud (või vasta tailwind `w-30` ja `h-34`)
+      height={136}
+      className={`object-cover cursor-pointer border border-gray-800 hover:opacity-80 ${
         i === selectedIndex ? 'ring-2 ring-gray-800' : ''
       }`}
       onClick={() => setSelectedIndex(i)}
     />
   ))}
 </div>
+
       </div>
 
       {/* Mida näidatakse kui pilt on modalina */}
@@ -89,12 +95,16 @@ export default function Gallery({ images }: GalleryProps) {
             ‹
           </button>
 
-          <img
-            src={images[selectedIndex]}
-            alt={`Suur pilt ${selectedIndex + 1}`}
-            className="max-w-[90vw] max-h-[90vh] rounded shadow-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="relative w-[90vw] h-[90vh] max-w-full max-h-full rounded shadow-lg">
+  <Image
+    src={images[selectedIndex]}
+    alt={`Suur pilt ${selectedIndex + 1}`}
+    fill
+    className="object-contain rounded"
+    onClick={(e) => e.stopPropagation()}
+  />
+</div>
+
 
           {/* Paremnool */}
           <button

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react"
 import { usePrivateData } from "../../lib/getPrivateData"
 import { updatePrivateData } from "../../lib/updatePrivateData"
 import { supabase } from '../../lib/supabaseClient'
+import Image from 'next/image'
 
 export default function AccountSettings() {
   const { privateData, loading, refresh } = usePrivateData()
@@ -221,11 +222,15 @@ if (loading) return <p>Laen andmeid...</p>
       <div className="border p-4 flex items-center space-x-6">
   {/* Avatar */}
   {avatarUrl ? (
-    <img
-      src={avatarUrl}
-      alt="Profiilipilt"
-      className="w-20 h-20 rounded-full object-cover"
-    />
+   <div className="relative w-20 h-20 rounded-full overflow-hidden">
+  <Image
+    src={avatarUrl}
+    alt="Profiilipilt"
+    fill
+    className="object-cover"
+  />
+</div>
+
   ) : (
     <div className="w-20 h-20 rounded-full bg-pink-300 text-white flex items-center justify-center text-xl font-bold">
       {formData.firstName.charAt(0)}

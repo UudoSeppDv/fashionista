@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
 import { ContactType } from '../../types/contact'
+import Image from 'next/image'
 
 
 
@@ -89,7 +90,7 @@ export default function ChatList({ selectedUserId, onSelectUser }: Props) {
   return () => {
     supabase.removeChannel(channel)
   }
-}, [supabase])
+}, [])
 
   return (
     
@@ -113,7 +114,7 @@ export default function ChatList({ selectedUserId, onSelectUser }: Props) {
           >
             <div className="flex gap-3">
               {contact.avatar_url ? (
-                <img src={contact.avatar_url} className="w-10 h-10 rounded-full object-cover" />
+                <Image alt="Avatar_URL" src={contact.avatar_url} className="w-10 h-10 rounded-full object-cover" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-pink-400 text-white flex items-center justify-center font-semibold">
   {(contact.first_name?.[0]?.toUpperCase() ?? '') + (contact.surname?.[0]?.toUpperCase() ?? '') || '?'}

@@ -33,7 +33,7 @@ export default function ChatPageClient() {
     return () => {
       listener.subscription.unsubscribe()
     }
-  }, [supabase])
+  }, [])
 
   // selectedUserId URL-ist
   const userIdFromUrl = pathname?.split('/').pop() || null

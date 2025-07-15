@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabaseClient'
 import ImageUploader from '@/components/ImageUploader'
+import { useCallback } from 'react'
 
 export default function EditProductForm({ productId }: { productId: string }) {
   const formRef = useRef<HTMLFormElement>(null)
@@ -14,7 +15,9 @@ export default function EditProductForm({ productId }: { productId: string }) {
   const [images, setImages] = useState<File[]>([])
   const [existingImages, setExistingImages] = useState<string[]>([])
   const [successMessage, setSuccessMessage] = useState('')
- 
+ const handleFilesChange = useCallback((files: File[]) => {
+  setImages(files)
+}, [])
   
 
   const [description, setDescription] = useState('')
@@ -59,9 +62,6 @@ export default function EditProductForm({ productId }: { productId: string }) {
     loadProduct()
   }, [productId])
 
-  const handleFilesChange = (files: File[]) => {
-    setImages(files)
-  }
 
   const toggleDelivery = (option: string) => {
     setDeliveryOptions(prev =>
@@ -146,7 +146,7 @@ export default function EditProductForm({ productId }: { productId: string }) {
       onSubmit={handleSubmit}
       className="max-w-2xl mx-auto space-y-6 text-sm font-montserrat"
     >
-     <ImageUploader
+    <ImageUploader
   key={formResetKey}
   onFilesChange={handleFilesChange}
   existingImages={existingImages}

@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 
 
@@ -68,10 +69,6 @@ export default function StoreSettingsAndProducts() {
 
 
 
-
-
-
-
   useEffect(() => {
   fetchUserAndProducts()
 }, [])
@@ -103,34 +100,48 @@ const handleStoreSave = async () => {
 
 
   const handleProductAction = async (id: string, action: string) => {
-    switch (action) {
-      case "delete":
+  if (!user) return;
+
+  switch (action) {
+    case "delete":
       const confirmed = window.confirm("Oled kindel, et soovid selle toote kustutada?");
       if (!confirmed) return;
-      await supabase.from("products").delete().eq("id", id);
-      break
-      case "sold":
-        // Kui sul on status välja, lisa andmebaasi ja siin uuenda:
-        await supabase.from("products").update({ status: "sold" }).eq("id", id)
-        break
-      case "hide":
-        // Kui sul on visible välja, lisa andmebaasi ja siin uuenda:
-        await supabase.from("products").update({ visible: false }).eq("id", id)
-        break
-        case "unhide":
-  await supabase.from("products").update({ visible: true }).eq("id", id)
-  await fetchUserAndProducts()
+      const { error: deleteError } = await supabase.from("products").delete().eq("id", id);
+      if (deleteError) {
+        alert("Kustutamine ebaõnnestus: " + deleteError.message);
+        return;
+      }
+      break;
+    case "sold":
+      const { error: soldError } = await supabase.from("products").update({ status: "sold" }).eq("id", id);
+      if (soldError) {
+        alert("Viga: " + soldError.message);
+        return;
+      }
+      break;
+    case "hide":
+      const { error: hideError } = await supabase.from("products").update({ visible: false }).eq("id", id);
+      if (hideError) {
+        alert("Viga: " + hideError.message);
+        return;
+      }
+      break;
+    case "unhide":
+      const { error: unhideError } = await supabase.from("products").update({ visible: true }).eq("id", id);
+      if (unhideError) {
+        alert("Viga: " + unhideError.message);
+        return;
+      }
+      break;
+    default:
+      return;
+  }
 
-  break
-
-      default:
-        break
-    }
-    // Värskenda toodete nimekiri
-    if (!user) return;
-const { data } = await supabase.from("products").select("*").eq("user_id", user.id || user.id);
-if (data) setProducts(data);
+  // Värskenda toodete nimekiri pärast kõikide toimingute puhul
+  const { data } = await supabase.from("products").select("*").eq("user_id", user.id);
+  if (data) setProducts(data);
 }
+
 
   if (loading) return <div>Laen...</div>
 
@@ -206,21 +217,23 @@ if (data) setProducts(data);
       className="relative w-[250px] group"
     >
       <div
-        className={`w-[250px] h-[350px] overflow-hidden bg-white relative transition-all duration-300 ${
-          product.status === "sold" ? "opacity-50 grayscale" : ""
-        }`}
-      >
-        <img
-          src={
-            product.images && product.images.length > 0
-              ? product.images[0]
-              : "/placeholder.png"
-          }
-          alt={product.brand || "Toode"}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute bottom-0 left-0 w-full h-6 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300 pointer-events-none" />
-      </div>
+  className={`w-[250px] h-[350px] overflow-hidden bg-white relative transition-all duration-300 ${
+    product.status === "sold" ? "opacity-50 grayscale" : ""
+  }`}
+>
+  <Image
+    src={
+      product.images && product.images.length > 0
+        ? product.images[0]
+        : "/placeholder.png"
+    }
+    alt={product.brand || "Toode"}
+    fill
+    className="object-cover"
+  />
+  <div className="absolute bottom-0 left-0 w-full h-6 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300 pointer-events-none" />
+</div>
+
 
       {/* Allosas bränd ja hind */}
       <div className="py-3 px-2">

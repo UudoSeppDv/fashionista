@@ -40,7 +40,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [onClose, supabase]);
+  }, [onClose]);
 
   // Funktsioon Enter-klahvi jaoks
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

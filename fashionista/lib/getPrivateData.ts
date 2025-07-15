@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import useSession from '../src/hooks/useSession'
 import useAuthEmail from '../src/hooks/useAuthEmail'
@@ -19,7 +19,7 @@ export function usePrivateData() {
   const [privateData, setPrivateData] = useState<PrivateData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!session || !email) {
       setPrivateData(null)
       setLoading(false)
@@ -61,11 +61,11 @@ export function usePrivateData() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [session, email]) // õiged sõltuvused!
 
   useEffect(() => {
     fetchData()
-  }, [session, email])
+  }, [fetchData]) // nüüd ESLint rahul
 
   return { privateData, loading, refresh: fetchData }
 }

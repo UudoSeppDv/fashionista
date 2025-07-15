@@ -3,6 +3,7 @@
 import { Menu } from "@headlessui/react";
 import { useRouter } from "next/navigation";
 
+
 interface Props {
   onLogout: () => void;
 }
@@ -13,7 +14,11 @@ export default function UserDropdownMenu({ onLogout }: Props) {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <Menu.Button className="flex items-center p-2   focus:outline-none">
-  <img src="/icons/user.svg" alt="User Icon" className="hover:scale-110 w-5 h-5" />
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="#222222" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+<path d="M20.5901 22C20.5901 18.13 16.7402 15 12.0002 15C7.26015 15 3.41016 18.13 3.41016 22" stroke="#222222" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+</svg>
+
 </Menu.Button>
 
       <Menu.Items className=" font-medium absolute right-0 mt-2 w-56 origin-top-right bg-[#F8C6DF] shadow-lg z-50 focus:outline-none font-montserrat ">

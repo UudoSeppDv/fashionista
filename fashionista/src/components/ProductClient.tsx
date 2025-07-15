@@ -9,7 +9,7 @@ import SectionFeaturedProducts from './SectionFeaturedProducts';
 import { useFavorites } from '@/context/FavoritesContext' 
 import { supabase } from '../../lib/supabaseClient'
 import { useRouter } from 'next/navigation';
-
+import Image from 'next/image';
 
 
 export type Product = {
@@ -114,18 +114,19 @@ const user = product.public_users
         <div className="flex-1 flex flex-col gap-4">
           {/* Müüja info */}
          <div className="bg-[#A692C3] p-4 flex items-center gap-4">
-  <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-pink-400 text-white font-medium text-4xl select-none">
-    {hasAvatar && product.public_users?.avatar_url ? (
-  <img
-    src={product.public_users.avatar_url}
-    alt={user?.user_metadata.full_name || 'Müüja'}
-    className="w-full h-full object-cover"
-  />
-) : (
-  user?.user_metadata.full_name?.charAt(0).toUpperCase() || '?'
-)}
+  <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-pink-400 text-white font-medium text-4xl select-none relative">
+  {hasAvatar && product.public_users?.avatar_url ? (
+    <Image
+      src={product.public_users.avatar_url}
+      alt={user?.user_metadata.full_name || 'Müüja'}
+      fill
+      className="object-cover"
+    />
+  ) : (
+    user?.user_metadata.full_name?.charAt(0).toUpperCase() || '?'
+  )}
+</div>
 
-  </div>
   <div className="flex flex-col flex-grow">
     <span className="font-semibold">
   {user?.user_metadata.full_name || 'Anonüümne'}

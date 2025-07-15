@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 
 interface ImageUploaderProps {
   existingImages?: string[]
@@ -8,29 +9,28 @@ interface ImageUploaderProps {
   onExistingImagesChange?: (urls: string[]) => void
 }
 
-
 export default function ImageUploader({ existingImages = [], onFilesChange, onExistingImagesChange }: ImageUploaderProps) {
   const [images, setImages] = useState<{ file?: File; url: string }[]>([])
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  // Lisa olemasolevad pildid esialgu imagesisse
-  useEffect(() => {
-    // Kui alguses pole images sees, lisa olemasolevad pildid
-    if (images.length === 0 && existingImages.length > 0) {
-      const imgs = existingImages.map(url => ({ url }))
-      setImages(imgs)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingImages])
+  // Hoia viimast existingImages sünkroonimise infot, et effect ei jooksu mitu korda asjatult
+  const hasSyncedRef = useRef(false)
 
-  // Kui muutuvad images, anna üles failid (ainult need, mis on File objektid)
- useEffect(() => {
-  onFilesChange(images.filter(img => img.file).map(img => img.file!))
-  if (onExistingImagesChange) {
-    onExistingImagesChange(images.filter(img => !img.file).map(img => img.url))
-  }
-}, [images])
-  
+  useEffect(() => {
+    // Kui pole veel sünkroniseeritud ja images on tühi, siis sünkroniseeri
+    if (!hasSyncedRef.current && images.length === 0 && existingImages.length > 0) {
+      setImages(existingImages.map(url => ({ url })))
+      hasSyncedRef.current = true
+    }
+  }, [existingImages, images.length])
+
+  // Kui images muutuvad, kutsu callback'id
+  useEffect(() => {
+    onFilesChange(images.filter(img => img.file).map(img => img.file!))
+    if (onExistingImagesChange) {
+      onExistingImagesChange(images.filter(img => !img.file).map(img => img.url))
+    }
+  }, [images, onFilesChange, onExistingImagesChange])
 
   function handleImageUpload(files: FileList | null) {
     if (!files) return
@@ -45,6 +45,7 @@ export default function ImageUploader({ existingImages = [], onFilesChange, onEx
     }
 
     setImages(prev => [...prev, ...newImages])
+    hasSyncedRef.current = true // Kui lisame uusi, siis loeme, et oleme juba sünkroniseerinud
   }
 
   function handleRemoveImage(index: number) {
@@ -126,10 +127,18 @@ export default function ImageUploader({ existingImages = [], onFilesChange, onEx
         <div className="mt-4 flex flex-wrap gap-4">
           {images.map((img, i) => (
             <div
-              key={i}
-              className="relative w-40 h-40 overflow-hidden group border rounded"
+              key={img.url}
+              className="relative w-40 h-40 overflow-hidden group"
             >
-              <img src={img.url} alt={`Upload Preview ${i}`} className="object-cover w-full h-full" />
+              <Image 
+                src={img.url} 
+                alt={`Upload Preview ${i}`} 
+                className="object-cover w-full h-full"
+                unoptimized={img.file !== undefined} 
+                fill
+                sizes="160px"
+                style={{ objectFit: 'cover' }}
+              />
               <button
                 onClick={() => handleRemoveImage(i)}
                 style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
@@ -137,7 +146,11 @@ export default function ImageUploader({ existingImages = [], onFilesChange, onEx
                 aria-label="Eemalda pilt"
                 type="button"
               >
-                <img src="/icons/trash.svg" alt="Kustuta" className="w-8 h-8" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 6H21" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M19 6V20C19 21 18 22 17 22H7C6 22 5 21 5 20V6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M8 6V4C8 3 9 2 10 2H14C15 2 16 3 16 4V6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
             </div>
           ))}

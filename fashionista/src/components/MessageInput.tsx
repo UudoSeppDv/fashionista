@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 type MessageInputProps = {
   onSend: (args: { text: string; image: File | null }) => Promise<void>;
@@ -29,19 +30,21 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, sending }) => {
       {/* Kui on valitud pilt, näita väikest eelvaadet koos ristiga */}
       {previewUrl && (
         <div className="relative inline-block w-24 h-24 border border-gray-600 rounded overflow-hidden">
-          <img
-            src={previewUrl}
-            alt="Valitud pilt"
-            className="w-full h-full object-cover"
-          />
-          <button
-            type="button"
-            onClick={() => setSelectedImage(null)}
-            className="absolute top-0 right-0 bg-black bg-opacity-50 text-white rounded-bl px-1 hover:bg-opacity-75"
-          >
-            ✕
-          </button>
-        </div>
+  <Image
+    src={previewUrl}
+    alt="Valitud pilt"
+    fill
+    style={{ objectFit: 'cover' }}
+  />
+  <button
+    type="button"
+    onClick={() => setSelectedImage(null)}
+    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white rounded-bl px-1 hover:bg-opacity-75"
+  >
+    ✕
+  </button>
+</div>
+
       )}
 
       <div className="flex gap-2 items-center">

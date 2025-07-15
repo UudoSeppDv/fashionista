@@ -8,6 +8,7 @@ import LoginModal from '@/components/LoginModal'
 import Footer from '@/components/Footer'
 import { ChevronDown } from 'lucide-react'
 import { supabase } from '../../../lib/supabaseClient'
+import { LS_KEYS } from '../../../lib/constants/localStorageKeys'
 
 
 
@@ -55,16 +56,7 @@ export default function ListingsPage() {
   const [showSortDropdown, setShowSortDropdown] = useState(false)
 
   const itemsPerPage = 20
-// võtmed localStorage jaoks
-const LS_KEYS = {
-  selectedSizes: 'selectedSizes',
-  selectedBrands: 'selectedBrands',
-  selectedCategories: 'selectedCategories',
-  selectedFilters: 'selectedFilters',
-  minPrice: 'minPrice',
-  maxPrice: 'maxPrice',
-  customSizes: 'customSizes',
-}
+
 
 // Lehe laadimisel loe localStorage'st
 useEffect(() => {
