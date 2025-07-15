@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '../../../lib/supabaseClient'
 import type { Session } from '@supabase/supabase-js'
 import type { Database } from '../../../types/supabase' // tee kindlaks, et tee on õige ja sul on see fail olemas
 
 type Message = Database['public']['Tables']['messages']['Row']
 
 export default function LoginAndMessages() {
-  const supabase = createClientComponentClient<Database>()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

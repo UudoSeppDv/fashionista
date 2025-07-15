@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Database } from '..../../../types/supabase' 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '../../lib/supabaseClient'
 import type { Session } from '@supabase/auth-helpers-nextjs'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -17,23 +16,50 @@ type Props = {
 export default function EditProductPageClient({ productId }: Props) {
   const router = useRouter()
 
+
   const [, setShowLoginModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClientComponentClient<Database>()
+  const [isOwner, setIsOwner] = useState(false)
 
   useEffect(() => {
-    const checkSession = async () => {
+    const init = async () => {
       const { data } = await supabase.auth.getSession()
-      setSession(data.session)
-      setIsLoading(false)
+      const currentSession = data.session
+      setSession(currentSession)
 
-      if (!data.session) {
+      if (!currentSession) {
         setShowLoginModal(true)
+        setIsLoading(false)
+        return
       }
+
+      // Lae toote andmed, et kontrollida omanikku
+      const { data: product, error } = await supabase
+        .from('products') // ← asenda vastavalt oma tabeli nimega
+        .select('user_id') // ← ainult omanikku on vaja
+        .eq('id', productId)
+        .single()
+
+      if (error || !product) {
+        console.error('Toodet ei leitud või viga:', error)
+        router.push('/') // Või error page
+        return
+      }
+
+      if (product.user_id !== currentSession.user.id) {
+        console.warn('Pole omanik, suunan välja')
+        router.push('/') // Või 403 page
+        return
+      }
+
+      // Kui kõik OK
+      setIsOwner(true)
+      setIsLoading(false)
     }
-    checkSession()
+
+    init()
 
     const { data: subscriptionData } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
@@ -48,12 +74,12 @@ export default function EditProductPageClient({ productId }: Props) {
     return () => {
       subscriptionData.subscription.unsubscribe()
     }
-  }, [router])
+  }, [productId, router, supabase])
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen text-xl">
-        Kontrollin kasutaja õiguseid...
+        Kontrollin õiguseid ja laen andmeid...
       </div>
     )
   }
@@ -64,6 +90,14 @@ export default function EditProductPageClient({ productId }: Props) {
         isOpen={true}
         onClose={() => setShowLoginModal(false)}
       />
+    )
+  }
+
+  if (!isOwner) {
+    return (
+      <div className="text-center mt-10 text-xl text-red-600">
+        Sul puudub luba seda toodet muuta.
+      </div>
     )
   }
 

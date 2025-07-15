@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import type { Session } from "@supabase/supabase-js";
-import type { Database } from '..../../../types/supabase' 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '../../lib/supabaseClient'
 type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -14,7 +13,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const supabase = createClientComponentClient<Database>();
+
  const [, setSession] = useState<Session | null>(null);
 
   useEffect(() => {

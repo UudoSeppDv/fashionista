@@ -1,27 +1,15 @@
 import { useEffect, useState } from 'react'
-import type { Database } from '../../types/supabase'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import useSession from './useSession'
 
 export default function useAuthEmail() {
+  const session = useSession()
   const [email, setEmail] = useState<string | null>(null)
-  const supabase = createClientComponentClient<Database>()
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      setEmail(data.user?.email ?? null)
+    if (session?.user?.email) {
+      setEmail(session.user.email)
     }
-
-    fetchUser()
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setEmail(session?.user.email ?? null)
-    })
-
-    return () => {
-      authListener?.subscription.unsubscribe()
-    }
-  }, [])
+  }, [session])
 
   return email
 }

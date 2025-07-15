@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Database } from '../../types/supabase'
+import { supabase } from '../../lib/supabaseClient'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
@@ -25,7 +24,7 @@ type Contact = {
 }
 
 export default function ChatList({ selectedUserId, onSelectUser }: Props) {
-  const supabase = createClientComponentClient<Database>()
+ 
   const [contacts, setContacts] = useState<Contact[]>([])
 
   useEffect(() => {

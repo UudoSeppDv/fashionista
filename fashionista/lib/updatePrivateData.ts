@@ -1,5 +1,4 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Database } from '../types/supabase'
+import { supabase } from '../lib/supabaseClient'
 
 export async function updatePrivateData(data: {
   firstName: string
@@ -9,7 +8,7 @@ export async function updatePrivateData(data: {
   location: string
   iban: string
 }) {
-  const supabase = createClientComponentClient<Database>()
+  
 
   // 1. Hangi sessioon ja kasutaja
   const { data: sessionData } = await supabase.auth.getSession()

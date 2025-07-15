@@ -1,23 +1,23 @@
-'use client'
-
 import { useState, useEffect } from 'react'
-import type { Session } from '@supabase/supabase-js'  // <- lisa see import
-import { supabase } from '../../lib/supabase'
+import { supabase } from '../../lib/supabaseClient'
+import type { Session } from '@supabase/supabase-js'
 
 export default function useSession() {
-  const [session, setSession] = useState<Session | null | undefined>(undefined) // laadimine
+  const [session, setSession] = useState<Session | null>(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session) // paneme sessiooni või null
+      setSession(session)
     })
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
     })
 
     return () => {
-      listener.subscription.unsubscribe()
+      subscription.unsubscribe()
     }
   }, [])
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRef } from 'react';
-import { supabase } from '../../lib/supabase'
+import { supabase } from '../../lib/supabaseClient'
 import ImageUploader from '@/components/ImageUploader'
 
 type FilterType = 'Riided' | 'Aksessuaarid' | 'Jalanõud' | 'Sport' | 'Ilu' | ''

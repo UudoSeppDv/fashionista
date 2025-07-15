@@ -2,17 +2,18 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Database } from '../../types/supabase'
+
 import MessageInput from './MessageInput'
 import type { Session } from '@supabase/supabase-js'
+import { supabase } from '../../lib/supabaseClient'
+import type { Database } from '../../types/supabase' 
 
 type Props = {
   userId: string | null
 }
 
 export default function ChatWindow({ userId }: Props) {
-  const supabase = createClientComponentClient<Database>()
+  
   const [session, setSession] = useState<Session | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -210,61 +211,101 @@ useEffect(() => {
     }
   }, [currentUserId, userId, supabase])
 
-  // sõnumi saatmine
-  const handleSend = async ({
-    text,
-    image,
-  }: {
-    text: string
-    image: File | null
-  }) => {
-    if (sending || (!text && !image) || !currentUserId || !userId) return
+const handleSend = async ({
+  text,
+  image,
+}: {
+  text: string
+  image: File | null
+}) => {
+  if (sending || (!text && !image) || !userId) return
 
-    setSending(true)
+  setSending(true)
 
-    try {
-      let imageFileName: string | null = null
+  try {
+    // Saa aktiivne kasutaja Supabase auth kaudu
+    const { data: userData, error: authError } = await supabase.auth.getUser()
+    if (authError || !userData?.user?.id) {
+      console.error('Auth viga:', authError)
+      alert('Sisselogimine on vajalik sõnumi saatmiseks')
+      setSending(false)
+      return
+    }
 
-      if (image) {
-        const fileExt = image.name.split('.').pop()
-        const fileName = `${currentUserId}_${Date.now()}.${fileExt}`
+    const currentUserId = userData.user.id
 
-        const { error: uploadError } = await supabase.storage
-          .from('chat-images')
-          .upload(fileName, image)
+    // Kontrolli, kas kontakt juba on olemas
+    const { data: existingContact, error: contactCheckError } = await supabase
+      .from('user_contacts')
+      .select('*')
+      .eq('user_id', currentUserId)
+      .eq('contact_id', userId)
+      .single()
 
-        if (uploadError) {
-          console.error('Pildi üleslaadimise viga:', uploadError.message)
-          alert('Pildi üleslaadimine ebaõnnestus')
-          setSending(false)
-          return
-        }
+    // Kui kontakti pole, lisa see
+    if (!existingContact && contactCheckError?.code === 'PGRST116') {
+      const { error: insertContactError } = await supabase
+        .from('user_contacts')
+        .insert({
+          user_id: currentUserId,
+          contact_id: userId,
+        })
 
-        imageFileName = fileName
-      }
-
-      const { error } = await supabase.from('messages').insert({
-        sender_id: currentUserId,
-        receiver_id: userId,
-        content: text,
-        image_url: imageFileName,
-        created_at: new Date().toISOString(),
-      })
-
-      if (error) {
-        console.error('Sõnumi saatmise viga:', error)
-        alert('Sõnumi saatmine ebaõnnestus')
+      if (insertContactError) {
+        console.error('Kontakti lisamise viga:', insertContactError)
+        alert('Kontakti lisamine ebaõnnestus')
         setSending(false)
         return
       }
-      // realtime hoiab sõnumid ise sünkroonis
-    } catch (err) {
-      console.error('Tundmatu viga sõnumi saatmisel:', err)
-      alert('Sõnumi saatmine ebaõnnestus')
-    } finally {
+    } else if (contactCheckError && contactCheckError.code !== 'PGRST116') {
+      console.error('Kontakti kontrolli viga:', contactCheckError)
+      alert('Kontakti kontroll ebaõnnestus')
       setSending(false)
+      return
     }
+
+    // Kui pilt olemas, lae üles
+    let imageFileName: string | null = null
+
+    if (image) {
+      const fileExt = image.name.split('.').pop()
+      const fileName = `${currentUserId}_${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('chat-images')
+        .upload(fileName, image)
+
+      if (uploadError) {
+        console.error('Pildi üleslaadimise viga:', uploadError.message)
+        alert('Pildi üleslaadimine ebaõnnestus')
+        setSending(false)
+        return
+      }
+
+      imageFileName = fileName
+    }
+
+    // Sõnumi saatmine
+    const { error } = await supabase.from('messages').insert({
+      sender_id: currentUserId,
+      receiver_id: userId,
+      content: text,
+      image_url: imageFileName,
+      created_at: new Date().toISOString(),
+    })
+
+    if (error) {
+      console.error('Sõnumi saatmise viga:', error)
+      alert('Sõnumi saatmine ebaõnnestus')
+    }
+  } catch (err) {
+    console.error('Tundmatu viga sõnumi saatmisel:', err)
+    alert('Sõnumi saatmine ebaõnnestus')
+  } finally {
+    setSending(false)
   }
+}
+
 
   const getInitials = (firstName: string | null, lastName: string | null) => {
     const firstInitial = firstName ? firstName[0].toUpperCase() : ''

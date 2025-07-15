@@ -3,9 +3,7 @@
 import React, { useEffect, useState } from "react"
 import { usePrivateData } from "../../lib/getPrivateData"
 import { updatePrivateData } from "../../lib/updatePrivateData"
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Database } from '../../types/supabase'
-
+import { supabase } from '../../lib/supabaseClient'
 
 export default function AccountSettings() {
   const { privateData, loading, refresh } = usePrivateData()
@@ -30,6 +28,7 @@ const [uploading, setUploading] = useState(false)
   const [editing, setEditing] = useState(false)
   const [,setHasChanges] = useState(false)
 
+  
   // Kui privateData muutub, täida vorm
   useEffect(() => {
     if (privateData) {
@@ -47,7 +46,7 @@ const [uploading, setUploading] = useState(false)
   }, [privateData])
 const handleAvatarChange = async (file: File) => {
   setUploading(true)
-  const supabase = createClientComponentClient<Database>()
+  
   const user = (await supabase.auth.getUser()).data.user
   if (!user) {
     alert("Pole kasutajat!")
@@ -112,7 +111,7 @@ const handleAvatarChange = async (file: File) => {
 }
 
 const handleAvatarDelete = async () => {
-  const supabase = createClientComponentClient<Database>()
+  
   const user = (await supabase.auth.getUser()).data.user
   if (!user) return alert("Pole kasutajat!")
 
@@ -179,7 +178,7 @@ const handleSave = async () => {
 const handleDelete = async () => {
   if (!confirm("Kas oled kindel, et soovid konto kustutada?")) return
 
-  const supabase = createClientComponentClient<Database>()
+ 
   const user = (await supabase.auth.getUser()).data.user
   if (!user) return alert("Pole kasutajat!")
 
@@ -205,7 +204,17 @@ const handleDelete = async () => {
 }
 
 
-  if (loading) return <p>Laen andmeid...</p>
+if (loading) return <p>Laen andmeid...</p>
+
+  if (!privateData) {
+    return (
+      <div className="p-6 max-w-3xl mx-auto font-montserrat text-sm text-gray-800 bg-[#f8f3ef]">
+        <p className="text-red-600 font-semibold">
+          Konto muutmiseks peab olema sisse logitud.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 max-w-3xl mx-auto font-montserrat text-sm text-gray-800 space-y-8 bg-[#f8f3ef]">

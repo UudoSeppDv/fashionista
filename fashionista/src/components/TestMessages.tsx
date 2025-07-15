@@ -1,15 +1,14 @@
 'use client'
 
 import { useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Database } from '../../types/supabase'
+import { supabase } from '../../lib/supabaseClient'
+
 
 type Props = {
   currentUserId: string
 }
 
 export default function TestMessages({ currentUserId }: Props) {
-  const supabase = createClientComponentClient<Database>()
 
   useEffect(() => {
     const loadMessages = async () => {

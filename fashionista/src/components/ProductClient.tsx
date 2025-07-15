@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Gallery from '@/components/Gallery';
 import LoginModal from '@/components/LoginModal';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SectionFeaturedProducts from './SectionFeaturedProducts';
 import { useFavorites } from '@/context/FavoritesContext' 
-
+import { supabase } from '../../lib/supabaseClient'
 import { useRouter } from 'next/navigation';
 
 
@@ -50,15 +50,9 @@ export default function ProductClient({ product}: Props) {
   const { favorites, toggleFavorite } = useFavorites();
   const isFavorited = favorites.has(product.id);
   
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const router = useRouter();
-  const [currentUserId] = useState<string | null>(null);
-  
-
-
-
-
   const isOwner = currentUserId === product.user_id;
-
   const handleSendMessageClick = () => {
     if (!product.public_users?.id) {
       alert('Müüja info puudub, ei saa sõnumit saata.');
@@ -66,6 +60,17 @@ export default function ProductClient({ product}: Props) {
     }
     router.push(`/messages/${product.public_users.id}`);
   };
+
+  useEffect(() => {
+  const fetchUserId = async () => {
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) {
+      setCurrentUserId(data.user.id);
+    }
+  };
+  fetchUserId();
+}, []);
+
 
   const handleEditClick = () => {
     router.push(`/edit-product/${product.id}`);

@@ -2,16 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '../../lib/supabaseClient'
 import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import LoginModal from '@/components/LoginModal'
 import ChatList from '../components/ChatList'
-import type { Database } from '../../types/supabase'
 import { ContactType } from '../../types/contact'
 
 export default function ChatView() {
-  const supabase = createClientComponentClient<Database>()
+  
   const router = useRouter()
   const pathname = usePathname()
   const [showLoginModal, setShowLoginModal] = useState(false)

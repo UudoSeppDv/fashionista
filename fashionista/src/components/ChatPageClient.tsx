@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import ChatList from './ChatList'
 import ChatWindow from './ChatWindow'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '../../lib/supabaseClient'
 import type { Session } from '@supabase/supabase-js'
 import { ContactType } from '../../types/contact'
 
 
+
 export default function ChatPageClient() {
-  const supabase = createClientComponentClient()
+  
+  
   const router = useRouter()
   const pathname = usePathname()
 

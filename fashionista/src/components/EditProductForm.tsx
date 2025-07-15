@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import type { Database } from "../../types/supabase"
+import { supabase } from '../../lib/supabaseClient'
 import ImageUploader from '@/components/ImageUploader'
 
 export default function EditProductForm({ productId }: { productId: string }) {
@@ -15,7 +14,7 @@ export default function EditProductForm({ productId }: { productId: string }) {
   const [images, setImages] = useState<File[]>([])
   const [existingImages, setExistingImages] = useState<string[]>([])
   const [successMessage, setSuccessMessage] = useState('')
-  const supabase = createClientComponentClient<Database>()
+ 
   
 
   const [description, setDescription] = useState('')

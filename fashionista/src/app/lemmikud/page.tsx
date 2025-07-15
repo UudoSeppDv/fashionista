@@ -7,8 +7,7 @@ import Header from '@/components/Header'
 import LoginModal from '@/components/LoginModal'
 import Footer from '@/components/Footer'
 import { ChevronDown } from 'lucide-react'
-import type { Database } from '..../../../types/supabase' 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '../../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import React from 'react';
 
@@ -57,7 +56,7 @@ export default function FavoritesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [minPrice, setMinPrice] = useState<string>('')
   const [maxPrice, setMaxPrice] = useState<string>('')
-  const supabase = createClientComponentClient<Database>()
+
 
 
   const [currentPage, setCurrentPage] = useState(1)

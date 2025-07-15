@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
-import type { Database } from '../types/supabase'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '../lib/supabaseClient'
 import useSession from '../src/hooks/useSession'
-import useAuthEmail from '../src/hooks/useAuthEmail' // ✅ Lisa see
+import useAuthEmail from '../src/hooks/useAuthEmail'
 
 type PrivateData = {
   phone: string | null
@@ -19,10 +18,10 @@ export function usePrivateData() {
   const email = useAuthEmail()
   const [privateData, setPrivateData] = useState<PrivateData | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClientComponentClient<Database>()
 
   const fetchData = async () => {
-    if (!session) {
+    if (!session || !email) {
+      setPrivateData(null)
       setLoading(false)
       return
     }
@@ -57,7 +56,7 @@ export function usePrivateData() {
         avatar_url: publicUserData?.avatar_url ?? null,
       })
     } catch (error) {
-      console.error(error)
+      console.error('Andmete laadimisel tekkis viga:', error)
       setPrivateData(null)
     } finally {
       setLoading(false)

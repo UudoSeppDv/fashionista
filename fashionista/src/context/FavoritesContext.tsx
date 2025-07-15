@@ -2,8 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react'
 import useAuthUserId from "../hooks/useAuthUserId";
-import type { Database } from '..../../../types/supabase' 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '../../lib/supabaseClient'
 
 
 type FavoritesContextType = {
@@ -21,7 +20,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const userId = useAuthUserId()
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [isLoading, setIsLoading] = useState(false)
-const supabase = createClientComponentClient<Database>();
+
   // Lae lemmikud kasutaja ID järgi supabase’ist
   React.useEffect(() => {
     if (!userId) {
