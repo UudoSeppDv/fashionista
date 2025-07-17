@@ -29,7 +29,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, sending }) => {
     <div className="flex flex-col gap-2 m-2">
       {/* Kui on valitud pilt, näita väikest eelvaadet koos ristiga */}
       {previewUrl && (
-        <div className="relative inline-block w-24 h-24 border border-gray-600 rounded overflow-hidden">
+        <div className="relative inline-block w-24 h-24 border border-gray-600 overflow-hidden group">
   <Image
     src={previewUrl}
     alt="Valitud pilt"
@@ -39,11 +39,24 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, sending }) => {
   <button
     type="button"
     onClick={() => setSelectedImage(null)}
-    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white rounded-bl px-1 hover:bg-opacity-75"
+    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white cursor-pointer"
+    style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+    aria-label="Eemalda pilt"
   >
-    ✕
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+         xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 6H21" stroke="white" strokeWidth="1.5"
+            strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M19 6V20C19 21 18 22 17 22H7C6 22 5 21 5 20V6"
+            stroke="white" strokeWidth="1.5"
+            strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 6V4C8 3 9 2 10 2H14C15 2 16 3 16 4V6"
+            stroke="white" strokeWidth="1.5"
+            strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   </button>
 </div>
+
 
       )}
 

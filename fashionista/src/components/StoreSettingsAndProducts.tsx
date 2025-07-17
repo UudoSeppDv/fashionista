@@ -24,7 +24,7 @@ type User = Database["public"]["Tables"]["public_users"]["Row"]
 export default function StoreSettingsAndProducts() {
   const router = useRouter()
   const [form, setForm] = useState({
-  url: "",
+  page_url: "",
   bio: "",
   social_media: {
     facebook: "",
@@ -36,8 +36,10 @@ export default function StoreSettingsAndProducts() {
   const [user, setUser] = useState<User | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+    const [successMessage, setSuccessMessage] = useState('')  
   const fetchUserAndProducts = async () => {
   const { data: { user } } = await supabase.auth.getUser()
+ 
   if (!user) return
 
   const { data: storeData } = await supabase
@@ -54,7 +56,7 @@ export default function StoreSettingsAndProducts() {
   if (storeData) {
     setUser(storeData)
     setForm({
-      url: storeData.url || "",
+      page_url: storeData.page_url || "",
       bio: storeData.bio || "",
       social_media: {
     facebook: storeData.social_media?.facebook || "",
@@ -74,6 +76,7 @@ export default function StoreSettingsAndProducts() {
 }, [])
 
 const handleStoreSave = async () => {
+  
   if (!user) return
 
   const cleanedSocialMedia = Object.fromEntries(
@@ -83,19 +86,30 @@ const handleStoreSave = async () => {
   const { error } = await supabase
     .from("public_users")
     .update({
-      url: form.url,
+      page_url: form.page_url,
       bio: form.bio,
       social_media: cleanedSocialMedia,
     })
     .eq("id", user.id)
 
   if (error) {
-    console.error(error)
-    alert("Viga salvestamisel")
+    if (error.code === "23505" && error.message.includes("page_url")) {
+      alert("See URL on juba kasutusel, palun vali teine.")
+    } else {
+      console.error(error)
+      alert("Viga salvestamisel")
+    }
   } else {
-    alert("Salvestatud!")
+   setSuccessMessage('Pood edukalt uuendatud!')
+      setTimeout(() => {
+        router.push(`/kasutaja/${form.page_url}`)
+      }, 1500)
+    // Siin suuname kasutaja uue URL-i lehele
+  
   }
 }
+
+
 
 
 
@@ -146,10 +160,10 @@ const handleStoreSave = async () => {
   if (loading) return <div>Laen...</div>
 
    return (
-    <div className="flex flex-col md:flex-row gap-8 p-8">
+    <div className="flex flex-col md:flex-row gap-8 m-2">
       {/* Store settings */}
-      <div className="border border-gray-600 w-full md:w-1/3 p-6">
-        <h2 className="text-xl font-semibold mb-4">Poe seaded</h2>
+      <div className="ml-6 border border-gray-600 w-full md:w-1/4 p-6">
+        <h2 className="text-xl font-semibold mb-2">Poe seaded</h2>
         <div className="space-y-4 ">
           
           <label htmlFor="store-url" className="block text-sm mb-1 font-montserrat text-gray-700">
@@ -158,8 +172,8 @@ const handleStoreSave = async () => {
   <Input
     id="store-url"
     placeholder="fashionista.ee/NIMI"
-    value={form.url}
-    onChange={(e) => setForm({ ...form, url: e.target.value })}
+    value={form.page_url}
+    onChange={(e) => setForm({ ...form, page_url: e.target.value })}
   />
           
           <label className="block text-sm mb-1 font-montserrat text-gray-700">
@@ -207,6 +221,11 @@ const handleStoreSave = async () => {
     />
           <Button onClick={handleStoreSave}>Salvesta</Button>
         </div>
+        {successMessage && (
+  <div className="mt-4 p-2 bg-green-100 text-green-700 rounded">
+    {successMessage}
+  </div>
+)}
       </div>
 
       {/* Product grid */}

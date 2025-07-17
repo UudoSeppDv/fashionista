@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRef, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient'
 import ImageUploaderNew from '@/components/ImageUploaderNew'
+import { useRouter } from 'next/navigation'; // või next/router, kui kasutad App Routerit
 
 type FilterType = 'Riided' | 'Aksessuaarid' | 'Jalanõud' | 'Sport' | 'Ilu' | ''
 
@@ -12,12 +13,9 @@ const validFilters: FilterType[] = ['Riided', 'Aksessuaarid', 'Jalanõud', 'Spor
 export default function ProductForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const [images, setImages] = useState<File[]>([])
-
   const [uploading, setUploading] = useState(false)
-  const [, setFormResetKey] = useState(0)
   const [successMessage, setSuccessMessage] = useState('');
-
-
+  const router = useRouter();
   const [description, setDescription] = useState('')
   const [brand, setBrand] = useState('')
   const [filter, setFilter] = useState<FilterType>('')
@@ -66,6 +64,11 @@ if (error !== null && error !== undefined) {
     )
   }
 
+  
+
+
+
+
 async function handleSubmit(e: React.FormEvent) {
   e.preventDefault();
 
@@ -96,52 +99,37 @@ async function handleSubmit(e: React.FormEvent) {
     return;
   }
 
-const { error } = await supabase.from('products').insert([
-  {
-    user_id: userId,
-    description: description || null,
-    brand: brand || null,
-    filter: filter || null,
-    category: category || null,
-    condition: condition || null,
-    size: size || null,
-    quantity: quantity, // number ok
-    location: location || null,
-    price: price || null, // SIIN muudatus
-    delivery: deliveryOptions.length > 0 ? deliveryOptions : null,
-    images: uploadedUrls.filter((url): url is string => url !== null),
-  }
-]);
-
-
-
-
+  const { data, error } = await supabase.from('products').insert([
+    {
+      user_id: userId,
+      description,
+      brand,
+      filter,
+      category,
+      condition,
+      size,
+      quantity,
+      location,
+      price,
+      delivery: deliveryOptions.length > 0 ? deliveryOptions : null,
+      images: uploadedUrls.filter((url): url is string => url !== null),
+    }
+  ]).select().single(); // <– NB! Saame tagasi sisestatud rea koos ID-ga
 
   setUploading(false);
 
-  if (error) {
+  if (error || !data) {
     alert('Viga salvestamisel');
     console.error('Supabase veateade:', error);
   } else {
-    setSuccessMessage('Toode on üles laetud! Kuulutus avaldatakse peale administraatori kontrolli, kui kõik nõuded on täidetud.');
-    setTimeout(() => setSuccessMessage(''), 8000);
-
-    // Reset
-    setDescription('');
-    setBrand('');
-    setFilter('');
-    setCategory('');
-    setCondition('');
-    setSize('');
-    setQuantity(1);
-    setLocation('');
-    setPrice('');
-    setDeliveryOptions([]);
-    setImages([]);
-    setFormResetKey(prev => prev + 1);
-    formRef.current?.reset();
+    setSuccessMessage('Toode on üles laetud!');
+    setTimeout(() => {
+      setSuccessMessage('');
+      router.push(`/products/${data.id}`); // Suuna uuele lehele
+    }, 1500);
   }
 }
+
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6 text-sm font-montserrat">
