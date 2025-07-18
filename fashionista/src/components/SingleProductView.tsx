@@ -221,9 +221,12 @@ const user = product.public_users
 
           {/* Nupud */}
           <div className="flex gap-2">
-            <button className="bg-black text-white px-30 py-2 rounded-full hover:bg-gray-900 transition">
-              OSTA
-            </button>
+            <button
+  className="cursor-pointer bg-black text-white px-30 py-2 rounded-full hover:bg-gray-900 transition"
+  onClick={() => router.push(`/checkout/${product.id}`)}
+>
+  OSTA
+</button>
              {/* Favorite icon */}
         <button
   type="button"
@@ -232,7 +235,7 @@ const user = product.public_users
     toggleFavorite(product.id);
   }}
   aria-label="Toggle favorite"
-  className={`rounded-full border p-1 px-4 transition-colors duration-300 hover:bg-gray-100 ${
+  className={`cursor-pointer rounded-full border p-1 px-4 transition-colors duration-300 hover:bg-gray-100 ${
     isFavorited ? 'border-gray-900 bg-transparent' : 'border-gray-900 bg-transparent hover:bg-gray-100'
   }`}
   
