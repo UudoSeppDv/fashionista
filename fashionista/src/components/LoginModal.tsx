@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from '../../lib/supabaseClient'
+import { usePathname, useRouter } from "next/navigation";
 type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -14,7 +15,18 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const router = useRouter();
+  const pathname = usePathname();
  const [, setSession] = useState<Session | null>(null);
+
+ const handleRegisterClick = () => {
+    if (pathname === "/register") {
+      onClose(); // lihtsalt sulge modal
+    } else {
+      router.push("/register"); // mine register lehele
+    }
+  };
+
 
   useEffect(() => {
     // Kontrolli olemasolevat sessiooni
@@ -106,7 +118,15 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         >
           ×
         </button>
-        <h2 className="text-2xl font-bold mb-6">Registreeru / Logi sisse</h2>
+         <h2 className="text-2xl font-bold mb-6">
+      <span
+        onClick={handleRegisterClick}
+        className="cursor-pointer underline hover:text-gray-600"
+      >
+        Registreeru
+      </span>{" "}
+      / Logi sisse
+    </h2>
         <hr className="border-gray-400 mb-6" />
 
         {/* Email */}

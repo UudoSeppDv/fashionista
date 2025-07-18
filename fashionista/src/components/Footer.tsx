@@ -2,7 +2,7 @@ import { FaFacebook, FaInstagram } from 'react-icons/fa';
 
 export default function Footer() {
   return (
-    <footer className="bg-zinc-900 text-zinc-300 py-20">
+    <footer className="bg-zinc-900 z-10 text-zinc-300 py-20">
       <div className="font-montserrat max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Vasak veerg */}
         <div className="space-y-4">

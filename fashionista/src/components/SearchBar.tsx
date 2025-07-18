@@ -77,19 +77,22 @@ export default function SearchBar({
       <span className="absolute left-3 top-2.5 text-gray-400">
         <MagnifyingGlassIcon className="w-4 h-4" />
       </span>
-      <input
-        type="text"
-        placeholder="Otsi toote või kategooria järgi"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        autoComplete="off"
-        className="font-montserrat w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            handleSelect(searchQuery)
-          }
-        }}
-      />
+     <input
+  type="text"
+  id="product-search"
+  name="search"
+  placeholder="Otsi toote või kategooria järgi"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  autoComplete="off"
+  className="font-montserrat w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') {
+      handleSelect(searchQuery);
+    }
+  }}
+/>
+
 {Array.isArray(suggestions) && suggestions.length > 0 && (
   <ul className="absolute z-50 top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
     {suggestions.map((item, index) =>

@@ -14,12 +14,12 @@ import Image from 'next/image';
 
 export type Product = {
   id: string;
-  title?: string; // sul pole 'title' päringus, tee valikuline
+  title?: string;
   brand: string;
   description: string;
   category: string;
   filter: string;
-  price: number | string; // serverist võib tulla string ka
+  price: number | string;
   images: string[];
   user_id: string;
   location?: string | null;
@@ -33,6 +33,7 @@ export type Product = {
     social_media?: Record<string, { url: string; icon?: string }>;
     sold_products_count?: number | null;
     created_at?: string;
+    page_url?: string | null; // ← siia see peab kuuluma!
   };
 };
 
@@ -71,6 +72,15 @@ export default function ProductClient({ product}: Props) {
   fetchUserId();
 }, []);
 
+const getInitials = (user?: {
+  first_name?: string | null;
+  surname?: string | null;
+}) => {
+  const first = user?.first_name?.charAt(0).toUpperCase() || '';
+  const last = user?.surname?.charAt(0).toUpperCase() || '';
+  const initials = first + last;
+  return initials || '?';
+};
 
   const handleEditClick = () => {
     router.push(`/edit-product/${product.id}`);
@@ -113,8 +123,18 @@ const user = product.public_users
 
         <div className="flex-1 flex flex-col gap-4">
           {/* Müüja info */}
-         <div className="bg-[#A692C3] p-4 flex items-center gap-4">
-  <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-pink-400 text-white font-medium text-4xl select-none relative">
+         <div
+  className={`bg-[#A692C3] p-4 flex items-center gap-4 ${
+    product.public_users?.page_url ? 'cursor-pointer hover:opacity-90' : ''
+  }`}
+  onClick={() => {
+    const pageUrl = product.public_users?.page_url;
+    if (pageUrl) {
+      router.push(`/kasutaja/${pageUrl}`);
+    }
+  }}
+>
+  <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-pink-400 text-white font-medium text-xl select-none relative">
   {hasAvatar && product.public_users?.avatar_url ? (
     <Image
       src={product.public_users.avatar_url}
@@ -123,26 +143,39 @@ const user = product.public_users
       className="object-cover"
     />
   ) : (
-    user?.user_metadata.full_name?.charAt(0).toUpperCase() || '?'
+    <>{getInitials(product.public_users)}</>
   )}
 </div>
 
   <div className="flex flex-col flex-grow">
     <span className="font-semibold">
-  {user?.user_metadata.full_name || 'Anonüümne'}
-</span>
+      {user?.user_metadata.full_name || 'Anonüümne'}
+    </span>
     <div className="text-sm text-gray-600">
-  <span className="font-bold text-gray-800">{user?.user_metadata.followers ?? 0}</span> Jälgijat &nbsp;
-  <span className="font-bold text-gray-800">{user?.user_metadata.sold_count ?? 0}+</span> Müüdud
-</div>
+      <span className="font-bold text-gray-800">{user?.user_metadata.followers ?? 0}</span> Jälgijat &nbsp;
+      <span className="font-bold text-gray-800">{user?.user_metadata.sold_count ?? 0}+</span> Müüdud
+    </div>
   </div>
+
+  {currentUserId && (
   <button
-          onClick={isOwner ? handleEditClick : handleSendMessageClick}
-          className="border border-black rounded-full px-4 py-1 text-sm font-medium hover:bg-black hover:text-white transition"
-        >
-          {isOwner ? 'MUUDA' : 'SAADA SÕNUM'}
-        </button>
-          </div>
+    onClick={(e) => {
+  e.stopPropagation();
+  if (isOwner) {
+    handleEditClick();
+  } else {
+    handleSendMessageClick();
+  }
+}}
+    className={`border border-black rounded-full px-4 py-1 text-sm font-medium hover:bg-black hover:text-white transition ${
+      isOwner ? 'mx-auto' : ''
+    }`}
+  >
+    {isOwner ? 'MUUDA' : 'SAADA SÕNUM'}
+  </button>
+)}
+
+</div>
 
           <div className="text-sm text-gray-600">{product.location}</div>
           <div className="text-sm font-bold">{product.description || 'Kirjeldus puudub'}</div>

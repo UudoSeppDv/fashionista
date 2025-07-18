@@ -122,10 +122,7 @@ export default function Header({ setShowLoginModal, searchQuery, setSearchQuery 
 
               </button>
 
-              <UserDropdownMenu onLogout={handleLogout} />
-              <span className="font-montserrat text-gray-700">
-                Hei, <span className="font-bold">{userName ?? 'Kasutaja'}</span>.
-              </span>
+              <UserDropdownMenu onLogout={handleLogout} userName={userName ?? 'Kasutaja'} />
             </div>
           ) : (
             <button

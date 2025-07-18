@@ -4,6 +4,16 @@ import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabaseClient' // eeldades, et kasutad seda
+import { Button } from "../components/ui/button"
+
+
+import { MoreHorizontal } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
 
 interface SocialMedia {
   facebook?: string
@@ -62,6 +72,64 @@ useEffect(() => {
 
   checkIfFollowing()
 }, [currentUserId, userId])
+
+const handleBlockToggle = async () => {
+  if (!currentUserId || currentUserId === userId) return
+
+  if (isBlocked) {
+    // Eemalda blokeering
+    const confirmed = confirm("Kas soovid selle kasutaja blokeeringu eemaldada?")
+    if (!confirmed) return
+
+    const { error } = await supabase
+      .from('user_blocks')
+      .delete()
+      .eq('blocker_id', currentUserId)
+      .eq('blocked_id', userId)
+
+    if (error) {
+      console.error("Blokeeringu eemaldamine ebaõnnestus:", error)
+      alert("Midagi läks valesti.")
+    } else {
+      setIsBlocked(false)
+      alert("Kasutaja blokeering eemaldatud.")
+    }
+
+  } else {
+    // Lisa blokeering
+    const confirmed = confirm("Kas soovid selle kasutaja blokeerida?")
+    if (!confirmed) return
+
+    const { error } = await supabase
+      .from('user_blocks')
+      .insert({
+        blocker_id: currentUserId,
+        blocked_id: userId,
+      })
+
+    if (error) {
+      console.error("Blokeerimine ebaõnnestus:", error)
+      alert("Midagi läks valesti.")
+    } else {
+      setIsBlocked(true)
+      alert("Kasutaja on blokeeritud.")
+
+      // Eemalda follow kui eksisteerib
+      const { error: unfollowError } = await supabase
+        .from('user_followers')
+        .delete()
+        .eq('user_id', userId)
+        .eq('follower_id', currentUserId)
+
+      if (unfollowError) {
+        console.error("Jälgimise eemaldamine blokeerimise ajal ebaõnnestus:", unfollowError)
+      } else {
+        setIsFollowing(false)
+        setFollowersCount((count) => Math.max(count - 1, 0))
+      }
+    }
+  }
+}
 
 
 
@@ -147,8 +215,59 @@ const initials =
     router.push(`/minu-pood`)
   }
 
+  const [isBlocked, setIsBlocked] = useState(false)
+
+  useEffect(() => {
+  async function checkIfBlocked() {
+    if (!currentUserId || currentUserId === userId) return
+
+    const { data, error } = await supabase
+      .from('user_blocks')
+      .select('*')
+      .eq('blocker_id', currentUserId)
+      .eq('blocked_id', userId)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Blokeeringu kontroll ebaõnnestus:', error)
+    } else if (data) {
+      setIsBlocked(true)
+    } else {
+      setIsBlocked(false)
+    }
+  }
+
+  checkIfBlocked()
+}, [currentUserId, userId])
+
+
   return (
-    <div className="bg-[#A692C3] border p-6 w-full text-black font-montserrat">
+    <div className="relative bg-[#A692C3] border p-6 w-full text-black font-montserrat">
+      {!isOwner && (
+  <div className="absolute top-0 right-0 z-20 p-3">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="text-white bg-transparent border-none hover:bg-transparent p-0 flex items-center justify-center transition duration-200 focus:outline-none focus-visible:ring-0 shadow-none"
+        >
+          <MoreHorizontal className="w-5 h-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="font-montserrat rounded-none font-medium border-none mr-27 mt-0">
+        <DropdownMenuItem
+          onClick={handleBlockToggle}
+          className="text-gray-900 cursor-pointer"
+        >
+          {isBlocked ? 'Eemalda blokeering' : 'Blokeeri kasutaja'}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
+)}
+
+
+      
       <div className="flex flex-col items-center">
         {imageUrl ? (
           <Image
@@ -164,11 +283,17 @@ const initials =
           </div>
         )}
         <h2 className="text-xl font-bold">{name}</h2>
-        <p className="mt-2">
-           <strong>{followersCount}</strong> Jälgijat &nbsp;
-          <strong>{sold}</strong> Müüdud
-        </p>
-        {!isOwner && currentUserId && (
+        {isBlocked ? (
+    <p className="mt-2 text-center font-semibold text-red-600">
+      Oled blokeerinud selle kasutaja
+    </p>
+  ) : (
+    <p className="mt-2">
+      <strong>{followersCount}</strong> Jälgijat &nbsp;
+      <strong>{sold}</strong> Müüdud
+    </p>
+  )}
+        {!isOwner && currentUserId && !isBlocked && (
   <div className="mt-4 flex space-x-4">
    <button
   onClick={handleFollowToggle}

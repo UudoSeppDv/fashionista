@@ -71,11 +71,14 @@ export default function ProductCard({
       <Link href={`/products/${id}`} onClick={handleCardClick} className="block">
         <div className="z-10 w-[250px] h-[350px] overflow-hidden border border-gray-600 bg-white relative transition-all duration-300 group-hover:[box-shadow:0_6px_8px_rgba(0,0,0,0.15)]">
   <Image
-    src={firstImage}
-    alt={brand || "Toote pilt"}
-    fill
-    className="object-cover mb-0"
-  />
+  src={firstImage}
+  alt={brand || "Toote pilt"}
+  fill
+  sizes="(max-width: 768px) 100vw, 250px"
+  priority
+  className="object-cover mb-0"
+/>
+
   <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-10 pointer-events-none" />
 </div>
 

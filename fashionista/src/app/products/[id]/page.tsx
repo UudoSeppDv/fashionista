@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { supabase } from '../../../../lib/supabaseClient'
 import ProductClient from "@/components/ProductClient";
 
+
 type Product = {
   id: string;
   title?: string;
@@ -82,7 +83,8 @@ export default function ProductPage() {
             surname, 
             avatar_url,
             location,
-            sold_products_count
+            sold_products_count,
+            page_url
           )
         `)
         .eq("id", id)

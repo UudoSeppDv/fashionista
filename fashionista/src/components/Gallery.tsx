@@ -61,6 +61,7 @@ export default function Gallery({ images }: GalleryProps) {
   {images.map((img, i) => (
     <Image
       key={i}
+      priority
       src={img}
       alt={`Pilt ${i + 1}`}
       width={120} // ⬅️ Määra sobivad mõõdud (või vasta tailwind `w-30` ja `h-34`)

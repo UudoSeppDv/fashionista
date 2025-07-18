@@ -5,10 +5,12 @@ import Image from 'next/image'
 import MessageInput from './MessageInput'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabaseClient'
+import { useRouter } from 'next/navigation'
 import type { Database } from '../../types/supabase' 
 
 type Props = {
   userId: string | null
+  
 }
 
 export default function ChatWindow({ userId }: Props) {
@@ -16,6 +18,7 @@ export default function ChatWindow({ userId }: Props) {
   const [session, setSession] = useState<Session | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 const messagesContainerRef = useRef<HTMLDivElement>(null);
+const router = useRouter()
   const [messages, setMessages] = useState<
     Database['public']['Tables']['messages']['Row'][]
   >([])
@@ -23,12 +26,12 @@ const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [imageUrls, setImageUrls] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(false)
   const [openImage, setOpenImage] = useState<string | null>(null);
-
-  const [recipientInfo, setRecipientInfo] = useState<{
-    first_name: string | null
-    surname: string | null
-    avatar_url: string | null
-  } | null>(null)
+const [recipientInfo, setRecipientInfo] = useState<{
+  first_name: string | null
+  surname: string | null
+  avatar_url: string | null
+  page_url: string | null
+} | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
  
@@ -133,7 +136,7 @@ useEffect(() => {
   const loadCurrentUserInfo = async () => {
     const { data, error } = await supabase
       .from('public_users')
-      .select('first_name, surname, avatar_url')
+      .select('first_name, surname, avatar_url, page_url')
       .eq('id', currentUserId)
       .single()
 
@@ -160,7 +163,7 @@ useEffect(() => {
       setLoading(true)
       const { data, error } = await supabase
         .from('public_users')
-        .select('first_name, surname, avatar_url')
+        .select('first_name, surname, avatar_url, page_url')
         .eq('id', userId)
         .single()
 
@@ -312,25 +315,106 @@ const handleSend = async ({
     return firstInitial + lastInitial
   }
 
+  const [isBlocked, setIsBlocked] = useState<null | 'blockedByMe' | 'blockedByThem'>(null)
+
+useEffect(() => {
+  if (!currentUserId || !userId) {
+    setIsBlocked(null)
+    return
+  }
+
+  const checkBlockedStatus = async () => {
+    // Kontrolli, kas mina olen blokeerinud teise kasutaja
+    const { data: blockedByMe, error: errorBlockedByMe } = await supabase
+      .from('user_blocks')
+      .select('*')
+      .eq('blocker_id', currentUserId)
+      .eq('blocked_id', userId)
+      .single()
+
+    if (errorBlockedByMe && errorBlockedByMe.code !== 'PGRST116') {
+      console.error('Blokeeringu kontrolli viga:', errorBlockedByMe)
+      setIsBlocked(null)
+      return
+    }
+    if (blockedByMe) {
+      setIsBlocked('blockedByMe')
+      return
+    }
+
+    // Kontrolli, kas teine kasutaja on mind blokeerinud
+    const { data: blockedByThem, error: errorBlockedByThem } = await supabase
+      .from('user_blocks')
+      .select('*')
+      .eq('blocker_id', userId)
+      .eq('blocked_id', currentUserId)
+      .single()
+
+    if (errorBlockedByThem && errorBlockedByThem.code !== 'PGRST116') {
+      console.error('Blokeeringu kontrolli viga:', errorBlockedByThem)
+      setIsBlocked(null)
+      return
+    }
+    if (blockedByThem) {
+      setIsBlocked('blockedByThem')
+      return
+    }
+
+    setIsBlocked(null)
+  }
+
+  checkBlockedStatus()
+}, [currentUserId, userId])
+
+
   return (
     
     <div className="flex border-gray-600 border-t flex-col flex-1 font-montserrat ">
       
       <div className="flex items-center border-gray-600 border-b p-4">
         {loading ? (
-          <div className="w-10 h-10 rounded-full bg-pink-200 animate-pulse" />
-        ) : recipientInfo?.avatar_url ? (
-          <Image
-            src={recipientInfo.avatar_url}
-            alt="Kontopilt"
-            className="w-10 h-10 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-pink-400 text-white flex items-center justify-center font-semibold">
-            {getInitials(recipientInfo?.first_name || '', recipientInfo?.surname || '')}
-          </div>
-        )}
-        <div className="ml-3 font-semibold text-lg">
+  <div
+    onClick={() => {
+      if (recipientInfo?.page_url) {
+        router.push(recipientInfo.page_url)
+      }
+    }}
+    className="w-10 h-10 rounded-full bg-pink-200 animate-pulse cursor-pointer"
+  />
+) : recipientInfo?.avatar_url ? (
+  <div
+    onClick={() => {
+      if (recipientInfo?.page_url) {
+        router.push(recipientInfo.page_url)
+      }
+    }}
+    className="w-10 h-10 rounded-full overflow-hidden cursor-pointer"
+  >
+    <Image
+      src={recipientInfo.avatar_url}
+      alt="Kontopilt"
+      className="object-cover w-full h-full"
+      width={40}
+      height={40}
+    />
+  </div>
+) : (
+  <div
+    onClick={() => {
+    if (recipientInfo?.page_url) {
+      router.push(`/kasutaja/${recipientInfo.page_url}`);
+    }
+  }}
+    className="w-10 h-10 rounded-full bg-pink-400 text-white flex items-center justify-center font-semibold cursor-pointer"
+  >
+    {getInitials(recipientInfo?.first_name || '', recipientInfo?.surname || '')}
+  </div>
+)}
+        <div onClick={() => {
+    if (recipientInfo?.page_url) {
+      router.push(`/kasutaja/${recipientInfo.page_url}`);
+    }
+  }} className="cursor-pointer ml-3 font-semibold text-lg">
           {loading ? (
             <span className="bg-gray-200 w-24 h-4 rounded animate-pulse" />
           ) : (
@@ -451,7 +535,21 @@ const surname = isCurrentUser
         <div ref={messagesEndRef} />
       </div>
 
-      <MessageInput onSend={handleSend} sending={sending} />
+      {isBlocked === 'blockedByMe' && (
+  <div className="p-4 text-center text-red-600 font-semibold">
+    Oled konto blokeerinud. Sõnumite saatmine pole võimalik.
+  </div>
+)}
+
+{isBlocked === 'blockedByThem' && (
+  <div className="p-4 text-center text-red-600 font-semibold">
+    Konto on teid blokeerinud. Sõnumite saatmine pole võimalik.
+  </div>
+)}
+
+{isBlocked === null && (
+  <MessageInput onSend={handleSend} sending={sending} />
+)}
     </div>
   )
 }
