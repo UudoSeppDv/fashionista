@@ -159,7 +159,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         <button
   onClick={handleContinue}
   disabled={loading}
-  className="w-full bg-black text-white py-2 rounded-full font-semibold flex items-center justify-center gap-2 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+  className="cursor-pointer w-full bg-black text-white py-2 rounded-full font-semibold flex items-center justify-center gap-2 mb-4 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800"
 >
   {loading ? (
     <svg
@@ -184,7 +184,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     </svg>
   ) : (
     <>
-      JÄTKA <span className="text-lg">→</span>
+      JÄTKA <span className="text-lg"><svg width="67" height="8" viewBox="0 0 67 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M0.75 3.25C0.473858 3.25 0.25 3.47386 0.25 3.75C0.25 4.02614 0.473858 4.25 0.75 4.25V3.25ZM66.6036 4.10355C66.7988 3.90829 66.7988 3.59171 66.6036 3.39645L63.4216 0.214466C63.2263 0.0192039 62.9097 0.0192039 62.7145 0.214466C62.5192 0.409728 62.5192 0.726311 62.7145 0.921573L65.5429 3.75L62.7145 6.57843C62.5192 6.77369 62.5192 7.09027 62.7145 7.28553C62.9097 7.4808 63.2263 7.4808 63.4216 7.28553L66.6036 4.10355ZM0.75 4.25H66.25V3.25H0.75V4.25Z" fill="white"/>
+</svg>
+</span>
     </>
   )}
 </button>

@@ -131,6 +131,28 @@ const handleBlockToggle = async () => {
   }
 }
 
+useEffect(() => {
+  const fetchUser = async () => {
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) {
+      setCurrentUserId(data.user.id);
+    }
+  };
+
+  fetchUser();
+
+  const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) {
+      setCurrentUserId(session.user.id);
+    } else {
+      setCurrentUserId(null);
+    }
+  });
+
+  return () => {
+    listener.subscription.unsubscribe();
+  };
+}, []);
 
 
 // handleFollowToggle sees:

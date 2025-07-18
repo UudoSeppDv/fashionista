@@ -43,13 +43,14 @@ type Props = {
   product: Product;
 };
 
-export default function ProductClient({ product}: Props) {
+export default function SingleProductView({ product}: Props) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [favoritesUpdatedAt, setFavoritesUpdatedAt] = useState(Date.now())
   const hasAvatar = !!product.public_users?.avatar_url;
   const { favorites, toggleFavorite } = useFavorites();
   const isFavorited = favorites.has(product.id);
+  const [followerCount, setFollowerCount] = useState<number>(0);
   
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const router = useRouter();
@@ -85,6 +86,41 @@ const getInitials = (user?: {
   const handleEditClick = () => {
     router.push(`/edit-product/${product.id}`);
   };
+  
+useEffect(() => {
+  if (!product?.id) return;
+
+  const key = 'recentlyViewed';
+  const viewedRaw = localStorage.getItem(key);
+  let viewed = viewedRaw ? JSON.parse(viewedRaw) : [];
+
+  // Eemalda olemasolev (et vältida duplikaate), lisa uuesti ette
+  viewed = viewed.filter((id: string) => id !== product.id);
+  viewed.unshift(product.id);
+
+  // Hoia kuni 10 viimast
+  const limited = viewed.slice(0, 10);
+  localStorage.setItem(key, JSON.stringify(limited));
+}, [product?.id]);
+
+useEffect(() => {
+  const loadFollowers = async () => {
+    if (!product.public_users?.id) return;
+
+const { count, error } = await supabase
+  .from('user_followers')
+  .select('*', { count: 'exact', head: false })
+  .eq('user_id', product.public_users?.id);
+
+    if (error) {
+      console.error('Viga jälgijate päringul:', error.message);
+    } else {
+      setFollowerCount(count || 0);
+    }
+  };
+
+  loadFollowers();
+}, [product.public_users?.id]);
 
 
   // Muuda 'user' struktuur vastavaks, mida komponent ootab
@@ -152,7 +188,7 @@ const user = product.public_users
       {user?.user_metadata.full_name || 'Anonüümne'}
     </span>
     <div className="text-sm text-gray-600">
-      <span className="font-bold text-gray-800">{user?.user_metadata.followers ?? 0}</span> Jälgijat &nbsp;
+      <span className="font-bold text-gray-800">{followerCount}</span> Jälgijat&nbsp;
       <span className="font-bold text-gray-800">{user?.user_metadata.sold_count ?? 0}+</span> Müüdud
     </div>
   </div>

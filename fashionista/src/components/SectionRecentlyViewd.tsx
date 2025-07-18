@@ -22,78 +22,74 @@ export default function SectionRecentlyViewed({ favoritesUpdatedAt }: Props) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchRecentlyViewedProducts = async () => {
-      setLoading(true)
+useEffect(() => {
+  const fetchRecentlyViewedProducts = async () => {
+    setLoading(true);
 
-      try {
-        const viewedIdsRaw = localStorage.getItem('recentlyViewed') || '[]'
-        let viewedIds = JSON.parse(viewedIdsRaw) as string[]
+    try {
+      if (typeof window === 'undefined') return;
 
-        // Filterda välja vaid UUID formaadile vastavad id-d
-        const uuidRegex =
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-        viewedIds = viewedIds.filter(id => id && id !== 'NaN' && uuidRegex.test(id))
+      const viewedIdsRaw = localStorage.getItem('recentlyViewed') || '[]';
+      let viewedIds = JSON.parse(viewedIdsRaw) as string[];
 
-        let data, error
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      viewedIds = viewedIds.filter(id => id && uuidRegex.test(id));
 
-        if (viewedIds.length === 0) {
-          // Kui vaatamisajalugu tühi, too lihtsalt viimased 5 toodet
-          const response = await supabase
-            .from('public_products')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(5)
+      let data, error;
 
-          data = response.data
-          error = response.error
-        } else {
-          // Kui vaatamisajalugu on, too konkreetsed tooted
-          const response = await supabase
-            .from('public_products')
-            .select('*')
-            .in('id', viewedIds)
+      if (viewedIds.length === 0) {
+        const response = await supabase
+          .from('public_products')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5);
 
-          data = response.data
-          error = response.error
-        }
+        data = response.data;
+        error = response.error;
+      } else {
+        const response = await supabase
+          .from('public_products')
+          .select('*')
+          .in('id', viewedIds);
 
-        if (error) {
-          setError('Toodete laadimine ebaõnnestus.')
-          setProducts([])
-          setLoading(false)
-          return
-        }
-
-        // Andmete puhastus ja tüübi kindlustamine
-        const cleanData = (data || []).map(item => ({
-          id: item.id,
-          brand: item.brand ?? '',
-          price: item.price !== null && item.price !== undefined ? Number(item.price) : 0,
-          images: item.images ?? [],
-          created_at: item.created_at ?? '',
-        }))
-
-        // Sorteeri tooted vastavalt vaatamisajaloo järjekorrale (kui on)
-        const sortedProducts = viewedIds.length > 0
-          ? viewedIds
-              .map(id => cleanData.find(product => product.id === id))
-              .filter(Boolean) as Product[]
-          : cleanData
-
-        setProducts(sortedProducts)
-        setError(null)
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err)
-        setError(`Viga: ${message}`)
-        setProducts([])
-      } finally {
-        setLoading(false)
+        data = response.data;
+        error = response.error;
       }
-    }
 
-    fetchRecentlyViewedProducts()
-  }, [favoritesUpdatedAt]) // uuenda kui favoriitide muutus
+      if (error) {
+        setError('Toodete laadimine ebaõnnestus.');
+        setProducts([]);
+        return;
+      }
+
+      const cleanData = (data || []).map(item => ({
+        id: item.id,
+        brand: item.brand ?? '',
+        price: Number(item.price ?? 0),
+        images: item.images ?? [],
+        created_at: item.created_at ?? '',
+      }));
+
+      const sortedProducts = viewedIds.length > 0
+        ? viewedIds
+            .map(id => cleanData.find(p => p.id === id))
+            .filter(Boolean) as Product[]
+        : cleanData;
+
+      setProducts(sortedProducts);
+      setError(null);
+    } catch (err) {
+      setError('Viga: ' + (err instanceof Error ? err.message : String(err)));
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchRecentlyViewedProducts();
+}, [favoritesUpdatedAt]);
+
 
 
   return (

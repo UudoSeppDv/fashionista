@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from '../../../../lib/supabaseClient'
-import ProductClient from "@/components/ProductClient";
+import SingleProductView from "@/components/SingleProductView";
 
 
 type Product = {
@@ -104,7 +104,7 @@ export default function ProductPage() {
 
   return (
     <>
-      <ProductClient product={product} />
+      <SingleProductView product={product} />
     </>
   );
 }
