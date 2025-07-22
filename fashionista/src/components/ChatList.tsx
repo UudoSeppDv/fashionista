@@ -114,7 +114,14 @@ export default function ChatList({ selectedUserId, onSelectUser }: Props) {
           >
             <div className="flex gap-3">
               {contact.avatar_url ? (
-                <Image alt="Avatar_URL" src={contact.avatar_url} className="w-10 h-10 rounded-full object-cover" />
+                <Image
+  alt="Avatar_URL"
+  src={contact.avatar_url}
+  width={40}
+  height={40}
+  className="w-10 h-10 rounded-full object-cover"
+/>
+
               ) : (
                 <div className="w-10 h-10 rounded-full bg-pink-400 text-white flex items-center justify-center font-semibold">
   {(contact.first_name?.[0]?.toUpperCase() ?? '') + (contact.surname?.[0]?.toUpperCase() ?? '') || '?'}
