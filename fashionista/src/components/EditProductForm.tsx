@@ -261,7 +261,7 @@ export default function EditProductForm({ productId }: { productId: string }) {
       </div>
 
       <div className="space-y-2">
-        {['Ostja tuleb ise järgi', 'DPD', 'Omniva', 'Itella'].map(option => {
+        {['Ostja tuleb ise järgi', 'DPD', 'Omniva', 'Smartpost'].map(option => {
           const isActive = deliveryOptions.includes(option)
           return (
             <label

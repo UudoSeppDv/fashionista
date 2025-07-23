@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { supabase } from '../../lib/supabaseClient'
 import { useUser } from '@supabase/auth-helpers-react';
 import { useRouter } from 'next/navigation';
+import ParcelSelector from './ParcelSelector';
 
 interface RawProduct {
   id: string;
@@ -65,6 +66,18 @@ export default function CheckOut({ productId }: CheckOutProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
+
+  const [selectedTransport, setSelectedTransport] = useState('');
+const [parcelLocation, setParcelLocation] = useState('');
+
+const finalTransportOptions = [
+  { label: 'Omniva pakiautomaat', price: 2.5 },
+  { label: 'DPD pakiautomaat', price: 3.0 },
+  { label: 'Smartpost pakiautomaat', price: 2.0 },
+  { label: 'Kuller', price: 5.0 },
+  { label: 'Jalgrattaga kohaletoimetamine', price: 0 },
+];
+
   const user = useUser();
 const router = useRouter();
 
@@ -81,10 +94,6 @@ function detectCardType(number: string) {
   if (/^5[1-5][0-9]{0,}$/.test(sanitized)) return 'MasterCard';
   return 'Unknown';
 }
-
-
-
-  const [selectedTransport, setSelectedTransport] = useState('');
   const [selectedPayment, setSelectedPayment] = useState('pangalingi');
   const [agree, setAgree] = useState(false);
   const [giftCard, setGiftCard] = useState('');
@@ -151,6 +160,18 @@ const transportOptions = deliveryString
 
 const handleCheckout = async () => {
   if (!agree || !user || !product || !product.user_id) return;
+
+  // Kontrolli, kas pakiautomaadi puhul on valitud asukoht
+  if (
+    ['omniva', 'smartpost', 'dpd'].some(t =>
+      selectedTransport.toLowerCase().includes(t)
+    ) &&
+    !parcelLocation
+  ) {
+    alert('Palun vali pakiautomaat');
+    return;
+  }
+
   setLoading(true);
 
   try {
@@ -160,6 +181,7 @@ const handleCheckout = async () => {
       product_id: product.id,
       status: 'pending',
       delivery_method: selectedTransport,
+      parcel_location: parcelLocation || null,
       payment_method: selectedPayment,
       price: product.price,
     });
@@ -175,11 +197,9 @@ const handleCheckout = async () => {
 
     const totalPrice = (product.price + transportPrice).toFixed(2);
 
-    // Suuna tänulehele koos info parameetritega
     router.push(
       `/aitah?price=${product.price}&transport=${transportPrice}&total=${totalPrice}`
     );
-
   } catch (error) {
     console.error('Viga maksmisel:', error);
     alert('Midagi läks valesti...');
@@ -191,10 +211,7 @@ const handleCheckout = async () => {
 
 
 
-const finalTransportOptions = transportOptions.filter(
-  (opt, index, self) =>
-    index === self.findIndex(o => o.label.toLowerCase() === opt.label.toLowerCase())
-);
+
 
 const selectedOption = finalTransportOptions.find(
   opt => opt.label.toLowerCase() === selectedTransport.toLowerCase()
@@ -233,30 +250,19 @@ const transportPrice = selectedOption ? selectedOption.price : 0;
           <div className="font-semibold text-lg">{productPrice.toFixed(2)} €</div>
         </div>
 
-        {/* Transport */}
-        <div>
-          <h2 className="font-semibold mb-2">Transpordiviis</h2>
-          <div className="border divide-y">
-            {finalTransportOptions.map(option => (
-  <label key={option.label} className="flex items-center px-4 py-3 cursor-pointer">
-    <input
-      type="radio"
-      name="transport"
-      checked={selectedTransport === option.label}
-      onChange={() => setSelectedTransport(option.label)}
-      className="mr-3"
-    />
-    {option.label}
-    <span className="ml-auto">
-      {option.price === 0 ? 'Tasuta' : `+ ${option.price.toFixed(2)}€`}
-    </span>
-  </label>
-))}
+<ParcelSelector
+  allTransportOptions={transportOptions}
+  selectedTransport={selectedTransport}
+  setSelectedTransport={setSelectedTransport}
+  parcelLocation={parcelLocation}
+  setParcelLocation={setParcelLocation}
+  productDelivery={product.delivery}
+/>
+
+    
 
 
 
-          </div>
-        </div>
 
         {/* Payment */}
         <div>
