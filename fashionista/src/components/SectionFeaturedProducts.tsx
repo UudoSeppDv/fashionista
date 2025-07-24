@@ -37,12 +37,16 @@ export default function SectionFeaturedProducts({
       setError('Andmete laadimine ebaõnnestus.')
     } else if (data) {
       // Puhastame ja teisendame
-      const cleanData = (data || []).map(item => ({
-        id: item.id,
-        brand: item.brand ?? '',
-        price: item.price !== null ? Number(item.price) : 0,
-        images: item.images ?? [],
-      }))
+      const cleanData: Product[] = (data || [])
+  .filter(item => item.id !== null) // oluline, et id oleks olemas
+  .map(item => ({
+    id: item.id as string,
+    brand: item.brand ?? '',
+    price: item.price !== null ? Number(item.price) : 0,
+    images: item.images ?? [],
+  }))
+setProducts(cleanData)
+
       setProducts(cleanData)
       setError(null)
     }

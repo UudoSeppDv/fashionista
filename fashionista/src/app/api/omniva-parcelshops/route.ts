@@ -9,27 +9,38 @@ interface OmnivaLocation {
   ZIP: string;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const url = new URL(request.url);
+    const id = url.searchParams.get('id');  // võta ?id= väärtus
+
     const res = await fetch('https://www.omniva.ee/locations.json');
     const text = await res.text();
     try {
       const data: OmnivaLocation[] = JSON.parse(text);
 
-      const filtered = data
-  .filter((loc) => ['EE', 'EST'].includes(loc.A0_NAME) && Number(loc.TYPE) === 0)
-  .map((loc) => ({
-    id: loc.ZIP,
-    name: loc.NAME,
-    address: loc.A5_NAME,
-    city: loc.A2_NAME,
-  }));
+      // Filtreerime ainult Eesti ja tüübi 0 (pakiautomaadid)
+      let filtered = data.filter(
+        (loc) => ['EE', 'EST'].includes(loc.A0_NAME) && Number(loc.TYPE) === 0
+      );
 
+      // Kui id on määratud, filtreerime veel id (ZIP) järgi
+      if (id) {
+        filtered = filtered.filter((loc) => loc.ZIP === id);
+      }
 
-      return NextResponse.json(filtered);
+      // Vormindame vastuse
+      const result = filtered.map((loc) => ({
+        id: loc.ZIP,
+        name: loc.NAME,
+        address: loc.A5_NAME,
+        city: loc.A2_NAME,
+      }));
+
+      return NextResponse.json(result);
     } catch (jsonErr) {
       console.error('JSON parse error:', jsonErr);
-      console.error('Tagastatud tekst:', text.slice(0, 300)); // Esimesed 300 märki
+      console.error('Tagastatud tekst:', text.slice(0, 300));
       return NextResponse.json({ error: 'JSON parse error' }, { status: 500 });
     }
   } catch (err) {

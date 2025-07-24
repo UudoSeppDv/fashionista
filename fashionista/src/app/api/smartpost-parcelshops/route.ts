@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { XMLParser } from 'fast-xml-parser';
 
 interface SmartpostPlace {
@@ -12,7 +12,10 @@ interface SmartpostPlace {
   active?: string | boolean | number;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams;
+  const queryId = searchParams.get('id');
+
   try {
     const res = await fetch('https://my.smartpost.ee/api/ext/v1/places?country=EE');
 
@@ -43,7 +46,6 @@ export async function GET() {
 
     const filtered = places
       .filter((p) => p.country === 'EE' || p.country_code === 'EE')
-
       .map((p) => ({
         id: p.place_id || p.id || '',
         name: p.name || '',
@@ -51,11 +53,14 @@ export async function GET() {
         city: p.city || '',
       }));
 
-    return NextResponse.json(filtered, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
+    if (queryId) {
+      const result = filtered.find((item) => String(item.id) === String(queryId));
+      return result
+        ? NextResponse.json(result)
+        : NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(filtered);
   } catch (error) {
     console.error('Smartpost fetch error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

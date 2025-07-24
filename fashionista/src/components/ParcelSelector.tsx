@@ -21,6 +21,8 @@ interface ParcelSelectorProps {
   parcelLocation: string;
   setParcelLocation: (value: string) => void;
   productDelivery: string | string[] | null;
+  phone: string;
+  setPhone: (value: string) => void;
 }
 
 interface DPDParcelShop {
@@ -57,6 +59,8 @@ export default function ParcelSelector({
   parcelLocation,
   setParcelLocation,
   productDelivery,
+  phone,
+  setPhone,
 }: ParcelSelectorProps) {
   const [options, setOptions] = useState<ParcelOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -230,13 +234,17 @@ useEffect(() => {
             Telefoni number
           </label>
           <input
-            type="tel"
-            id="phone"
-            name="phone"
-            placeholder="+372 5xxxxxxx"
-            className="w-full border px-3 py-2 text-sm rounded"
-            required
-          />
+  type="tel"
+  id="phone"
+  name="phone"
+  placeholder="+372 5xxxxxxx"
+  value={phone}
+  onChange={(e) => setPhone(e.target.value)}
+  className="w-full border px-3 py-2 text-sm rounded"
+  required
+/>
+
+
         </div>
       </div>
     )}

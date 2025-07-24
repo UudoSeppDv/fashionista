@@ -52,7 +52,7 @@ export default function MinuOstudPage() {
 
   // Kuva mitu tellimust (pagination)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-
+const safeUserId = userId ?? '';
   // Jälgi akna laiust
   useEffect(() => {
     function handleResize() {
@@ -77,7 +77,7 @@ export default function MinuOstudPage() {
     confirmed_at
   `)
 
-  .eq('user_id', userId)
+  .eq('user_id', safeUserId)
   .order('created_at', { ascending: false });
 
 
@@ -91,7 +91,7 @@ export default function MinuOstudPage() {
     }
 
     fetchOrders();
-  }, [userId]);
+  }, [userId, safeUserId]);
 
 
   function handleSendMessageClick(order: Order) {

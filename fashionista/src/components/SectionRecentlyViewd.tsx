@@ -11,6 +11,15 @@ interface Product {
   images: string[]
   created_at: string
 }
+interface RawProduct {
+  id: string | null
+  brand: string | null
+  price: number | null
+  images: string[] | null
+  created_at: string | null
+  // ... teised väljad, kui vaja
+}
+
 
 interface Props {
   favoritesUpdatedAt: number
@@ -63,13 +72,17 @@ useEffect(() => {
         return;
       }
 
-      const cleanData = (data || []).map(item => ({
-        id: item.id,
-        brand: item.brand ?? '',
-        price: Number(item.price ?? 0),
-        images: item.images ?? [],
-        created_at: item.created_at ?? '',
-      }));
+    const cleanData = (data as RawProduct[] || [])
+  .filter((item): item is RawProduct & { id: string } => item.id !== null)
+  .map(item => ({
+    id: item.id,
+    brand: item.brand ?? '',
+    price: Number(item.price ?? 0),
+    images: item.images ?? [],
+    created_at: item.created_at ?? '',
+  }));
+
+
 
       const sortedProducts = viewedIds.length > 0
         ? viewedIds

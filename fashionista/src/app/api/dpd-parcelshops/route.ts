@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: Request) {
   const url = 'https://eserviss.dpd.lv/api/v1/lockers?countryCode=EE';
   const token = process.env.DPD_API_TOKEN;
 
   if (!token) {
     return NextResponse.json({ error: 'DPD_API_TOKEN not set' }, { status: 500 });
   }
+
+  // Võta query param id
+  const reqUrl = new URL(request.url);
+  const id = reqUrl.searchParams.get('id');
 
   try {
     const res = await fetch(url, {
@@ -21,6 +25,12 @@ export async function GET() {
     }
 
     const data = await res.json();
+
+    if (id) {
+      const filtered = data.filter((locker: { id: string }) => locker.id === id);
+      return NextResponse.json(filtered);
+    }
+
     return NextResponse.json(data);
   } catch (error: unknown) {
     let message = 'Unknown error';

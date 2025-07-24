@@ -10,13 +10,14 @@ import ParcelSelector from './ParcelSelector';
 
 interface RawProduct {
   id: string;
-  brand: string;
-  description: string;
+  brand: string | null;
+  description: string | null;
   price: number | string;
-  delivery: string | string[];  // delivery võib olla kas string või stringide massiiv
+  delivery: string | string[] | null;
   images: unknown;
-  user_id: string;
+  user_id: string | null;
 }
+
 
 
 
@@ -30,16 +31,11 @@ interface Product {
   user_id: string; // ← see on müüja ID
 }
 
-
-
-interface CheckOutProps {
-  productId: string;
-}
-
-
-
-
 function normalizeProduct(data: RawProduct): Product {
+  if (!data.id) {
+    throw new Error('Tootel puudub id');
+  }
+
   let deliveryStr = '';
 
   if (typeof data.delivery === 'string') {
@@ -49,16 +45,21 @@ function normalizeProduct(data: RawProduct): Product {
   }
 
   return {
-  id: data.id,
-  brand: data.brand,
-  description: data.description,
-  price: Number(data.price),
-  delivery: deliveryStr,
-  images: Array.isArray(data.images) ? data.images : [],
-  user_id: data.user_id, // ← see on müüja ID
-};
-
+    id: data.id,
+    brand: data.brand || '',
+    description: data.description || '',
+    price: Number(data.price) || 0,
+    delivery: deliveryStr,
+    images: Array.isArray(data.images) ? data.images : [],
+    user_id: data.user_id || '',
+  };
 }
+
+
+interface CheckOutProps {
+  productId: string;
+}
+
 
 
 export default function CheckOut({ productId }: CheckOutProps) {
@@ -66,6 +67,8 @@ export default function CheckOut({ productId }: CheckOutProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
+  const [phone, setPhone] = useState('');
+
 
   const [selectedTransport, setSelectedTransport] = useState('');
 const [parcelLocation, setParcelLocation] = useState('');
@@ -116,8 +119,11 @@ function detectCardType(number: string) {
         if (!data) {
           throw new Error('Toodet ei leitud');
         }
-
-        const normalized = normalizeProduct(data);
+if (!data.id) {
+  setError('Toode on vigane, puudub id');
+  return;
+}
+const normalized = normalizeProduct(data as RawProduct);
         setProduct(normalized);
 
         if (normalized.delivery) {
@@ -184,6 +190,7 @@ const handleCheckout = async () => {
       parcel_location: parcelLocation || null,
       payment_method: selectedPayment,
       price: product.price,
+      phone: phone,
     });
 
     if (insertError) throw insertError;
@@ -257,6 +264,8 @@ const transportPrice = selectedOption ? selectedOption.price : 0;
   parcelLocation={parcelLocation}
   setParcelLocation={setParcelLocation}
   productDelivery={product.delivery}
+  phone={phone}
+  setPhone={setPhone}
 />
 
     
@@ -360,7 +369,7 @@ const transportPrice = selectedOption ? selectedOption.price : 0;
       </div>
 
       {/* Right side summary */}
-      <div className="md:col-span-1 border p-6 space-y-4 self-start">
+      <div className="md:col-span-1 w-full md:w-[320px] border p-6 space-y-8 self-start">
         <h2 className="text-lg font-semibold">Kokkuvõte</h2>
         <div className="flex justify-between text-sm">
   <span>Toote hind</span>
@@ -408,29 +417,35 @@ const transportPrice = selectedOption ? selectedOption.price : 0;
 </div>
 
 
-        {/* Agreement */}
-        <label className="flex items-center text-sm mt-8 cursor-pointer">
+       <label className="flex flex-wrap items-start text-sm mt-8 cursor-pointer">
   <input
     type="checkbox"
     checked={agree}
     onChange={() => setAgree(!agree)}
     className="w-5 h-5 mr-2 border border-gray-800 appearance-none checked:bg-[#F8C6DF] checked:transition-all duration-200 cursor-pointer relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-black after:text-sm after:opacity-0 checked:after:opacity-100"
   />
+  <span>
   Nõustun&nbsp;
-  <a href="#" className="underline font-semibold">kasutustingimustega</a>
+  <a href="#" className="underline font-semibold sm:inline">
+    kasutustingimustega
+  </a>
+</span>
+
 </label>
+
 
 
         {/* Pay button */}
         <button
   onClick={handleCheckout}
   className={`w-full mt-4 py-2 rounded-full text-white font-semibold ${
-    agree ? 'bg-black hover:bg-gray-800' : 'bg-gray-400 cursor-not-allowed'
+    agree && !loading ? 'bg-black hover:bg-gray-800' : 'bg-gray-400 cursor-not-allowed'
   }`}
   disabled={!agree || loading}
 >
-  {loading ? 'Töötlen...' : 'MAKSA'}
+  {loading ? 'Ootan...' : 'Maksma'}
 </button>
+
       </div>
     </div>
   );

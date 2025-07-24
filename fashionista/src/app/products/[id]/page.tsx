@@ -29,7 +29,7 @@ type Product = {
 };
 
 type SupabaseProductResponse = {
-  id: string;
+  id: string | null;
   title?: string | null;
   brand: string | null;
   description: string | null;
@@ -50,7 +50,7 @@ type SupabaseProductResponse = {
 
 function normalizeProductData(data: SupabaseProductResponse): Product {
   return {
-    id: data.id,
+    id: data.id ?? '',
     title: data.title ?? '',
     brand: data.brand ?? '',
     description: data.description ?? '',

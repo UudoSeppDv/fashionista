@@ -59,16 +59,15 @@ const [contacts, setContacts] = useState<ContactType[]>([])
 
       if (data) {
         const filtered = data
-          .filter((c) => c.contact_id !== currentUserId)
-          .map((c) => ({
-            id: c.contact_id,
-            first_name: c.first_name,
-            surname: c.surname,
-            avatar_url: c.avatar_url,
-            last_message_text: c.last_message_text,
-            last_message_timestamp: c.last_message_timestamp,
-          }))
-
+  .filter((c) => c.contact_id !== currentUserId && c.contact_id !== null)
+  .map((c) => ({
+    id: c.contact_id!,
+    first_name: c.first_name ?? '',         // kui null, siis ''
+    surname: c.surname ?? '',
+    avatar_url: c.avatar_url ?? '',
+    last_message_text: c.last_message_text ?? '',
+    last_message_timestamp: c.last_message_timestamp ?? '',
+  }))
         setContacts(filtered)
       }
     }

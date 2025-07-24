@@ -16,13 +16,14 @@ type Props = {
 }
 
 type Contact = {
-  id: string
-  first_name: string | null
-  surname: string | null
-  avatar_url: string | null
-  last_message_text: string | null
-  last_message_timestamp: string | null
+  id: string;
+  first_name: string | null;
+  surname: string | null;
+  avatar_url: string | null;
+  last_message_text: string | null;
+  last_message_timestamp: string | null;
 }
+
 
 export default function ChatList({ selectedUserId, onSelectUser }: Props) {
  
@@ -55,15 +56,16 @@ export default function ChatList({ selectedUserId, onSelectUser }: Props) {
     if (data) {
       setContacts(
         data
-          .filter((c) => c.contact_id !== myId)
-          .map((c) => ({
-            id: c.contact_id,
-            first_name: c.first_name,
-            surname: c.surname,
-            avatar_url: c.avatar_url,
-            last_message_text: c.last_message_text,
-            last_message_timestamp: c.last_message_timestamp,
-          }))
+  .filter((c) => c.contact_id !== myId && c.contact_id !== null)
+  .map((c) => ({
+    id: c.contact_id!,
+    first_name: c.first_name ?? '',
+    surname: c.surname ?? '',
+    avatar_url: c.avatar_url ?? '',
+    last_message_text: c.last_message_text ?? '',
+    last_message_timestamp: c.last_message_timestamp ?? '',
+  }))
+
       )
     }
   }
