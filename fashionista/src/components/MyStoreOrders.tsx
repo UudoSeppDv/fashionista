@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabaseClient';
-import Image from 'next/image'
+import Image from 'next/image';
 import ConfirmOrderModal from './ConfirmOrderModal';
 
 
@@ -24,155 +24,85 @@ interface PublicUser {
 interface Order {
   id: string;
   status: string;
+  delivery_status?: string;
   price: number;
   delivery_method: string;
   payment_method: string;
   created_at: string;
-  phone: string | null; 
+  phone: string | null;
   parcel_location: string;
   confirmed_at?: string;
-  user_id: string; // ostja ID
-  seller_id: string; // müüja ID
+  user_id: string;
+  seller_id: string;
   product: Product | null;
-  buyer?: PublicUser;  // ostja info, fetched via user_id
-  seller?: PublicUser; // müüja info, fetched via seller_id, kui vaja
+  buyer?: PublicUser;
 }
-
-
 
 const PAGE_SIZE = 3;
 
 export default function MyStoreOrders() {
+  const user = useUser();
+  const userId = user?.id ?? '';
+  const router = useRouter();
+
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [filter, setFilter] = useState<'all' | 'confirmed' | 'unconfirmed'>('all');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const user = useUser();
-  const userId = user?.id;
-  const safeUserId = userId ?? '';
-  const router = useRouter();
-  const [filter, setFilter] = useState<'all' | 'confirmed' | 'unconfirmed'>('all');
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-
-
-
-const handleConfirmSend = () => {
-  handleSendPackage();
-  setModalOpen(false);
-};
-
-
-
-
- function handleConfirmClick(order: Order) {
-    setSelectedOrder(order);
-    setModalOpen(true);
-  }
-
-
-
-
-
-  
-
-  // Ekraani suuruse jälgimine
-  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
     function handleResize() {
       setIsSmallScreen(window.innerWidth < 768);
     }
-    handleResize(); // algne kontroll
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-useEffect(() => {
-  setVisibleCount(PAGE_SIZE);
-}, [filter]);
-
- useEffect(() => {
-  if (!userId) return;
-
-  async function fetchOrders() {
+  useEffect(() => {
+    if (!userId) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        phone,
-        parcel_location,
-        product:products(*),
-        buyer:public_users!user_id(first_name, surname, avatar_url)
-      `)
-      .eq('seller_id', safeUserId)
-      .order('created_at', { ascending: false });
 
-    if (error) {
-      setError(error.message);
-    } else if (data) {
-      setOrders(data as Order[]);
-      setError(null);
-      setVisibleCount(PAGE_SIZE);
+    async function fetchOrders() {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          phone,
+          parcel_location,
+          delivery_status,
+          product:products(*),
+          buyer:public_users!user_id(first_name, surname, avatar_url)
+        `)
+        .eq('seller_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        setError(error.message);
+      } else if (data) {
+        setOrders(data as Order[]);
+        setError(null);
+        setVisibleCount(PAGE_SIZE);
+      }
+      setLoading(false);
     }
-    setLoading(false);
-  }
 
-  fetchOrders();
-}, [userId, safeUserId]);
+    fetchOrders();
+  }, [userId]);
 
-
-
-
-const buyerPhone = selectedOrder?.phone ?? '';
+  const buyerPhone = selectedOrder?.phone ?? '';
 const parcelLocation = selectedOrder?.parcel_location ?? '';
 
 
-
-
-// ...
-
-async function handleSendPackage() {
-  if (!selectedOrder) return;
-
-  // 1. Supabase UPDATE
-  const { error } = await supabase
-    .from('orders')
-    .update({
-      status: 'confirmed',
-      confirmed_at: 'now()'
-
-    })
-    .eq('id', selectedOrder.id);
-
-  if (error) {
-    console.error('Tellimuse kinnitamisel tekkis viga:', error.message);
-    return;
-  }
-
-  // 2. Lokaalne state uuendus
-  setOrders(prev =>
-    prev.map(order =>
-      order.id === selectedOrder.id
-        ? {
-            ...order,
-            status: 'confirmed',
-            confirmed_at: new Date().toISOString(), // kui sul confirmed_at on UI-s vajalik
-          }
-        : order
-    )
-  );
-
-  // 3. Sulge modal ja muud vajalikud asjad
-  setModalOpen(false);
-}
-
-
-   useEffect(() => {
-    // Kui filter muutub, siis reseti visibleCount tagasi algusesse
+  // Kui filter muutub, reseti visibleCount
+  useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [filter]);
+
   if (!userId) {
     return (
       <main className="min-h-screen flex items-center justify-center font-montserrat">
@@ -203,11 +133,21 @@ async function handleSendPackage() {
     setLoading(false);
   }
 
+  function handleConfirmClick(order: Order) {
+    setSelectedOrder(order);
+    setModalOpen(true);
+  }
+
+  function handleConfirmSend() {
+    if (!selectedOrder) return;
+    confirmOrder(selectedOrder.id);
+    setModalOpen(false);
+  }
+
   function handleSendMessageClick(order: Order) {
     router.push(`/messages/${order.user_id}`);
   }
 
-  // Filtreeri tellimused vastavalt filterile
   const filteredOrders = orders.filter(order => {
     if (filter === 'confirmed') return order.status === 'confirmed';
     if (filter === 'unconfirmed') return order.status !== 'confirmed';
@@ -221,9 +161,7 @@ async function handleSendPackage() {
       .padStart(2, '0')}.${date.getFullYear()}`;
   };
 
-const canLoadMore = visibleCount < filteredOrders.length;
-
-
+  const canLoadMore = visibleCount < filteredOrders.length;
 
 return (
   <main className="min-h-screen bg-[#f8f3ef] font-montserrat">
@@ -305,7 +243,8 @@ return (
       const serviceFee = 1; // Või arvutuslik
       const netAmount = order.price - serviceFee;
       const confirmed = order.status === 'confirmed';
-      const delivered = order.status === 'delivered';
+      const deliveryStatus = order.delivery_status ?? 'pending';
+
 
       const statusDate =
               confirmed && order.confirmed_at ? order.confirmed_at : order.created_at;
@@ -327,35 +266,46 @@ return (
                     {/* Pilt väikestel ekraanidel keskel */}
                                     {/* Pilt väikestel ekraanidel keskel, proportsioonid paigas */}
                   <div className="relative w-32 aspect-[3/4] self-center mb-4 md:hidden">
-                    <Image
-                      src={order.product?.images?.[0] || '/bag.jpg'}
-                      alt={order.product?.description || 'Toode'}
-                      fill
-                      className="object-cover border"
-                    />
-                  </div>
-              <div className="grid grid-cols-2 mb-5 gap-y-3">
-                <p className="text-m text-gray-700">Hind:</p>
-                <p className="text-m text-right font-semibold">{order.price} €</p>
+ <Image
+  src={order.product?.images?.[0] || '/bag.jpg'}
+  alt={order.product?.description || 'Toode'}
+  fill
+  sizes="(max-width: 768px) 100vw, 128px"
+  priority
+  className="object-cover border"
+/>
 
-                <p className="text-m text-gray-700">Teenustasu:</p>
-                <p className="text-m text-right font-semibold">{serviceFee} €</p>
-                </div>
-                <div className="grid grid-cols-2 mb-5 pt-5  border-t gap-y-2">
+</div>
 
-                <p className="text-m font-bold text-gray-700">Kokku:</p>
-                <p className="text-m text-right font-semibold">{netAmount} €</p>
-              </div>
+               <div className="grid grid-cols-2 mb-5 gap-y-2">
+                      <p className="text-m text-gray-700">Hind:</p>
+                      <p className="text-m text-right font-semibold">{order.price} €</p>
+
+                      <p className="text-m text-gray-700">Teenustasu:</p>
+                      <p className="text-m text-right font-semibold">{serviceFee} €</p>
+
+                      <p className="text-m text-gray-700">Kätte:</p>
+                      <p className="text-m text-right font-semibold">{netAmount} €</p>
+                    </div>
+
 
               <div className="flex gap-4">
-                <button
-                  disabled
-                  className={`px-4 py-1 rounded-full font-small transition-colors
-                    ${delivered ? 'bg-green-200 text-green-800' : 'bg-blue-200 text-blue-800'}
-                  `}
-                >
-                  {delivered ? 'Kohaletoimetatud' : 'Kohale toimetamisel'}
-                </button>
+                {order.status === 'confirmed' && (
+  <button
+    disabled
+    className={`px-4 py-1 rounded-full font-small transition-colors ${
+      deliveryStatus === 'delivered'
+        ? 'bg-green-200 text-green-800'
+        : 'bg-yellow-200 text-yellow-800'
+    }`}
+  >
+    {deliveryStatus === 'delivered'
+      ? 'Kohaletoimetatud'
+      : 'Kohaletoimetamisel'}
+  </button>
+)}
+
+
 
                 <button
                   disabled
@@ -387,23 +337,16 @@ return (
     confirmed ? 'mt-19' : 'mt-7'
   }`}
 >
-  <Image
-    src={order.product?.images?.[0] || '/bag.jpg'}
-    alt={order.product?.description || 'Toode'}
-    fill
-    className="object-cover border"
-  />
-</div>
-<ConfirmOrderModal
-  isOpen={modalOpen}
-  onClose={() => setModalOpen(false)}
-  orderId={selectedOrder?.id || ''}
- buyerName={`${selectedOrder?.buyer?.first_name ?? ''} ${selectedOrder?.buyer?.surname ?? ''}`.trim()}
-
-  buyerPhone={buyerPhone}
-  parcelLocation={parcelLocation}
-  onConfirmSend={handleConfirmSend}
+<Image
+  src={order.product?.images?.[0] || '/bag.jpg'}
+  alt={order.product?.description || 'Toode'}
+  fill
+  sizes="(max-width: 768px) 100vw, 128px"
+  priority
+  className="object-cover border"
 />
+
+</div>
 
 
 
@@ -413,15 +356,16 @@ return (
           {/* Väikse ekraani "Kinnita" nupp keskel */}
   {order.status !== 'confirmed' && (
     <div className="md:hidden w-full flex justify-center">
-      <button
-        onClick={() => confirmOrder(order.id)}
-        disabled={loading}
-        className="w-full py-2 bg-gray-800 text-white rounded-full hover:bg-gray-600 transition"
-      >
-        Kinnita
-      </button>
-    </div>
+  <button
+                      className="bg-pink-600 text-white rounded-lg px-4 py-2 font-semibold hover:bg-pink-700"
+                      onClick={() => handleConfirmClick(order)}
+                    >
+                      Kinnita tellimus
+                    </button>
+
+</div>
   )}
+
 
          {/* Alumine rida: avatar + nimi + saada sõnum + Kinnita väiksel ekraanil */}
 <div className="flex flex-col sm:flex-row items-center justify-between pt-4 gap-4">
@@ -429,14 +373,14 @@ return (
   {/* Avatar ja nimi */}
 <div className="flex items-center gap-3">
   {order.buyer?.avatar_url ? (
-    <div className="relative w-14 h-14 rounded-full overflow-hidden">
-      <Image
-        src={order.buyer.avatar_url}
-        alt="Profiilipilt"
-        fill
-        className="object-cover"
-      />
-    </div>
+    <Image
+  src={order.buyer.avatar_url}
+  alt="Profiilipilt"
+  fill
+  className="object-cover"
+  sizes="56px"
+/>
+
   ) : (
     <div className="w-14 h-14 rounded-full bg-pink-300 text-white flex items-center justify-center text-xl font-bold">
       {order.buyer?.first_name?.charAt(0)}
@@ -474,6 +418,18 @@ return (
     </button>
   )}
 </section>
+
+<ConfirmOrderModal
+  isOpen={modalOpen}
+  onClose={() => setModalOpen(false)}
+  orderId={selectedOrder?.id || ''}
+ buyerName={`${selectedOrder?.buyer?.first_name ?? ''} ${selectedOrder?.buyer?.surname ?? ''}`.trim()}
+
+  buyerPhone={buyerPhone}
+  parcelLocation={parcelLocation}
+  onConfirmSend={handleConfirmSend}
+/>
+   
 
     </div>
 

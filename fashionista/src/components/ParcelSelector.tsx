@@ -64,6 +64,10 @@ export default function ParcelSelector({
 }: ParcelSelectorProps) {
   const [options, setOptions] = useState<ParcelOption[]>([]);
   const [loading, setLoading] = useState(true);
+   const [phoneError, setPhoneError] = useState('');
+   // Kontrolli, kas on järeletulemine transport
+const isPickup = selectedTransport.toLowerCase().includes('ostja tuleb ise järgi') || selectedTransport.toLowerCase().includes('pickup');
+
 
   // Normaliseeri productDelivery väärtus (string või array)
   const deliveryArray =
@@ -138,6 +142,12 @@ useEffect(() => {
   }
 }, [selectedTransport]);
 
+useEffect(() => {
+  if (isPickup) {
+    setParcelLocation('Ostja tuleb ise järele');
+  }
+}, [selectedTransport, isPickup, setParcelLocation]);
+
 
   const groupedByCity = options.reduce<Record<string, ParcelOption[]>>((groups, option) => {
     const city = option.city || 'Muu';
@@ -190,6 +200,38 @@ useEffect(() => {
   </span>
 </div>
 
+{isPickup && isSelected && (
+  <div className="mt-4 ml-6 w-full max-w-sm">
+    <label htmlFor="phone" className="text-sm font-medium block mb-1">
+      Telefoni number
+    </label>
+    <input
+      type="tel"
+      id="phone"
+      name="phone"
+      placeholder="+372 5xxxxxxx"
+      value={phone}
+      onChange={(e) => {
+        const value = e.target.value;
+        setPhone(value);
+        if (value.trim() === '') {
+          setPhoneError('Telefon on kohustuslik');
+        } else {
+          setPhoneError('');
+        }
+      }}
+      onBlur={() => {
+        if (phone.trim() === '') {
+          setPhoneError('Telefon on kohustuslik');
+        }
+      }}
+      className={`w-full border px-3 py-2 text-sm rounded ${phoneError ? 'border-red-500' : ''}`}
+    />
+    <p className={`text-sm mt-1 ${phoneError ? 'text-red-600' : 'invisible'}`}>
+  {phoneError || 'Placeholder'}
+</p>
+  </div>
+)}
 
   {/* Pakiautomaat ja telefon allpool, kui valitud ja sobiv */}
   {isParcel && isSelected && (
@@ -239,10 +281,19 @@ useEffect(() => {
   name="phone"
   placeholder="+372 5xxxxxxx"
   value={phone}
-  onChange={(e) => setPhone(e.target.value)}
-  className="w-full border px-3 py-2 text-sm rounded"
-  required
+  onChange={(e) => {
+    const value = e.target.value;
+    setPhone(value);
+    if (value.trim() === '') {
+      setPhoneError('Telefon on kohustuslik');
+    } else {
+      setPhoneError('');
+    }
+  }}
+ 
+  className={`w-full border px-3 py-2 text-sm rounded ${phoneError ? 'border-red-500' : ''}`}
 />
+
 
 
         </div>

@@ -11,6 +11,7 @@ export default function AitahPageClient() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const price = parseFloat(searchParams.get('price') || '0');
+  const service = parseFloat(searchParams.get('service') || '0');  // teenustasu
   const transport = parseFloat(searchParams.get('transport') || '0');
   const total = parseFloat(searchParams.get('total') || '0');
 
@@ -43,9 +44,16 @@ export default function AitahPageClient() {
               <span className="font-semibold">{format(price)}</span>
             </div>
             <div className="flex justify-between">
-              <span>Transport:</span>
-              <span className="font-semibold">{format(transport)}</span>
+              <span>Teenustasu:</span>
+              <span className="font-semibold">{format(service)}</span>
             </div>
+            <div className="flex justify-between">
+  <span>Transport:</span>
+  <span className="font-semibold">
+    {transport === 0 ? 'Tasuta' : format(transport)}
+  </span>
+</div>
+
             <div className="flex justify-between border-t pt-5 mt-5 text-lg">
               <span className="font-bold">Kokku:</span>
               <span className="font-bold">{format(total)}</span>

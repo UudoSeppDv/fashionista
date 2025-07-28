@@ -68,17 +68,18 @@ export default function CheckOut({ productId }: CheckOutProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [phone, setPhone] = useState('');
+  
 
 
   const [selectedTransport, setSelectedTransport] = useState('');
 const [parcelLocation, setParcelLocation] = useState('');
 
 const finalTransportOptions = [
-  { label: 'Omniva pakiautomaat', price: 2.5 },
-  { label: 'DPD pakiautomaat', price: 3.0 },
-  { label: 'Smartpost pakiautomaat', price: 2.0 },
+  { label: 'Omniva', price: 2.5 },
+  { label: 'DPD', price: 3.0 },
+  { label: 'Smartpost', price: 2.0 },
   { label: 'Kuller', price: 5.0 },
-  { label: 'Jalgrattaga kohaletoimetamine', price: 0 },
+  
 ];
 
   const user = useUser();
@@ -167,14 +168,19 @@ const transportOptions = deliveryString
 const handleCheckout = async () => {
   if (!agree || !user || !product || !product.user_id) return;
 
+  const isParcelAutomaat = ['omniva', 'smartpost', 'dpd'].some(t =>
+    selectedTransport.toLowerCase().includes(t)
+  );
+
   // Kontrolli, kas pakiautomaadi puhul on valitud asukoht
-  if (
-    ['omniva', 'smartpost', 'dpd'].some(t =>
-      selectedTransport.toLowerCase().includes(t)
-    ) &&
-    !parcelLocation
-  ) {
+  if (isParcelAutomaat && !parcelLocation) {
     alert('Palun vali pakiautomaat');
+    return;
+  }
+
+  // Kontrolli telefoni numbri olemasolu ainult pakiautomaadi puhul
+  if (!phone || phone.trim() === '') {
+    alert('Palun sisesta telefoninumber');
     return;
   }
 
@@ -202,10 +208,10 @@ const handleCheckout = async () => {
 
     if (updateError) throw updateError;
 
-    const totalPrice = (product.price + transportPrice).toFixed(2);
+    const totalPrice = (product.price + serviceFee +transportPrice).toFixed(2);
 
     router.push(
-      `/aitah?price=${product.price}&transport=${transportPrice}&total=${totalPrice}`
+      `/aitah?price=${product.price}&transport=${transportPrice}&service=${serviceFee}&total=${totalPrice}`
     );
   } catch (error) {
     console.error('Viga maksmisel:', error);
@@ -220,6 +226,8 @@ const handleCheckout = async () => {
 
 
 
+
+
 const selectedOption = finalTransportOptions.find(
   opt => opt.label.toLowerCase() === selectedTransport.toLowerCase()
 );
@@ -227,8 +235,8 @@ const transportPrice = selectedOption ? selectedOption.price : 0;
 
 
   const productPrice = product.price;
- 
-  const totalPrice = (productPrice + transportPrice).toFixed(2);
+  const serviceFee = 1;
+  const totalPrice = (productPrice + serviceFee + transportPrice).toFixed(2);
 
   
 
@@ -369,13 +377,18 @@ const transportPrice = selectedOption ? selectedOption.price : 0;
       </div>
 
       {/* Right side summary */}
-      <div className="md:col-span-1 w-full md:w-[320px] border p-6 space-y-8 self-start">
+      <div className="md:col-span-1 w-full md:w-[320px] border p-6 space-y-6 self-start">
         <h2 className="text-lg font-semibold">Kokkuvõte</h2>
         <div className="flex justify-between text-sm">
   <span>Toote hind</span>
   <span className="font-semibold">{productPrice.toFixed(2)}€</span>
 </div>
 <div className="flex justify-between text-sm">
+  <span>Teenustasu</span>
+  <span className="font-semibold">{serviceFee}€</span>
+</div>
+<div className="flex justify-between text-sm">
+  
   <span>Transport</span>
   <span className="font-semibold">
     {transportPrice === 0 ? 'Tasuta' : `${transportPrice.toFixed(2)}€`}
