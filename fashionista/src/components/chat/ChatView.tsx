@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { supabase } from '../../lib/supabaseClient'
+import { supabase } from '../../../lib/supabaseClient'
 import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import LoginModal from '@/components/LoginModal'
-import ChatList from '../components/ChatList'
-import { ContactType } from '../../types/contact'
+import ChatList from './ChatList'
+import { ContactType } from '../../../types/contact'
 
 export default function ChatView() {
   

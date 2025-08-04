@@ -1,6 +1,6 @@
 'use client'
 
-import ChatView from "@/components/ChatView"
+import ChatView from "@/components/chat/ChatView"
 
 export default function MessagePage() {
   

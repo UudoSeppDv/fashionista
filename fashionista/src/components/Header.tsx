@@ -7,6 +7,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import DropdownMenu from './DropdownMenu'
 import UserDropdownMenu from './UserDropdownMenu'
 import SearchBar from './SearchBar'
+import NotificationDropdown from './NotificationDropdown'
 
 interface HeaderProps {
   setShowLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,6 +23,8 @@ export default function Header({ setShowLoginModal, searchQuery, setSearchQuery 
   const supabase = createClientComponentClient<Database>();
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+
 
   useEffect(() => {
     const checkSession = async () => {
@@ -29,6 +32,7 @@ export default function Header({ setShowLoginModal, searchQuery, setSearchQuery 
 
       if (session?.user) {
         setIsLoggedIn(true)
+        setUserId(session.user.id)
 
         // kui tahad nime profiilist, eeldades et sul on näiteks
         // public.profiles tabel kus on `full_name`:
@@ -81,6 +85,49 @@ export default function Header({ setShowLoginModal, searchQuery, setSearchQuery 
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
 
+  const [hasUnread, setHasUnread] = useState(false)
+
+useEffect(() => {
+  if (!userId) return;
+
+  const checkUnread = async () => {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('id')
+      .eq('receiver_id', userId)
+      .eq('on_read', false)
+      .limit(1)
+
+    if (!error) {
+      setHasUnread(data.length > 0)
+    }
+  }
+
+  checkUnread()
+
+  const channel = supabase
+    .channel(`unread-messages-${userId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'messages',
+        filter: `receiver_id=eq.${userId}`,
+      },
+      async () => {
+        await checkUnread()
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}, [userId, supabase])
+
+
+
   return (
     <header className="sticky top-0 z-50">
       <div className="z-50 relative flex items-center justify-between px-6 py-3 bg-[#FE9BD4]">
@@ -113,14 +160,35 @@ export default function Header({ setShowLoginModal, searchQuery, setSearchQuery 
               </button>
 
               <button
-                onClick={() => router.push('/messages')}
-                className="hover:scale-110 w-5 h-5"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M7.9 20C9.80858 20.9791 12.0041 21.2443 14.0909 20.7478C16.1777 20.2514 18.0186 19.0259 19.2818 17.2922C20.545 15.5586 21.1474 13.4308 20.9806 11.2922C20.8137 9.15366 19.8886 7.14502 18.3718 5.62824C16.855 4.11146 14.8464 3.1863 12.7078 3.01946C10.5693 2.85263 8.44147 3.45509 6.70782 4.71829C4.97417 5.98149 3.74869 7.82236 3.25222 9.90916C2.75575 11.996 3.02094 14.1915 4 16.1L2 22L7.9 20Z" stroke="#222222" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-</svg>
+      onClick={() => router.push('/messages')}
+      className="relative hover:scale-110 w-5 h-5"
+    >
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M7.9 20C9.80858 20.9791 12.0041 21.2443 14.0909 20.7478C16.1777 20.2514 18.0186 19.0259 19.2818 17.2922C20.545 15.5586 21.1474 13.4308 20.9806 11.2922C20.8137 9.15366 19.8886 7.14502 18.3718 5.62824C16.855 4.11146 14.8464 3.1863 12.7078 3.01946C10.5693 2.85263 8.44147 3.45509 6.70782 4.71829C4.97417 5.98149 3.74869 7.82236 3.25222 9.90916C2.75575 11.996 3.02094 14.1915 4 16.1L2 22L7.9 20Z"
+          stroke="#222222"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
 
-              </button>
+    
+
+      {/* Roheline teavituspunkt */}
+      {hasUnread && (
+        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
+      )}
+    </button>
+<div className="relative" >
+    <NotificationDropdown  />
+    </div>
 
               <UserDropdownMenu onLogout={handleLogout} userName={userName ?? 'Kasutaja'} />
             </div>

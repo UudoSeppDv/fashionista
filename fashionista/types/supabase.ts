@@ -73,30 +73,38 @@ export type Database = {
         ]
       }
       messages: {
-        Row: {
-          content: string
-          created_at: string
-          id: number
-          receiver_id: string
-          sender_id: string
-          image_url: string | null;  // lisa see
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id?: number
-          receiver_id: string
-          sender_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: number
-          receiver_id?: string
-          sender_id?: string
-        }
-        Relationships: []
-      }
+  Row: {
+    content: string;
+    created_at: string;
+    id: number;
+    receiver_id: string;
+    sender_id: string;
+    image_url: string | null;
+    on_read: boolean;           
+    on_read_at: string | null;  
+  };
+  Insert: {
+    content: string;
+    created_at?: string;
+    id?: number;
+    receiver_id: string;
+    sender_id: string;
+    image_url?: string | null;
+    on_read?: boolean;
+    on_read_at?: string | null;
+  };
+  Update: {
+    content?: string;
+    created_at?: string;
+    id?: number;
+    receiver_id?: string;
+    sender_id?: string;
+    image_url?: string | null;
+    on_read?: boolean;
+    on_read_at?: string | null;
+  };
+  Relationships: [];
+}
       products: {
   Row: {
     brand: string | null

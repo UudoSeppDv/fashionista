@@ -211,8 +211,9 @@ const handleCheckout = async () => {
     const totalPrice = (product.price + serviceFee +transportPrice).toFixed(2);
 
     router.push(
-      `/aitah?price=${product.price}&transport=${transportPrice}&service=${serviceFee}&total=${totalPrice}`
-    );
+  `/aitah?product_id=${product.id}&price=${product.price}&transport=${transportPrice}&service=${serviceFee}&total=${totalPrice}`
+);
+
   } catch (error) {
     console.error('Viga maksmisel:', error);
     alert('Midagi läks valesti...');
