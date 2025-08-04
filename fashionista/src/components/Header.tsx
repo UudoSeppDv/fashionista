@@ -286,10 +286,10 @@ useEffect(() => {
 
       <div className="overflow-visible relative">
         <nav
-          className={`transition-transform duration-300 ease-in-out transform ${
-            showNav ? 'translate-y-0' : '-translate-y-full'
-          } z-20 border-t border-b border-gray-600 px-6 py-4 text-sm font-semibold text-gray-700 space-x-6 font-montserrat bg-[#F1ECE6] flex`}
-        >
+  className={`hidden sm:flex transition-transform duration-300 ease-in-out transform ${
+    showNav ? 'translate-y-0' : '-translate-y-full'
+  } z-20 border-t border-b border-gray-600 px-6 py-4 text-sm font-semibold text-gray-700 space-x-6 font-montserrat bg-[#F1ECE6]`}
+>
            <DropdownMenu label="UUS" title="UUS" links={[
             { label: 'Uus 1', href: '#' },
             { label: 'Uus 2', href: '#' },
@@ -326,7 +326,7 @@ useEffect(() => {
       
           {/* Mobile Menu */}
     {mobileMenuOpen && (
-      <div className="sm:hidden fixed top-[60px] left-0 right-0 bg-white z-40 flex flex-col px-6 py-4 max-h-[calc(100vh-64px)] overflow-y-auto">
+      <div className="sm:hidden top-0 left-0 right-0 bg-white z-40 flex flex-col px-6 py-4 max-h-[calc(100vh-64px)] overflow-y-auto">
 
 {isLoggedIn ? (
   <div className="space-y-3 mb-5 font-montserrat">

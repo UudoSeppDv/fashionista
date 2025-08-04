@@ -17,7 +17,7 @@ export default function SectionTrends() {
 
       {/* Text content */}
       <div className="w-full md:w-1/2 max-w-md text-left md:mt-20 mt-4">
-        <p className="font-montserrat text-sm text-[#2B438D] mb-2">Fashionista soovitab</p>
+        <p className="font-montserrat text-xl text-[#2B438D] mb-2">Fashionista soovitab</p>
         <h2 className="font-montserrat text-3xl md:text-4xl font-bold text-[#2B438D] leading-snug mb-6">
           Avasta Hetke <br /> Moetrendid
         </h2>

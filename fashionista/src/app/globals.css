@@ -3,6 +3,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+
 @font-face {
   font-family: 'Clash Display';
   src: url('/fonts/ClashDisplay-Medium.woff2') format('woff2');
@@ -158,3 +160,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Sobib lisada globaalsesse CSS faili või Tailwindi jaoks teha custom klass */
+
+.slider-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem; /* vahe tootekaartide vahel */
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch; /* sujuvam kerimine iOS */
+}
+
+.slider-item {
+  flex: 0 0 auto; /* ära lase elemendil venida */
+  scroll-snap-align: start;
+  width: 250px; /* sama, mis min-width tootekaardil */
+}
+

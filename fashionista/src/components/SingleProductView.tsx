@@ -5,7 +5,7 @@ import Gallery from '@/components/Gallery';
 import LoginModal from '@/components/LoginModal';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import SectionFeaturedProducts from './SectionFeaturedProducts';
+import SectionFeaturedProducts from './main-page/SectionFeaturedProducts';
 import { useFavorites } from '@/context/FavoritesContext' 
 import { supabase } from '../../lib/supabaseClient'
 import { useRouter } from 'next/navigation';

@@ -2,12 +2,12 @@ import { FaFacebook, FaInstagram } from 'react-icons/fa';
 
 export default function Footer() {
   return (
-    <footer className="bg-zinc-900 z-10 text-zinc-300 py-20">
+    <footer className="bg-zinc-900 z-10 px-5 text-zinc-300 py-15">
       <div className="font-montserrat max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Vasak veerg */}
         <div className="space-y-4">
           <p>
-            Vajad abi? Saada meile kiri < br /> aadressile <a href="mailto:info@fashionista.com" className="underline">info@fashionista.com</a>.<br />
+            Vajad abi? Saada meile kiri <br /> aadressile <a href="mailto:info@fashionista.com" className="underline">info@fashionista.com</a>.<br />
             Oleme sinu jaoks olemas.
           </p>
 
@@ -20,14 +20,17 @@ export default function Footer() {
             </a>
           </div>
 
+          {/* Lisa border-b väikestel ekraanidel */}
+          <div className="md:hidden border-b border-zinc-700 py-4" />
+
           <div className="flex space-x-6 pt-4 text-sm">
             <a href="/privaatsus" className="underline hover:text-white">Privaatsuspoliitika</a>
             <a href="/tingimused" className="underline hover:text-white">Tingimused</a>
           </div>
         </div>
 
-        {/* Keskmine veerg */}
-        <div>
+        {/* Keskmine veerg (peidetud väikestel ekraanidel) */}
+        <div className="hidden md:block">
           <h4 className="text-white font-bold mb-2">Kasutajatugi</h4>
           <ul className="space-y-1">
             <li><a href="/muujale" className="hover:text-white">Müüjale</a></li>
@@ -36,8 +39,8 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Parem veerg */}
-        <div>
+        {/* Parem veerg (peidetud väikestel ekraanidel) */}
+        <div className="hidden md:block">
           <h4 className="text-white font-bold mb-2">Meist</h4>
           <ul>
             <li><a href="/meist" className="hover:text-white">Meist</a></li>
