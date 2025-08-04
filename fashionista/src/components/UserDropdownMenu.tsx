@@ -41,9 +41,10 @@ export default function UserDropdownMenu({ onLogout, userName }: Props) {
     </svg>
     </div>
     
-    <span className="font-montserrat text-gray-700 cursor-pointer select-none hover:scale-110">
-      Hei, <span className="font-bold">{userName ?? 'Kasutaja'}</span>.
-    </span>
+    <span className="hidden sm:inline font-montserrat text-gray-700 cursor-pointer select-none hover:scale-110">
+  Hei, <span className="font-bold">{userName ?? 'Kasutaja'}</span>.
+</span>
+
   </Menu.Button>
 
       <Menu.Items className=" font-medium absolute right-0 mt-2 w-56 origin-top-right bg-[#F8C6DF] shadow-lg z-50 focus:outline-none font-montserrat ">
