@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '@/components/Header'
+import Header from '@/components/header/Header'
 import LoginModal from '@/components/LoginModal'
 import SectionFeaturedProducts from '@/components/main-page/SectionFeaturedProducts'
 import SectionFeaturedBrands from '@/components/main-page/SectionFeaturedBrands'

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Gallery from '@/components/Gallery';
 import LoginModal from '@/components/LoginModal';
-import Header from '@/components/Header';
+import Header from '@/components/header/Header';
 import Footer from '@/components/Footer';
 import SectionFeaturedProducts from './main-page/SectionFeaturedProducts';
 import { useFavorites } from '@/context/FavoritesContext' 

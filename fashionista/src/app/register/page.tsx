@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '@/components/Header'
+import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'
 import RegisterForm from "@/components/RegisterForm";
 import LoginModal from '@/components/LoginModal'

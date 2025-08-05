@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Database } from '..../../../types/supabase' 
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import DropdownMenu from './DropdownMenu'
+import DropdownMenu from '../DropdownMenu'
 import UserDropdownMenu from './UserDropdownMenu'
 import SearchBar from './SearchBar'
 import NotificationDropdown from './NotificationDropdown'
 import MobileDropdown from './MobileDropdown'
+import Link from 'next/link'
 
 interface HeaderProps {
   setShowLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -171,8 +172,6 @@ useEffect(() => {
   />
 </button>
 
-
-
   {/* Suur ekraan – otsinguriba */}
   <div className="hidden sm:flex w-full">
     <SearchBar
@@ -186,19 +185,15 @@ useEffect(() => {
   </div>
 </div>
 
-
      <div
   onClick={() => router.push('/')}
   className="absolute top-1/2 transform -translate-y-1/2 left-4 ml-13 sm:left-1/2 sm:-translate-x-1/2 sm:ml-0 cursor-pointer text-2xl font-bold tracking-wide text-gray-800"
 >
   FASHIONISTA
 </div>
-
-
-
         <div className="flex items-center space-x-3 w-1/3 justify-end">
           {isLoggedIn ? (
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               <button
   onClick={() => router.push('/add-product')}
   className="hidden sm:inline-flex font-semibold font-montserrat bg-black text-white px-5 py-2 rounded-full text-sm hover:bg-gray-800 transition-colors duration-200"
@@ -207,13 +202,13 @@ useEffect(() => {
 </button>
 
 
-              <button
-      onClick={() => router.push('/messages')}
-      className="relative hover:scale-110 w-5 h-5"
-    >
+
+<div className="flex items-center gap-5 mx-4">
+  <div className="relative hover:scale-110 w-5 h-[22px]">
+    <button onClick={() => router.push('/messages')}>
       <svg
-        width="24"
-        height="24"
+        width="25"
+        height="25"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -226,32 +221,43 @@ useEffect(() => {
           strokeLinejoin="round"
         />
       </svg>
-
-    
-
-      {/* Roheline teavituspunkt */}
       {hasUnread && (
         <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
       )}
     </button>
-<div className="relative" >
-    <NotificationDropdown  />
-    </div>
+  </div>
 
-              <UserDropdownMenu onLogout={handleLogout} userName={userName ?? 'Kasutaja'} />
+  <div className="cursor-pointer relative w-5 h-5">
+    <NotificationDropdown />
+  </div>
+
+  <div className="cursor-pointer relative w-5 h-5">
+    <UserDropdownMenu
+      onLogout={handleLogout}
+      userName={userName ?? 'Kasutaja'}
+    />
+  </div>
+</div>
+
+
+
+
+            <div className="hidden ml-2 relative sm:inline font-montserrat text-gray-700">
+  Hei, <span className="font-bold">{userName ?? 'Kasutaja'}</span>.
+</div>
             </div>
           ) : (
             <>
   <button
     onClick={() => setShowLoginModal(true)}
-    className="hidden sm:inline-block font-montserrat px-4 py-2 rounded-full border border-black text-sm hover:bg-gray-100"
+    className="relative hidden sm:inline-block font-montserrat px-4 py-2 rounded-full border border-black text-sm hover:bg-gray-100"
   >
     Logi sisse / Registreeri
   </button>
 
   <button
     onClick={() => setShowLoginModal(true)}
-    className="sm:hidden w-6 h-6 mr-4 hover:scale-110 transition-transform"
+    className="sm:hidden w-5 h-5 mr-4 hover:scale-110 transition-transform"
     aria-label="Logi sisse või registreeru"
   >
     <svg
@@ -469,18 +475,25 @@ useEffect(() => {
           )}
 
         {/* Mobile dropdown accordion */}
-        <div className="mt-4 space-y-2">
-          {[
-            'UUS',
-            'BRÄNDID',
-            'RIIDED',
-            'JALANÕUD',
-            'SPORT',
-            'ILU'
-          ].map((label) => (
-            <MobileDropdown key={label} label={label} />
-          ))}
-        </div>
+
+
+<div className="mt-4 space-y-2">
+  {['UUS', 'BRÄNDID', 'RIIDED', 'JALANÕUD', 'SPORT', 'ILU'].map((label) => {
+    if (label === 'UUS' || label === 'BRÄNDID') {
+      return (
+        <Link
+          key={label}
+          href={`/search?category=${label.toLowerCase()}`} // või mingi sobiv url
+          className="block p-2 text-lg font-semibold hover:bg-gray-100 rounded"
+        >
+          {label}
+        </Link>
+      )
+    }
+    return <MobileDropdown key={label} label={label} />
+  })}
+</div>
+
         
       </div>
       

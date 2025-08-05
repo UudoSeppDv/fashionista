@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import AccountSettings from '@/components/AccountSettings'
-import Header from '@/components/Header'
+import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'
 
 export default function KontoPage() {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Footer from "@/components/Footer"
-import Header from "@/components/Header"
+import Header from "@/components/header/Header"
 import LoginModal from '@/components/LoginModal'
 import ChatPageClient from '@/components/chat/ChatPageClient'
 

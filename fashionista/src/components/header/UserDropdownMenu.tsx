@@ -3,51 +3,46 @@
 import { Menu } from "@headlessui/react";
 import { useRouter } from "next/navigation";
 
-
 interface Props {
   onLogout: () => void;
-  userName?: string;  
+  userName?: string;
 }
 
-export default function UserDropdownMenu({ onLogout, userName }: Props) {
+export default function UserDropdownMenu({ onLogout }: Props) {
   const router = useRouter();
 
   return (
     <Menu as="div" className="relative inline-block text-left">
-  <Menu.Button className="cursor-pointer flex items-center p-2 focus:outline-none space-x-2">
-    <div className="hover:scale-110 w-5 h-5 mr-5">
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="text-gray-700"
-    >
-      <path
-        d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
-        stroke="#222222"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M20.5901 22C20.5901 18.13 16.7402 15 12.0002 15C7.26015 15 3.41016 18.13 3.41016 22"
-        stroke="#222222"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-    </div>
-    
-    <span className="hidden sm:inline font-montserrat text-gray-700 cursor-pointer select-none hover:scale-110">
-  Hei, <span className="font-bold">{userName ?? 'Kasutaja'}</span>.
-</span>
+      <Menu.Button className="hover:scale-110">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="text-gray-700"
+        >
+          <path
+            d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+            stroke="#222222"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M20.5901 22C20.5901 18.13 16.7402 15 12.0002 15C7.26015 15 3.41016 18.13 3.41016 22"
+            stroke="#222222"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </Menu.Button>
 
-  </Menu.Button>
+      <Menu.Items className="absolute right-0 mt-0 w-56 origin-top-right bg-[#F8C6DF] shadow-lg z-50 focus:outline-none font-montserrat font-medium
+  max-sm:fixed max-sm:top-14 max-sm:right-0 max-sm:left-0 max-sm:w-full max-sm:rounded-none max-sm:px-4 max-sm:py-4 max-sm:space-y-2 sm:font-large max-sm:text-base max-sm:z-[999]"
+>
 
-      <Menu.Items className=" font-medium absolute right-0 mt-2 w-56 origin-top-right bg-[#F8C6DF] shadow-lg z-50 focus:outline-none font-montserrat ">
         <div className="py-1">
           {[
             { label: "Lemmikud", href: "/lemmikud" },
@@ -71,7 +66,7 @@ export default function UserDropdownMenu({ onLogout, userName }: Props) {
             </Menu.Item>
           ))}
         </div>
-        <div >
+        <div>
           <Menu.Item>
             {({ active }) => (
               <button
