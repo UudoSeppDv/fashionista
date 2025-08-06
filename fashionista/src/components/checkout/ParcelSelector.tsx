@@ -169,7 +169,7 @@ useEffect(() => {
       return (
         <div key={option.label} className="px-4 py-3">
   {/* Raadio + nimi + hind kõik ühel real, ka väiksel ekraanil */}
- <div className="flex items-center gap-2">
+ <div className="flex mb-2 items-center gap-2">
   {/* ← see on custom radio */}
   <label className="relative cursor-pointer">
     <input
@@ -201,8 +201,9 @@ useEffect(() => {
 </div>
 
 {isPickup && isSelected && (
+   <div className="mt-4 mb-4 ml-6">
   <div className="sm:flex-1 w-full">
-          <label htmlFor="phone" className="text-sm font-medium block mt-4 mb-2">
+          <label htmlFor="phone" className="text-sm font-medium block mb-1">
       Telefoni number
     </label>
     <input
@@ -227,15 +228,16 @@ useEffect(() => {
       }}
       className={`w-full border px-3 py-2 text-sm rounded ${phoneError ? 'border-red-500' : ''}`}
     />
-    <p className={`text-sm ${phoneError ? 'text-red-600' : 'invisible'}`}>
+    <p className={`text-sm mt-1 ${phoneError ? 'text-red-600' : 'invisible'}`}>
   {phoneError || 'Placeholder'}
 </p>
+  </div>
   </div>
 )}
 
   {/* Pakiautomaat ja telefon allpool, kui valitud ja sobiv */}
   {isParcel && isSelected && (
-  <div className="mt-4 ml-6">
+  <div className="mt-4 mb-4 ml-6">
     {loading ? (
       <p className="text-sm text-gray-500">Laen pakiautomaate...</p>
     ) : (
@@ -291,7 +293,7 @@ useEffect(() => {
     }
   }}
  
-  className={`w-full border px-3 py-2 mb-4 text-sm rounded ${phoneError ? 'border-red-500' : ''}`}
+  className={`w-full border px-3 py-2 text-sm rounded ${phoneError ? 'border-red-500' : ''}`}
 />
 
 
