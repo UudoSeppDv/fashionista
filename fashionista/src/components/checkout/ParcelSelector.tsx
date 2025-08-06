@@ -201,7 +201,7 @@ useEffect(() => {
 </div>
 
 {isPickup && isSelected && (
-   <div className="mt-4 mb-4 ml-6">
+   <div className="mt-4 ml-6">
   <div className="sm:flex-1 w-full">
           <label htmlFor="phone" className="text-sm font-medium block mb-1">
       Telefoni number
