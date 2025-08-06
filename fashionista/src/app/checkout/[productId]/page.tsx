@@ -3,7 +3,7 @@
 import { use, useState } from 'react'
 import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'
-import CheckOut from '@/components/CheckOut';
+import CheckOut from '@/components/checkout/CheckOut';
 
 interface PageProps {
   params: Promise<{

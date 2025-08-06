@@ -201,8 +201,8 @@ useEffect(() => {
 </div>
 
 {isPickup && isSelected && (
-  <div className="mt-4 ml-6 w-full max-w-sm">
-    <label htmlFor="phone" className="text-sm font-medium block mb-1">
+  <div className="sm:flex-1 w-full">
+          <label htmlFor="phone" className="text-sm font-medium block mt-4 mb-2">
       Telefoni number
     </label>
     <input
@@ -227,7 +227,7 @@ useEffect(() => {
       }}
       className={`w-full border px-3 py-2 text-sm rounded ${phoneError ? 'border-red-500' : ''}`}
     />
-    <p className={`text-sm mt-1 ${phoneError ? 'text-red-600' : 'invisible'}`}>
+    <p className={`text-sm ${phoneError ? 'text-red-600' : 'invisible'}`}>
   {phoneError || 'Placeholder'}
 </p>
   </div>
@@ -291,7 +291,7 @@ useEffect(() => {
     }
   }}
  
-  className={`w-full border px-3 py-2 text-sm rounded ${phoneError ? 'border-red-500' : ''}`}
+  className={`w-full border px-3 py-2 mb-4 text-sm rounded ${phoneError ? 'border-red-500' : ''}`}
 />
 
 
