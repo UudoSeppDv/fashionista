@@ -11,9 +11,10 @@ export default function Gallery({ images }: GalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-
+  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState<boolean | null>(null);
 
   const prevImage = useCallback(() => {
     setSelectedIndex((i) => (i === 0 ? images.length - 1 : i - 1));
@@ -23,7 +24,7 @@ export default function Gallery({ images }: GalleryProps) {
     setSelectedIndex((i) => (i === images.length - 1 ? 0 : i + 1));
   }, [images.length]);
 
-    useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
         prevImage();
@@ -40,31 +41,49 @@ export default function Gallery({ images }: GalleryProps) {
 
   if (images.length === 0) return null;
 
-
-
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStartX(e.targetTouches[0].clientX);
+    setTouchStartY(e.targetTouches[0].clientY);
     setIsDragging(true);
+    setIsHorizontalSwipe(null);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStartX !== null) {
+    if (touchStartX !== null && touchStartY !== null) {
       const currentX = e.targetTouches[0].clientX;
-      setDragX(currentX - touchStartX);
+      const currentY = e.targetTouches[0].clientY;
+      const diffX = currentX - touchStartX;
+      const diffY = currentY - touchStartY;
+
+      if (isHorizontalSwipe === null) {
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 5) {
+          setIsHorizontalSwipe(true);
+        } else if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
+          setIsHorizontalSwipe(false);
+        }
+      }
+
+      if (isHorizontalSwipe) {
+        e.preventDefault();
+        setDragX(diffX);
+      }
     }
   };
 
   const handleTouchEnd = () => {
-    if (dragX < -50) {
-      nextImage();
-    } else if (dragX > 50) {
-      prevImage();
+    if (isHorizontalSwipe) {
+      if (dragX < -50) {
+        nextImage();
+      } else if (dragX > 50) {
+        prevImage();
+      }
     }
     setTouchStartX(null);
+    setTouchStartY(null);
     setDragX(0);
     setIsDragging(false);
+    setIsHorizontalSwipe(null);
   };
-
 
   return (
     <>
