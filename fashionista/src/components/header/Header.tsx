@@ -435,7 +435,7 @@ useEffect(() => {
     )}
   </div>
 ) : (
-  <div className="border-b">
+  <div className="border-gray-200 border-b">
   <button
     onClick={() => {
       setShowLoginModal(true)
