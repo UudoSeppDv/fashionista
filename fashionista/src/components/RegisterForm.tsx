@@ -214,7 +214,7 @@ const handleOAuthLogin = async (provider: "google" | "facebook") => {
       <BackgroundSvg />
       <form
         onSubmit={handleRegister}
-        className="z-10 w-full mx-auto my-8 p-8 bg-[#F1ECE6] max-w-[600px] border border-gray-200 shadow-md font-montserrat space-y-6"
+        className="z-10 w-full mx-auto lg:mt-8 lg:mb-15 p-8 bg-[#F1ECE6] max-w-[600px] border border-gray-200 shadow-md font-montserrat space-y-6"
       >
        <h2 className="text-2xl font-bold mb-6">
       <span className="text-gray-900">Registreeru</span>{" "}
@@ -242,24 +242,25 @@ const handleOAuthLogin = async (provider: "google" | "facebook") => {
           </div>
         )}
 
-        <div className="flex gap-3">
-          <input
-            type="text"
-            placeholder="Eesnimi"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className="flex-1 border border-black px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Perekonnanimi"
-            value={surname}
-            onChange={(e) => setSurname(e.target.value)}
-            className="flex-1 border border-black px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
-            required
-          />
-        </div>
+     <div className="flex flex-col gap-3 sm:flex-row">
+  <input
+    type="text"
+    placeholder="Eesnimi"
+    value={firstName}
+    onChange={(e) => setFirstName(e.target.value)}
+    className="flex-1 border border-black px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+    required
+  />
+  <input
+    type="text"
+    placeholder="Perekonnanimi"
+    value={surname}
+    onChange={(e) => setSurname(e.target.value)}
+    className="flex-1 border border-black px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+    required
+  />
+</div>
+
 
         <input
           type="text"
