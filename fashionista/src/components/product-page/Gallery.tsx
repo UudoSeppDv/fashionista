@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
 type GalleryProps = {
@@ -10,79 +10,38 @@ type GalleryProps = {
 export default function Gallery({ images }: GalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [touchStartY, setTouchStartY] = useState<number | null>(null);
-  const [dragX, setDragX] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState<boolean | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const prevImage = useCallback(() => {
-    setSelectedIndex((i) => (i === 0 ? images.length - 1 : i - 1));
-  }, [images.length]);
-
-  const nextImage = useCallback(() => {
-    setSelectedIndex((i) => (i === images.length - 1 ? 0 : i + 1));
-  }, [images.length]);
-
+  // Kui selectedIndex muutub, kerime horisontaalselt õigele pildile
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        prevImage();
-      } else if (e.key === 'ArrowRight') {
-        nextImage();
-      } else if (e.key === 'Escape' && modalOpen) {
-        setModalOpen(false);
-      }
-    };
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        left: selectedIndex * scrollRef.current.clientWidth,
+        behavior: 'smooth',
+      });
+    }
+  }, [selectedIndex]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [modalOpen, prevImage, nextImage]);
+  // Scrolli event, et uuendada aktiivset indeksit
+  const onScroll = () => {
+    if (scrollRef.current) {
+      const scrollLeft = scrollRef.current.scrollLeft;
+      const width = scrollRef.current.clientWidth;
+      const index = Math.round(scrollLeft / width);
+      if (index !== selectedIndex) {
+        setSelectedIndex(index);
+      }
+    }
+  };
 
   if (images.length === 0) return null;
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.targetTouches[0].clientX);
-    setTouchStartY(e.targetTouches[0].clientY);
-    setIsDragging(true);
-    setIsHorizontalSwipe(null);
+  const prevImage = () => {
+    setSelectedIndex((i) => (i === 0 ? images.length - 1 : i - 1));
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStartX !== null && touchStartY !== null) {
-      const currentX = e.targetTouches[0].clientX;
-      const currentY = e.targetTouches[0].clientY;
-      const diffX = currentX - touchStartX;
-      const diffY = currentY - touchStartY;
-
-      if (isHorizontalSwipe === null) {
-        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 5) {
-          setIsHorizontalSwipe(true);
-        } else if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
-          setIsHorizontalSwipe(false);
-        }
-      }
-
-      if (isHorizontalSwipe) {
-        e.preventDefault();
-        setDragX(diffX);
-      }
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (isHorizontalSwipe) {
-      if (dragX < -50) {
-        nextImage();
-      } else if (dragX > 50) {
-        prevImage();
-      }
-    }
-    setTouchStartX(null);
-    setTouchStartY(null);
-    setDragX(0);
-    setIsDragging(false);
-    setIsHorizontalSwipe(null);
+  const nextImage = () => {
+    setSelectedIndex((i) => (i === images.length - 1 ? 0 : i + 1));
   };
 
   return (
@@ -144,23 +103,30 @@ export default function Gallery({ images }: GalleryProps) {
       {/* Mobile */}
       <div className="md:hidden w-full relative">
         <div
-          className="w-full h-[600px] relative overflow-hidden touch-pan-x"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory w-full h-[600px]"
+          style={{ scrollbarWidth: 'none' /* Firefox */, msOverflowStyle: 'none' /* IE 10+ */ }}
         >
-          <Image
-            src={images[selectedIndex]}
-            alt={`Pilt ${selectedIndex + 1}`}
-            fill
-            className="object-cover transition-transform duration-200 ease-out"
-            style={{
-              transform: `translateX(${isDragging ? dragX : 0}px)`,
-            }}
-            onClick={() => setModalOpen(true)}
-          />
+          {images.map((img, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 w-full h-full relative snap-center cursor-pointer"
+              onClick={() => setModalOpen(true)}
+            >
+              <Image
+                src={img}
+                alt={`Pilt ${i + 1}`}
+                fill
+                className="object-cover"
+                draggable={false}
+                loading="eager"
+              />
+            </div>
+          ))}
         </div>
 
+        {/* Indikaatorid */}
         {images.length > 1 && (
           <div className="flex justify-center mt-2 space-x-2">
             {images.map((_, i) => (
@@ -170,6 +136,7 @@ export default function Gallery({ images }: GalleryProps) {
                 className={`w-2 h-2 rounded-full ${
                   selectedIndex === i ? 'bg-pink-400' : 'bg-gray-400'
                 }`}
+                aria-label={`Vali pilt ${i + 1}`}
               />
             ))}
           </div>
@@ -218,6 +185,7 @@ export default function Gallery({ images }: GalleryProps) {
           <button
             onClick={() => setModalOpen(false)}
             className="absolute top-4 right-4 text-white text-3xl font-bold cursor-pointer select-none"
+            aria-label="Sulge modal"
           >
             &times;
           </button>
