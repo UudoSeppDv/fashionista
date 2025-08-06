@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Gallery from '@/components/Gallery';
+import Gallery from '@/components/product-page/Gallery';
 import LoginModal from '@/components/LoginModal';
 import Header from '@/components/header/Header';
 import Footer from '@/components/Footer';
-import SectionFeaturedProducts from './main-page/SectionFeaturedProducts';
+import SectionFeaturedProducts from '../main-page/SectionFeaturedProducts';
 import { useFavorites } from '@/context/FavoritesContext' 
-import { supabase } from '../../lib/supabaseClient'
+import { supabase } from '../../../lib/supabaseClient'
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -150,19 +150,33 @@ const user = product.public_users
       />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
       
-  <div className=" w-full px-[5rem] py-4 mt-8 text-m  text-gray-400 font-montserrat">
+<div className="hidden lg:block w-full lg:mt-10 px-4 lg:px-[5rem] text-m text-gray-400 font-montserrat">
   {product.category} &gt; {product.filter}
 </div>
-      <div className="w-full px-[5rem] flex flex-col lg:flex-row gap-8 font-montserrat mt-4 pb-10 border-b">
-      
+
+<div className="w-full lg:px-[5rem] flex flex-col lg:flex-row gap-8 font-montserrat lg:mt-4 pb-10 border-b">
+
         <Gallery images={product.images || []} />
 
         <div className="flex-1 flex flex-col gap-4">
+
+
+
+
+<div className="mx-4 lg:mx-20 flex flex-col gap-4">
+
           {/* Müüja info */}
+          {/* Hind */}
+          <div className="block lg:hidden text-2xl font-bold">
+  {Number(product.price).toFixed(2)} €
+</div>
+
+
          <div
-  className={`bg-[#A692C3] p-4 flex items-center gap-4 ${
+  className={`hidden lg:flex bg-[#A692C3] p-4 items-center gap-4 ${
     product.public_users?.page_url ? 'cursor-pointer hover:opacity-90' : ''
   }`}
+
   onClick={() => {
     const pageUrl = product.public_users?.page_url;
     if (pageUrl) {
@@ -187,7 +201,7 @@ const user = product.public_users
     <span className="font-semibold">
       {user?.user_metadata.full_name || 'Anonüümne'}
     </span>
-    <div className="text-sm text-gray-600">
+    <div className="text-sm mt-2 text-gray-600">
       <span className="font-bold text-gray-800">{followerCount}</span> Jälgijat&nbsp;
       <span className="font-bold text-gray-800">{user?.user_metadata.sold_count ?? 0}+</span> Müüdud
     </div>
@@ -213,20 +227,29 @@ const user = product.public_users
 
 </div>
 
-          <div className="text-sm text-gray-600">{product.location}</div>
-          <div className="text-sm font-bold">{product.description || 'Kirjeldus puudub'}</div>
+          <div className="text-sm text-gray-600">
+  <span>{product.location}</span>
+  <span className="block font-bold text-gray-800 mt-1">
+    {product.description || 'Kirjeldus puudub'}
+  </span>
+</div>
+
+
 
           {/* Hind */}
-          <div className="text-2xl font-bold mt-20">{Number(product.price).toFixed(2)} €</div>
+<div className="hidden lg:block text-2xl font-bold mt-20">
+  {Number(product.price).toFixed(2)} €
+</div>
 
           {/* Nupud */}
           <div className="flex gap-2">
             <button
-  className="cursor-pointer bg-black text-white px-30 py-2 rounded-full hover:bg-gray-900 transition"
+  className="cursor-pointer bg-black text-white px-30 py-2 rounded-full hover:bg-gray-900 transition w-full lg:w-auto"
   onClick={() => router.push(`/checkout/${product.id}`)}
 >
   OSTA
 </button>
+
              {/* Favorite icon */}
         <button
   type="button"
@@ -262,6 +285,72 @@ const user = product.public_users
 </button>
 
           </div>
+          {/* mobiil */}
+          <div
+  className={`flex lg:hidden bg-[#A692C3] p-4 flex-col gap-4 ${
+    product.public_users?.page_url ? 'cursor-pointer hover:opacity-90' : ''
+  }`}
+  onClick={() => {
+    const pageUrl = product.public_users?.page_url;
+    if (pageUrl) {
+      router.push(`/kasutaja/${pageUrl}`);
+    }
+  }}
+>
+  {/* Ülemine rida: avatar + nimi + statistika */}
+  <div className="flex items-center gap-4">
+    {/* Avatar */}
+    <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-pink-400 text-white font-medium text-xl select-none relative">
+      {hasAvatar && product.public_users?.avatar_url ? (
+        <Image
+          src={product.public_users.avatar_url}
+          alt={user?.user_metadata.full_name || 'Müüja'}
+          fill
+          className="object-cover"
+        />
+      ) : (
+        <>{getInitials(product.public_users)}</>
+      )}
+    </div>
+
+    {/* Nimi ja statistika */}
+    <div className="flex flex-col">
+      <span className="font-semibold">
+        {user?.user_metadata.full_name || 'Anonüümne'}
+      </span>
+      <div className="text-sm mt-2 text-gray-600">
+        <span className="font-bold text-gray-800">{followerCount}</span> Jälgijat&nbsp;
+        <span className="font-bold text-gray-800">{user?.user_metadata.sold_count ?? 0}+</span> Müüdud
+      </div>
+    </div>
+  </div>
+
+  {/* Alumine rida: nupp eraldi real */}
+  {currentUserId && (
+    <div className="mt-2">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          if (isOwner) {
+            handleEditClick();
+          } else {
+            handleSendMessageClick();
+          }
+        }}
+        className="w-full border border-black rounded-full px-4 py-2 text-base font-medium hover:bg-black hover:text-white transition"
+      >
+        {isOwner ? 'MUUDA' : 'SAADA SÕNUM'}
+      </button>
+    </div>
+  )}
+</div>
+
+
+</div>
+
+
+
+
         </div>
       </div>
   
