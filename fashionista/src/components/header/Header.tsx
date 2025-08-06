@@ -435,29 +435,35 @@ useEffect(() => {
     )}
   </div>
 ) : (
+  <div className="border-b">
   <button
     onClick={() => {
       setShowLoginModal(true)
       setMobileMenuOpen(false)
     }}
-    className="w-full border py-2 rounded-full"
+    className="w-full border py-2 mb-10 rounded-full"
   >
     Logi sisse / Registreeri
   </button>
+  </div>
 )}
 
 
-
+<div className="mt-10">
         {/* Mobile SearchBar */}
         <SearchBar
           searchQuery={searchQuery}
+          
           setSearchQuery={setSearchQuery}
           onSelectSuggestion={(val) => {
             const categorySlug = val.toLowerCase().replace(/\s+/g, '-')
             router.push(`/category/${categorySlug}`)
             setMobileMenuOpen(false)
+            
           }}
+
         />
+        </div>
         {isLoggedIn ? (
             <>
               <button
