@@ -130,7 +130,7 @@ export default function ChatList({ selectedUserId, onSelectUser }: Props) {
   }, [])
 
   return (
-    <div className="w-1/3 h-full border-gray-600 border-r border-t overflow-y-auto font-montserrat">
+    <div className=" h-full border-gray-600 border-r border-t overflow-y-auto font-montserrat">
       <div className="flex items-center border-gray-600 border-b py-5.5 pl-4">
         <h2 className="font-semibold text-lg">Messages</h2>
       </div>

@@ -202,7 +202,7 @@ const handleCheckout = async () => {
     if (insertError) throw insertError;
 
     const { error: updateError } = await supabase
-      .from('public_products')
+      .from('products')
       .update({ status: 'sold' })
       .eq('id', product.id);
 

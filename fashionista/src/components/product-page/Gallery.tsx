@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { useSwipeable } from 'react-swipeable';
 
 type GalleryProps = {
   images: string[];
@@ -10,6 +11,7 @@ type GalleryProps = {
 export default function Gallery({ images }: GalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Kui selectedIndex muutub, kerime horisontaalselt õigele pildile
@@ -34,6 +36,24 @@ export default function Gallery({ images }: GalleryProps) {
     }
   };
 
+ // Jälgi ekraani laiust
+useEffect(() => {
+  function handleResize() {
+    setIsMobile(window.innerWidth < 768);
+  }
+  handleResize();
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
+  // swipe abilist modali jaoks
+  const handlers = useSwipeable({
+    onSwipedLeft: () => nextImage(),
+    onSwipedRight: () => prevImage(),
+    preventScrollOnSwipe: true,
+    trackMouse: true,
+  });
+
   if (images.length === 0) return null;
 
   const prevImage = () => {
@@ -44,7 +64,11 @@ export default function Gallery({ images }: GalleryProps) {
     setSelectedIndex((i) => (i === images.length - 1 ? 0 : i + 1));
   };
 
-  return (
+
+
+
+
+return (
     <>
       {/* Desktop */}
       <div className="hidden md:flex gap-8">
@@ -106,7 +130,7 @@ export default function Gallery({ images }: GalleryProps) {
           ref={scrollRef}
           onScroll={onScroll}
           className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory w-full h-[600px]"
-          style={{ scrollbarWidth: 'none' /* Firefox */, msOverflowStyle: 'none' /* IE 10+ */ }}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {images.map((img, i) => (
             <div
@@ -143,54 +167,108 @@ export default function Gallery({ images }: GalleryProps) {
         )}
       </div>
 
-      {/* Modal */}
-      {modalOpen && (
-        <div
-          className="fixed inset-0 flex items-center justify-center z-50"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
-          onClick={() => setModalOpen(false)}
-        >
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              prevImage();
-            }}
-            className="z-50 absolute left-6 top-1/2 transform -translate-y-1/2 px-2 text-white text-3xl hover:font-bold transition"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-          >
-            ‹
-          </button>
+{/* Modal */}
+{modalOpen && (
+  <div
+    className="fixed inset-0 flex flex-col items-center justify-center z-50 bg-[rgba(0,0,0,0.7)]"
+    onClick={() => setModalOpen(false)}
+  >
+    <div
+      {...handlers}
+      onClick={(e) => e.stopPropagation()}
+      className="relative w-[90vw] h-[90vh] max-w-full max-h-full rounded shadow-lg flex items-center justify-center"
+    >
+      {/* Vasaknool, ainult suuremal ekraanil */}
+      <button
+        onClick={prevImage}
+        className="z-50 absolute left-6 top-1/2 hidden md:block transform -translate-y-1/2 px-2 text-white text-3xl hover:font-bold transition"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+        aria-label="Eelmine pilt"
+      >
+        ‹
+      </button>
 
-          <div className="relative w-[90vw] h-[90vh] max-w-full max-h-full rounded shadow-lg">
+      {/* MODALI GALERII */}
+      <div
+        ref={scrollRef}
+        onScroll={onScroll}
+        className={`${
+          isMobile
+            ? 'flex w-full h-full overflow-x-auto scroll-smooth snap-x snap-mandatory'
+            : 'w-full h-full flex items-center justify-center'
+        }`}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {isMobile ? (
+          images.map((img, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 w-full h-full relative snap-center cursor-pointer"
+              onClick={() => {
+                if (isMobile) return; // mobiilil ei ava uuesti
+                setSelectedIndex(i);
+              }}
+            >
+              <Image
+                src={img}
+                alt={`Suur pilt ${i + 1}`}
+                fill
+                className={`object-contain rounded ${
+                  selectedIndex === i ? '' : 'opacity-70'
+                }`}
+                draggable={false}
+              />
+            </div>
+          ))
+        ) : (
+          <div className="relative w-[600px] h-[700px] cursor-pointer" onClick={() => { /* võib lisada näiteks suumifunktsiooni */ }}>
             <Image
               src={images[selectedIndex]}
               alt={`Suur pilt ${selectedIndex + 1}`}
               fill
               className="object-contain rounded"
-              onClick={(e) => e.stopPropagation()}
+              draggable={false}
             />
           </div>
+        )}
+      </div>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              nextImage();
-            }}
-            className="z-50 absolute right-6 top-1/2 transform -translate-y-1/2 px-2 text-white text-3xl hover:font-bold transition"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-          >
-            ›
-          </button>
+      {/* Paremnool, ainult suuremal ekraanil */}
+      <button
+        onClick={nextImage}
+        className="z-50 absolute right-6 top-1/2 hidden md:block transform -translate-y-1/2 px-2 text-white text-3xl hover:font-bold transition"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+        aria-label="Järgmine pilt"
+      >
+        ›
+      </button>
 
-          <button
-            onClick={() => setModalOpen(false)}
-            className="absolute top-4 right-4 text-white text-3xl font-bold cursor-pointer select-none"
-            aria-label="Sulge modal"
-          >
-            &times;
-          </button>
-        </div>
-      )}
+      {/* Sulgemisnupp */}
+      <button
+        onClick={() => setModalOpen(false)}
+        className="absolute top-4 right-4 text-white text-3xl font-bold cursor-pointer select-none"
+        aria-label="Sulge modal"
+      >
+        &times;
+      </button>
+    </div>
+
+    {/* Väikese ekraani punktid modali all */}
+    <div className="flex space-x-2 mt-4 md:hidden">
+      {images.map((_, i) => (
+        <button
+          key={i}
+          onClick={() => setSelectedIndex(i)}
+          className={`w-3 h-3 rounded-full ${
+            selectedIndex === i ? 'bg-pink-400' : 'bg-gray-400'
+          }`}
+          aria-label={`Vali pilt ${i + 1}`}
+        />
+      ))}
+    </div>
+  </div>
+)}
+
     </>
   );
 }

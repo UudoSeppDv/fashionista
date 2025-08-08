@@ -10,18 +10,18 @@ import ChatList from './ChatList'
 import { ContactType } from '../../../types/contact'
 
 export default function ChatView() {
-  
   const router = useRouter()
   const pathname = usePathname()
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-
-const [contacts, setContacts] = useState<ContactType[]>([])
+  const [contacts, setContacts] = useState<ContactType[]>([])
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   const userIdFromUrl = pathname?.split('/').pop() || null
   const [selectedUserId, setSelectedUserId] = useState<string | null>(userIdFromUrl)
+
+  const [windowWidth, setWindowWidth] = useState<number>(0)
 
   useEffect(() => {
     setSelectedUserId(userIdFromUrl)
@@ -59,21 +59,33 @@ const [contacts, setContacts] = useState<ContactType[]>([])
 
       if (data) {
         const filtered = data
-  .filter((c) => c.contact_id !== currentUserId && c.contact_id !== null)
-  .map((c) => ({
-    id: c.contact_id!,
-    first_name: c.first_name ?? '',         // kui null, siis ''
-    surname: c.surname ?? '',
-    avatar_url: c.avatar_url ?? '',
-    last_message_text: c.last_message_text ?? '',
-    last_message_timestamp: c.last_message_timestamp ?? '',
-  }))
+          .filter((c) => c.contact_id !== currentUserId && c.contact_id !== null)
+          .map((c) => ({
+            id: c.contact_id!,
+            first_name: c.first_name ?? '',
+            surname: c.surname ?? '',
+            avatar_url: c.avatar_url ?? '',
+            last_message_text: c.last_message_text ?? '',
+            last_message_timestamp: c.last_message_timestamp ?? '',
+          }))
         setContacts(filtered)
       }
     }
 
     fetchContacts()
   }, [currentUserId])
+
+  // Jälgi akna laiust, et teha responsive renderdust
+  useEffect(() => {
+    function handleResize() {
+      setWindowWidth(window.innerWidth)
+    }
+
+    handleResize() // algseadistus
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   if (!currentUserId) {
     return <div className="p-4">Palun logi sisse, et kasutada vestlust.</div>
@@ -83,6 +95,9 @@ const [contacts, setContacts] = useState<ContactType[]>([])
     setSelectedUserId(newUserId)
     router.push(`/messages/${newUserId}`)
   }
+
+  // Kui väiksem kui nt 768px (mobile)
+  const isMobile = windowWidth > 0 && windowWidth < 768
 
   return (
     <>
@@ -97,10 +112,10 @@ const [contacts, setContacts] = useState<ContactType[]>([])
       />
 
       <main className="flex h-[85vh] font-montserrat">
-  {contacts.length === 0 ? (
-    <div className="flex flex-1 items-center justify-center">
-      <div className="flex flex-col items-center text-center space-y-4">
-        <svg
+        {contacts.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center">
+            <div className="flex flex-col items-center text-center space-y-4">
+               <svg
           width="107"
           height="119"
           viewBox="0 0 107 119"
@@ -112,27 +127,38 @@ const [contacts, setContacts] = useState<ContactType[]>([])
           <path d="M47.1279 26.0794C48.5048 23.8643 56.8263 34.8798 56.7664 33.8022C56.6467 31.5272 54.6112 25.6603 56.5869 24.882C58.5625 24.1038 59.1013 35.239 59.5802 34.0416C60.0591 32.8443 61.6755 25.9596 65.507 22.4874C69.3384 18.9552 70.6555 19.8532 67.0635 24.5228C64.1301 28.4142 63.6511 36.7356 61.7952 41.7645C61.017 43.9197 65.4471 59.6646 70.2365 70.9195C73.3495 78.1634 78.8573 86.1257 76.9415 84.8685C72.4515 81.8752 64.8485 70.5603 58.3829 41.8243C58.0835 40.148 45.8707 28.1747 47.1279 26.0794Z" fill="#B4A6A6"/>
         </svg>
 
-        <p className="text-gray-800 text-lg">
-          Pole veel sõnumeid
-        </p>
-      </div>
-    </div>
-  ) : (
-    <>
+              <p className="text-gray-800 text-lg">
+                Pole veel sõnumeid
+              </p>
+            </div>
+          </div>
+        ) : isMobile ? (
+          // Väiksel ekraanil ainult ChatList
+          <div className="flex-1 h-full w-full">
+          <ChatList
+            contacts={contacts}
+            onSelectUser={handleSelectUser}
+            selectedUserId={selectedUserId}
+          />
+          </div>
+        ) : (
+          // Suurel ekraanil nii ChatList kui ka placeholder vestlusaken
+          <>
+            <div className="w-1/3 h-full border-r border-gray-300">
       <ChatList
         contacts={contacts}
         onSelectUser={handleSelectUser}
         selectedUserId={selectedUserId}
       />
-      <div className="flex-1 flex items-center justify-center border-gray-600 border-t">
-        <p className="text-gray-600 text-lg text-center">
-          Alusta vestlust kellegagi vasakult nimekirjast.
-        </p>
-      </div>
-    </>
-  )}
-</main>
-
+    </div>
+    <div className="flex-1 flex items-center justify-center border-gray-600 border-t">
+      <p className="text-gray-600 text-lg text-center">
+        Alusta vestlust kellegagi vasakult nimekirjast.
+      </p>
+    </div>
+          </>
+        )}
+      </main>
 
       <Footer />
     </>
