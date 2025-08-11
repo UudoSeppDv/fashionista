@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'
-import NotificationItem from '@/components/NotificationItem'
+import NotificationItem from '@/components/notification-page/NotificationItem'
 import LoginModal from '@/components/LoginModal'
 
 export default function RegisterPage() {

@@ -1,12 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from '../../lib/supabaseClient'
-import type { Database } from "../../types/supabase"
-import { Button } from "../components/ui/button"
+import { supabase } from '../../../lib/supabaseClient'
+import type { Database } from "../../../types/supabase"
+import { Button } from "../ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Check, EyeOff, MoreHorizontal } from "lucide-react"
+import { Check, EyeOff, MoreHorizontal, ChevronDown } from "lucide-react"
+
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -32,7 +34,7 @@ export default function StoreSettingsAndProducts() {
   } as { facebook: string; instagram: string },
 })
 
-
+const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -160,99 +162,108 @@ const handleStoreSave = async () => {
   if (loading) return <div>Laen...</div>
 
    return (
-    <div className="flex flex-col md:flex-row gap-8 m-2">
+    <div className="flex flex-col md:flex-row md:py-10 gap-8">
       {/* Store settings */}
-      <div className="ml-6 border border-gray-600 w-full md:w-1/4 p-6">
-        <h2 className="text-xl font-semibold mb-2">Poe seaded</h2>
-        <div className="space-y-4 ">
-          
-          <label htmlFor="store-url" className="block text-sm mb-1 font-montserrat text-gray-700">
-    Poe veebiaadress
-  </label>
-  <Input
-    id="store-url"
-    placeholder="fashionista.ee/NIMI"
-    value={form.page_url}
-    onChange={(e) => setForm({ ...form, page_url: e.target.value })}
-  />
-          
-          <label className="block text-sm mb-1 font-montserrat text-gray-700">
-  Instagram
-</label>
-<Input
-  placeholder="https://www.instagram.com/kasutajanimi"
-  value={form.social_media.instagram || ""}
-  onChange={(e) =>
-    setForm({
-      ...form,
-      social_media: {
-        ...form.social_media,
-        instagram: e.target.value,
-      },
-    })
-  }
-/>
-
-<label className="block text-sm mb-1 font-montserrat text-gray-700">
-  Facebook
-</label>
-<Input
-  placeholder="https://www.facebook.com/kasutajanimi"
-  value={form.social_media.facebook || ""}
-  onChange={(e) =>
-    setForm({
-      ...form,
-      social_media: {
-        ...form.social_media,
-        facebook: e.target.value,
-      },
-    })
-  }
-/>
-
-          <label htmlFor="store-description" className="block text-sm mb-1 font-montserrat text-gray-700">
-      Poe kirjeldus
-    </label>
-    <Textarea
-      id="store-description"
-      placeholder="Poe kirjeldus"
-      value={form.bio}
-      onChange={(e) => setForm({ ...form, bio: e.target.value })}
-    />
-          <Button onClick={handleStoreSave}>Salvesta</Button>
-        </div>
-        {successMessage && (
-  <div className="mt-4 p-2 bg-green-100 text-green-700 rounded">
-    {successMessage}
-  </div>
-)}
+     <div className="ml-0 md:ml-6 w-full md:w-1/4">
+      {/* Mobile dropdown toggle */}
+      <div className="border p-6">
+      <div
+        className=" flex items-center justify-between md:hidden cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <h2 className="text-xl font-semibold">Poe seaded</h2>
+        <ChevronDown
+          className={`transition-transform duration-300 ${isOpen ? "rotate-180" : "rotate-0"}`}
+        />
       </div>
 
+      {/* Always visible on desktop, collapsible on mobile */}
+      <div className={`${isOpen ? "block" : "hidden"} md:block mt-4 space-y-4`}>
+        <label htmlFor="store-url" className="block text-sm mb-1 font-montserrat text-gray-700">
+          Poe veebiaadress
+        </label>
+        <Input
+          id="store-url"
+          placeholder="fashionista.ee/NIMI"
+          value={form.page_url}
+          onChange={(e) => setForm({ ...form, page_url: e.target.value })}
+        />
+
+        <label className="block text-sm mb-1 font-montserrat text-gray-700">Instagram</label>
+        <Input
+          placeholder="https://www.instagram.com/kasutajanimi"
+          value={form.social_media.instagram || ""}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              social_media: {
+                ...form.social_media,
+                instagram: e.target.value,
+              },
+            })
+          }
+        />
+
+        <label className="block text-sm mb-1 font-montserrat text-gray-700">Facebook</label>
+        <Input
+          placeholder="https://www.facebook.com/kasutajanimi"
+          value={form.social_media.facebook || ""}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              social_media: {
+                ...form.social_media,
+                facebook: e.target.value,
+              },
+            })
+          }
+        />
+
+        <label htmlFor="store-description" className="block text-sm mb-1 font-montserrat text-gray-700">
+          Poe kirjeldus
+        </label>
+        <Textarea
+          id="store-description"
+          placeholder="Poe kirjeldus"
+          value={form.bio}
+          onChange={(e) => setForm({ ...form, bio: e.target.value })}
+        />
+
+        <Button onClick={handleStoreSave}>Salvesta</Button>
+
+        {successMessage && (
+          <div className="mt-4 p-2 bg-green-100 text-green-700 rounded">
+            {successMessage}
+          </div>
+        )}
+      </div>
+      </div>
+    </div>
+
       {/* Product grid */}
-      <div className="w-full md:w-2/3 flex flex-wrap gap-4 justify-start">
+      <div className="w-full md:w-2/3 flex flex-wrap md:gap-4 justify-start">
   {products.map((product) => (
     <div
       key={product.id}
-      className="relative w-[250px] group"
+      className="relative w-1/2 md:w-[250px] group"
     >
       <div
-  className={`w-[250px] h-[350px] overflow-hidden bg-white relative transition-all duration-300 ${
-    product.status === "sold" ? "opacity-50 grayscale" : ""
-  }`}
->
-  <Image
-    src={
-      product.images && product.images.length > 0
-        ? product.images[0]
-        : "/placeholder.png"
-    }
-    alt={product.brand || "Toode"}
-    fill
-    className="object-cover"
-  />
-  <div className="absolute bottom-0 left-0 w-full h-6 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300 pointer-events-none" />
-</div>
-
+        className={`w-full aspect-[5/7] overflow-hidden bg-white relative transition-all duration-300 ${
+          product.status === "sold" ? "opacity-50 grayscale" : ""
+        }`}
+      >
+        <Image
+          src={
+            product.images && product.images.length > 0
+              ? product.images[0]
+              : "/placeholder.png"
+          }
+          alt={product.brand || "Toode"}
+          fill
+          className="object-cover"
+        />
+        <div className="absolute bottom-0 left-0 w-full h-6 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300 pointer-events-none" />
+      </div>
 
       {/* Allosas bränd ja hind */}
       <div className="py-3 px-2">
@@ -261,6 +272,7 @@ const handleStoreSave = async () => {
           {product.price != null ? `${Number(product.price).toFixed(2)} €` : "Hind puudub"}
         </p>
       </div>
+
 
       {/* Toote tegevuste dropdown */}
       <div className="text-white absolute top-2 p-3 right-2 z-20">

@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../../lib/supabaseClient'
+import { supabase } from '../../../lib/supabaseClient'
 import type { Session } from '@supabase/auth-helpers-nextjs'
 import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'
-import EditProductForm from '../components/EditProductForm'
+import EditProductForm from './EditProductForm'
 import LoginModal from '@/components/LoginModal'
 
 type Props = {

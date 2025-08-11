@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../../lib/supabaseClient'
-import ImageUploader from '@/components/ImageUploader'
+import { supabase } from '../../../lib/supabaseClient'
+import ImageUploader from '@/components/product-edit-page/ImageUploaderEdit'
 import { useCallback } from 'react'
 
 export default function EditProductForm({ productId }: { productId: string }) {

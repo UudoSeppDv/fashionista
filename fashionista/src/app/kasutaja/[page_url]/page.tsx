@@ -1,6 +1,6 @@
 'use client'
 
-import UserProfileClient from '../../../components/UserProfileClient'
+import UserProfileClient from '../../../components/profile-page/UserProfileClient'
 import { useState } from 'react'
 import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'

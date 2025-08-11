@@ -6,7 +6,7 @@ import { supabase } from '../../../lib/supabaseClient'
 import type { Session } from '@supabase/auth-helpers-nextjs'
 import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'
-import ProductForm from '@/components/ProductForm'
+import ProductForm from '@/components/product-add-page/ProductForm'
 import LoginModal from '@/components/LoginModal'
 
 export default function AddProductPage() {

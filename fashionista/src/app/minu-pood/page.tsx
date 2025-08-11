@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'
-import StoreSettingsAndProducts from '@/components/StoreSettingsAndProducts'
+import StoreSettingsAndProducts from '@/components/my-store/StoreSettingsAndProducts'
 
 export default function KontoPage() {
   const [, setShowLoginModal] = useState(false)
@@ -17,7 +17,7 @@ export default function KontoPage() {
         setSearchQuery={setSearchQuery}
       />
 
-      <div className="flex-grow py-10">
+      <div className="flex-grow">
         <StoreSettingsAndProducts />
       </div>
 

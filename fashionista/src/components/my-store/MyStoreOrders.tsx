@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from '../../../lib/supabaseClient';
 import Image from 'next/image';
 import ConfirmOrderModal from './ConfirmOrderModal';
 
@@ -356,31 +356,33 @@ return (
           {/* Väikse ekraani "Kinnita" nupp keskel */}
   {order.status !== 'confirmed' && (
     <div className="md:hidden w-full flex justify-center">
-  <button
-                      className="bg-pink-600 text-white rounded-lg px-4 py-2 font-semibold hover:bg-pink-700"
-                      onClick={() => handleConfirmClick(order)}
-                    >
-                      Kinnita tellimus
-                    </button>
+<button
+  className="w-full px-9 py-2 bg-gray-800 text-white rounded-full hover:bg-gray-600 transition"
+  onClick={() => handleConfirmClick(order)}
+>
+  Kinnita
+</button>
+
 
 </div>
   )}
 
 
          {/* Alumine rida: avatar + nimi + saada sõnum + Kinnita väiksel ekraanil */}
-<div className="flex flex-col sm:flex-row items-center justify-between pt-4 gap-4">
+<div className="flex flex-col sm:flex-row items-center justify-between pt-4 gap-4 border-t">
   
   {/* Avatar ja nimi */}
 <div className="flex items-center gap-3">
   {order.buyer?.avatar_url ? (
-    <Image
-  src={order.buyer.avatar_url}
-  alt="Profiilipilt"
-  fill
-  className="object-cover"
-  sizes="56px"
-/>
-
+    <div className="relative w-14 h-14 rounded-full overflow-hidden">
+      <Image
+        src={order.buyer.avatar_url}
+        alt="Profiilipilt"
+        fill
+        className="object-cover"
+        sizes="56px"
+      />
+    </div>
   ) : (
     <div className="w-14 h-14 rounded-full bg-pink-300 text-white flex items-center justify-center text-xl font-bold">
       {order.buyer?.first_name?.charAt(0)}

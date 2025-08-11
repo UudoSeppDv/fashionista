@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import ProductCard from '@/components/ProductCard'
+import ProductCard from '@/components/ui/ProductCard'
 import Filters from '@/components/Choises'
 import Header from '@/components/header/Header'
 import LoginModal from '@/components/LoginModal'

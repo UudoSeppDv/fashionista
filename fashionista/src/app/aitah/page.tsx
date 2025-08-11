@@ -1,6 +1,6 @@
 // src/app/aitah/page.tsx
 import React, { Suspense } from 'react';
-import AitahPageClient from '@/components/AitahPageClient';
+import AitahPageClient from '@/components/checkout/AitahPageClient';
 
 export default function AitahPage() {
   return (

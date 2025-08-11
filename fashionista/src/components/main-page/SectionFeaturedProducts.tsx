@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import ProductCard from '@/components/ProductCard'
+import ProductCard from '@/components/ui/ProductCard'
 import { supabase } from '../../../lib/supabaseClient'
 
 interface Product {

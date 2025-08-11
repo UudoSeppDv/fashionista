@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'
-import MyPurchases from '@/components/MyPurchases'
+import MyPurchases from '@/components/my-store/MyPurchases'
 import LoginModal from '@/components/LoginModal';
 
 export default function KontoPage() {

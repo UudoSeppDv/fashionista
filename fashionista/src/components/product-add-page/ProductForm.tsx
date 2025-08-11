@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRef, useCallback } from 'react';
-import { supabase } from '../../lib/supabaseClient'
-import ImageUploaderNew from '@/components/ImageUploaderNew'
+import { supabase } from '../../../lib/supabaseClient'
+import ImageUploaderNew from '@/components/product-add-page/ImageUploaderAdd'
 import { useRouter } from 'next/navigation'; // või next/router, kui kasutad App Routerit
 
 type FilterType = 'Riided' | 'Aksessuaarid' | 'Jalanõud' | 'Sport' | 'Ilu' | ''

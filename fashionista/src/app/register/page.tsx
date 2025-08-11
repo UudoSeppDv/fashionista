@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'
-import RegisterForm from "@/components/RegisterForm";
+import RegisterForm from "@/components/register/RegisterForm";
 import LoginModal from '@/components/LoginModal'
 
 export default function RegisterPage() {

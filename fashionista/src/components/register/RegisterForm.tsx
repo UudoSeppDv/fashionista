@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabaseClient";
+import { supabase } from "../../../lib/supabaseClient";
 import { BackgroundSvg } from "./BackgroundSvg";
 import { User } from "@supabase/supabase-js";
 import { FaFacebookF, FaGoogle } from "react-icons/fa";

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import AccountSettings from '@/components/AccountSettings'
+import AccountSettings from '@/components/my-store/AccountSettings'
 import Header from '@/components/header/Header'
 import Footer from '@/components/Footer'
 

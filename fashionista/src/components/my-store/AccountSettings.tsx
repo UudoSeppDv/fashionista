@@ -1,9 +1,9 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { usePrivateData } from "../../lib/getPrivateData"
-import { updatePrivateData } from "../../lib/updatePrivateData"
-import { supabase } from '../../lib/supabaseClient'
+import { usePrivateData } from "../../../lib/getPrivateData"
+import { updatePrivateData } from "../../../lib/updatePrivateData"
+import { supabase } from '../../../lib/supabaseClient'
 import Image from 'next/image'
 
 export default function AccountSettings() {

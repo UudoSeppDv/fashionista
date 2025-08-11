@@ -3,8 +3,8 @@
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../../lib/supabaseClient' // eeldades, et kasutad seda
-import { Button } from "../components/ui/button"
+import { supabase } from '../../../lib/supabaseClient' // eeldades, et kasutad seda
+import { Button } from "../ui/button"
 
 
 import { MoreHorizontal } from "lucide-react"

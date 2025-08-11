@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabaseClient'
-import ProductCard from '@/components/ProductCard'
-import UserCard from '@/components/UserCard'
+import { supabase } from '../../../lib/supabaseClient'
+import ProductCard from '@/components/ui/ProductCard'
+import UserCard from '@/components/profile-page/UserCard'
 
 interface SocialMedia {
   instagram?: string

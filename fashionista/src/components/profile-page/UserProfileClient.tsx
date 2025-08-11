@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import UserProfile from '@/components/UserProfile'
+import UserProfile from '@/components/profile-page/UserProfile'
 
 export default function UserProfileClient() {
   const params = useParams()

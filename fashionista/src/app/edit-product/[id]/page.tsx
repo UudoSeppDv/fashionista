@@ -1,4 +1,4 @@
-import EditProductPageClient from '../../../components/EditProductPageClient'
+import EditProductPageClient from '../../../components/product-edit-page/EditProductPageClient'
 
 export default async function EditProductPage({
   params,

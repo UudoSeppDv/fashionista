@@ -11,15 +11,15 @@ function timeAgo(date: string) {
 
 import {
   NotificationFromDB
-} from '../../types/Notification'
+} from '../../../types/Notification'
 
 import {
   isMessageNotification,
   isOrderNotification,
   isPriceChangeNotification,
-} from '../../lib/utils/notificationGuards'
+} from '../../../lib/utils/notificationGuards'
 
-import { supabase } from '../../lib/supabaseClient'
+import { supabase } from '../../../lib/supabaseClient'
 
 type SenderInfo = {
   id: string
