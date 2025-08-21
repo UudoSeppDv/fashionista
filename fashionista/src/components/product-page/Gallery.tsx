@@ -184,10 +184,14 @@ return (
     onClick={() => setModalOpen(false)}
   >
     <div
-      {...handlers}
-      onClick={(e) => e.stopPropagation()}
-      className="relative w-[90vw] h-[90vh] max-w-full max-h-full rounded shadow-lg flex items-center justify-center"
-    >
+  {...handlers}
+  // ainult modali sees, ära stopPropagation mobiilil
+  onClick={(e) => {
+    if (!isMobile) e.stopPropagation();
+  }}
+  className="relative w-[90vw] h-[90vh] max-w-full max-h-full rounded shadow-lg flex items-center justify-center"
+>
+
       {/* Vasaknool, ainult suuremal ekraanil */}
       <button
         onClick={prevImage}
@@ -202,10 +206,12 @@ return (
       <div
   ref={modalScrollRef}
   onScroll={isMobile ? onScroll : undefined}
-  className={isMobile 
-    ? 'flex w-full h-full overflow-x-auto scroll-smooth snap-x snap-mandatory -webkit-overflow-scrolling-touch' 
-    : 'w-full h-full flex items-center justify-center'}
-  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+  className={`flex w-full h-full overflow-x-auto snap-x snap-mandatory ${isMobile ? 'touch-pan-x' : ''}`}
+  style={{
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none',
+    WebkitOverflowScrolling: isMobile ? 'touch' : undefined,
+  }}
 >
 
 
