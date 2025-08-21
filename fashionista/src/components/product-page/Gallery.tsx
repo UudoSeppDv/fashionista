@@ -184,14 +184,10 @@ return (
     onClick={() => setModalOpen(false)}
   >
     <div
-  {...handlers}
-  // ainult modali sees, ära stopPropagation mobiilil
-  onClick={(e) => {
-    if (!isMobile) e.stopPropagation();
-  }}
-  className="relative w-[90vw] h-[90vh] max-w-full max-h-full rounded shadow-lg flex items-center justify-center"
->
-
+      {...handlers}
+      onClick={(e) => e.stopPropagation()}
+      className="relative w-[90vw] h-[90vh] max-w-full max-h-full rounded shadow-lg flex items-center justify-center"
+    >
       {/* Vasaknool, ainult suuremal ekraanil */}
       <button
         onClick={prevImage}
@@ -206,14 +202,11 @@ return (
       <div
   ref={modalScrollRef}
   onScroll={isMobile ? onScroll : undefined}
-  className={`flex w-full h-full overflow-x-auto snap-x snap-mandatory ${isMobile ? 'touch-pan-x' : ''}`}
-  style={{
-    scrollbarWidth: 'none',
-    msOverflowStyle: 'none',
-    WebkitOverflowScrolling: isMobile ? 'touch' : undefined,
-  }}
+  className={isMobile 
+    ? 'flex w-full h-full overflow-x-auto scroll-smooth snap-x snap-mandatory' 
+    : 'w-full h-full flex items-center justify-center'}
+  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
 >
-
 
         {isMobile ? (
           images.map((img, i) => (
@@ -269,18 +262,7 @@ return (
     </div>
 
     {/* Väikese ekraani punktid modali all */}
-    <div className="flex space-x-2 mt-4 md:hidden">
-      {images.map((_, i) => (
-        <button
-          key={i}
-          onClick={() => setSelectedIndex(i)}
-          className={`w-3 h-3 rounded-full ${
-            selectedIndex === i ? 'bg-pink-400' : 'bg-gray-400'
-          }`}
-          aria-label={`Vali pilt ${i + 1}`}
-        />
-      ))}
-    </div>
+
   </div>
 )}
 
