@@ -14,6 +14,28 @@ export default function Gallery({ images }: GalleryProps) {
   const [isMobile, setIsMobile] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const modalScrollRef = useRef<HTMLDivElement>(null);
+const prevModalOpen = useRef(modalOpen);
+const selectedIndexRef = useRef(selectedIndex);
+
+// Uuendame refi iga renderiga, aga effecti ei käivitata
+selectedIndexRef.current = selectedIndex;
+
+useEffect(() => {
+  if (!prevModalOpen.current && modalOpen && isMobile && modalScrollRef.current) {
+    const timeout = setTimeout(() => {
+      modalScrollRef.current?.scrollTo({
+        left: selectedIndexRef.current * modalScrollRef.current.clientWidth,
+        behavior: 'instant', // kohe kerimine
+      });
+    },);
+
+    return () => clearTimeout(timeout);
+  }
+
+  prevModalOpen.current = modalOpen;
+}, [modalOpen, isMobile]); // NB! selectedIndex ei lähe dependencyks
+
+
 
   // Kui selectedIndex muutub, kerime horisontaalselt õigele pildile (ainult galeriis, mitte modalis)
   useEffect(() => {
@@ -49,14 +71,6 @@ export default function Gallery({ images }: GalleryProps) {
   };
 
   // Kui modal avatakse mobiilis, kerime õigesse kohta
-  useEffect(() => {
-    if (modalOpen && isMobile && modalScrollRef.current) {
-      modalScrollRef.current.scrollTo({
-        left: selectedIndex * modalScrollRef.current.clientWidth,
-        behavior: 'smooth',
-      });
-    }
-  }, [modalOpen, selectedIndex, isMobile]);
 
   // Kontrolli ekraani laiust
   useEffect(() => {
@@ -152,10 +166,13 @@ export default function Gallery({ images }: GalleryProps) {
         >
           {images.map((img, i) => (
             <div
-              key={i}
-              className="flex-shrink-0 w-full h-full relative snap-center cursor-pointer"
-              onClick={() => setModalOpen(true)}
-            >
+  key={i}
+  className="flex-shrink-0 w-full h-full relative snap-center cursor-pointer"
+  onClick={() => {
+    setSelectedIndex(i);
+    setModalOpen(true);
+  }}
+>
               <Image
                 src={img}
                 alt={`Pilt ${i + 1}`}
