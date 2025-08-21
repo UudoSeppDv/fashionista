@@ -368,12 +368,15 @@ const sortedListings = [...filteredListings].sort((a, b) => {
    
 
 
-        <section className="flex-1 mb-10 grid grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-6 sm:px-3 md:px-0">
+<section className="flex-1 mb-6 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-6 px-4 sm:px-6 md:px-8 justify-items-center sm:justify-items-start">
   {loading ? (
     <p className="col-span-full text-center text-gray-500">Laadimine...</p>
   ) : currentItems.length > 0 ? (
     currentItems.map((item) => (
-      <div key={item.id} className="transform scale-90 sm:scale-95 md:scale-100">
+      <div
+        key={item.id}
+        className="w-full mb-2 sm:mb-0"
+      >
         <ProductCard
           id={item.id.toString()}
           brand={item.brand}

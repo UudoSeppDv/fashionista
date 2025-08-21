@@ -33,7 +33,7 @@ export default function ProductCard({
   };
 
   return (
-    <div className="z-11 relative w-[250px] group cursor-pointer">
+   <div className="z-11 relative flex-1 min-w-[120px] max-w-[300px] group cursor-pointer">
       <button
         type="button"
         onClick={(e) => {
@@ -68,27 +68,27 @@ export default function ProductCard({
         </svg>
       </button>
 
-      <Link href={`/products/${id}`} onClick={handleCardClick} className="block">
-        <div className="z-10 w-[250px] h-[350px] overflow-hidden border border-gray-600 bg-white relative transition-all duration-300 group-hover:[box-shadow:0_6px_8px_rgba(0,0,0,0.15)]">
-  <Image
-  src={firstImage}
-  alt={brand || "Toote pilt"}
-  fill
-  sizes="(max-width: 768px) 100vw, 250px"
-  priority
-  className="object-cover mb-0"
-/>
+    <Link href={`/products/${id}`} onClick={handleCardClick} className="block">
+    <div className="relative w-full aspect-[2/3] overflow-hidden border border-gray-600 bg-white transition-all duration-300 group-hover:[box-shadow:0_6px_8px_rgba(0,0,0,0.15)]">
+      <Image
+        src={firstImage}
+        alt={brand || "Toote pilt"}
+        fill
+        sizes="(max-width: 768px) 100vw, 300px"
+        priority
+        className="object-cover"
+      />
+      <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-10 pointer-events-none" />
+    </div>
 
-  <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-10 pointer-events-none" />
+    <div className="py-3">
+  <p className="font-montserrat text-xs sm:text-sm text-gray-700">{brand}</p>
+  <p className="font-montserrat text-xl sm:text-2xl font-bold mt-1">
+    {price != null ? `${Number(price).toFixed(2)} €` : "Hind puudub"}
+  </p>
 </div>
 
-        <div className="py-3">
-          <p className="font-montserrat text-sm text-gray-700">{brand}</p>
-          <p className="font-montserrat text-black text-2xl font-bold mt-1">
-            {price != null ? `${Number(price).toFixed(2)} €` : "Hind puudub"}
-          </p>
-        </div>
-      </Link>
+  </Link>
     </div>
   );
 }
