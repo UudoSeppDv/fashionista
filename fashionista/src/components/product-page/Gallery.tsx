@@ -36,14 +36,7 @@ export default function Gallery({ images }: GalleryProps) {
       }
     }
   };
-useEffect(() => {
-  if (modalOpen && modalScrollRef.current && isMobile) {
-    modalScrollRef.current.scrollTo({
-      left: selectedIndex * modalScrollRef.current.clientWidth,
-      behavior: 'smooth',
-    });
-  }
-}, [modalOpen, selectedIndex, isMobile]);
+useEffect(() => { if (modalOpen && isMobile && modalScrollRef.current) { modalScrollRef.current.scrollTo({ left: selectedIndex * modalScrollRef.current.clientWidth, behavior: 'smooth', }); } }, [modalOpen, selectedIndex, isMobile]);
 
  // Jälgi ekraani laiust
 useEffect(() => {
