@@ -203,10 +203,11 @@ return (
   ref={modalScrollRef}
   onScroll={isMobile ? onScroll : undefined}
   className={isMobile 
-    ? 'flex w-full h-full overflow-x-auto scroll-smooth snap-x snap-mandatory' 
+    ? 'flex w-full h-full overflow-x-auto scroll-smooth snap-x snap-mandatory -webkit-overflow-scrolling-touch' 
     : 'w-full h-full flex items-center justify-center'}
   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
 >
+
 
         {isMobile ? (
           images.map((img, i) => (
