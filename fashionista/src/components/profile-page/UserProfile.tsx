@@ -99,8 +99,8 @@ export default function UserProfile({ pageUrl }: UserProfileProps) {
   if (!user) return <div className="p-6">Kasutajat ei leitud</div>
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 p-6 min-h-screen">
-      <aside className="w-full md:w-72 text-white flex flex-col items-center">
+    <div className="flex flex-col md:flex-row gap-6 md:p-6 min-h-screen">
+      <aside className="w-full sm-w-full md:w-72 text-white flex flex-col items-center">
         <UserCard
           name={`${user.first_name ?? ''} ${user.surname ?? ''}`.trim() || user.display_name || 'Kasutaja'}
           followers={followers.length}
@@ -116,21 +116,22 @@ export default function UserProfile({ pageUrl }: UserProfileProps) {
         />
       </aside>
 
-      <section className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <section className="flex-1 mb-10 grid grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-6 sm:px-3 md:px-0">
         {products.length === 0 ? (
           <p className="text-center col-span-full text-gray-500 mt-4">
             Tooteid pole
           </p>
         ) : (
           products.map((product) => (
-            <ProductCard
-              key={product.id}
-              id={product.id}
-              images={product.images}
-              brand={product.brand}
-              price={product.price}
+           <div key={product.id} className="transform scale-90 sm:scale-95 md:scale-100">
+  <ProductCard
+    id={product.id}
+    images={product.images}
+    brand={product.brand}
+    price={product.price}
+  />
+</div>
 
-            />
           ))
         )}
       </section>

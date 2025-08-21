@@ -264,16 +264,18 @@ const initials =
 
 
   return (
-    <div className="relative bg-[#A692C3] border p-6 w-full text-black font-montserrat">
+    <div className="relative bg-[#A692C3] md:border sm:border-b md:p-6 p-10 w-full text-black font-montserrat">
       {!isOwner && (
   <div className="absolute top-0 right-0 z-20 p-3">
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="text-white bg-transparent border-none hover:bg-transparent p-0 flex items-center justify-center transition duration-200 focus:outline-none focus-visible:ring-0 shadow-none"
+          className="text-black bg-transparent hover:text-white border-none hover:bg-transparent p-0 flex items-center justify-center transition duration-200 focus:outline-none focus-visible:ring-0 shadow-none"
         >
-          <MoreHorizontal className="w-5 h-5" />
+          <MoreHorizontal 
+  className="text-black transform scale-150" 
+/>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="font-montserrat rounded-none font-medium border-none mr-27 mt-0">

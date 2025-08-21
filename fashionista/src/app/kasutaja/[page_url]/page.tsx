@@ -22,7 +22,7 @@ export default function Page() {
                 onClose={() => setShowLoginModal(false)}
               />
 
-      <div className="flex-grow py-10">
+      <div className="flex-grow md:py-10">
         <UserProfileClient />
       </div>
 

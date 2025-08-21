@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import ProductCard from '@/components/ui/ProductCard'
-import Filters from '@/components/Choises'
+import Choises from '@/components/category/Choises'
 import Header from '@/components/header/Header'
 import LoginModal from '@/components/LoginModal'
 import Footer from '@/components/Footer'
@@ -10,6 +10,7 @@ import { ChevronDown } from 'lucide-react'
 import { supabase } from '../../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import React from 'react';
+import ChoisesMobile from '@/components/category/ChoisesMobile'
 
 
 
@@ -47,7 +48,7 @@ export default function FavoritesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const [showEmptyState, setShowEmptyState] = React.useState(false);
+
   const [selectedFilters, setSelectedFilters] = useState<string[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
@@ -56,12 +57,69 @@ export default function FavoritesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [minPrice, setMinPrice] = useState<string>('')
   const [maxPrice, setMaxPrice] = useState<string>('')
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
 
 
   const [currentPage, setCurrentPage] = useState(1)
   const [sortOption, setSortOption] = useState('Uusim')
   const [showSortDropdown, setShowSortDropdown] = useState(false)
+
+
+    // Nupuvajutuste handlerid
+const handleSave = () => {
+  console.log('Salvestatud valikud:', {
+    selectedCategories,
+    selectedSizes,
+    selectedBrands,
+    selectedFilters,
+    minPrice,
+    maxPrice,
+  });
+
+
+}
+  const handleCancel = () => {
+    // tee midagi tühistamisel - nt sulge akordion, tühjenda valikud vms
+    
+  }
+
+    const toggleCategory = (category: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+    )
+    setCurrentPage(1)
+  }
+
+
+const toggleBrand = (brand: string) => {
+  setSelectedBrands((prevSelectedBrands) => {
+    if (prevSelectedBrands.includes(brand)) {
+      return prevSelectedBrands.filter(b => b !== brand)
+    } else {
+      return [...prevSelectedBrands, brand]
+    }
+  })
+  setCurrentPage(1)
+}
+
+const toggleFilter = (filter: string) => {
+  setSelectedFilters((prevSelectedFilters) => {
+    if (prevSelectedFilters.includes(filter)) {
+      return prevSelectedFilters.filter(b => b !== filter)
+    } else {
+      return [...prevSelectedFilters, filter]
+    }
+  })
+  setCurrentPage(1)
+}
+
+  const toggleSize = (size: string) => {
+    setSelectedSizes((prev) =>
+      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
+    )
+    setCurrentPage(1)
+  }
 
   const itemsPerPage = 20
 
@@ -78,10 +136,6 @@ useEffect(() => {
   checkUser()
 }, [router]) // nüüd hoiatus kaob ja kõik töötab ootuspäraselt
  
-React.useEffect(() => {
-  const timer = setTimeout(() => setShowEmptyState(true), 2000);
-  return () => clearTimeout(timer);
-}, []);
 
 
   // Loeme filtrite eelseisud localStorage'st (või võid soovi korral selle eemaldada)
@@ -244,142 +298,158 @@ useEffect(() => {
   const goToNextPage = () => setCurrentPage(p => Math.min(totalPages, p + 1))
 
   return (
-  <main className="min-h-screen text-gray-800 relative">
-    <Header setShowLoginModal={() => {}} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-    <LoginModal isOpen={false} onClose={() => {}} />
-
-    <h1 className="font-montserrat text-gray-400 px-10 py-6">Minu lemmikud</h1>
-
-    {loading && (
-      <p className="px-10">Laadimine...</p>
-     )}
-    {!loading && products.length > 0 && (
-      <>
-      
-        <div className="flex justify-between items-center px-10 mb-4 text-sm">
-          <div>
-            <strong>Kuvatakse {start} – {end}</strong> {totalItems.toLocaleString()} tootest
-            {error && <p className="text-red-600 mt-2">Viga: {error}</p>}
-          </div>
-          <div className="relative">
-            <button
-              onClick={() => setShowSortDropdown(p => !p)}
-              className="px-3 py-2 rounded flex items-center gap-2 hover:text-gray-500 hover:transition"
-            >
-              Sordi: {sortOption} <ChevronDown size={16} />
-            </button>
-            {showSortDropdown && (
-              <ul className="absolute right-0 mt-1 w-35 bg-white shadow-md z-50">
-                {['Uusim', 'Populaarseim', 'Madalaim hind', 'Kõrgeim hind'].map(option => (
-                  <li
-                    key={option}
-                    onClick={() => {
-                      setSortOption(option)
-                      setShowSortDropdown(false)
-                      setCurrentPage(1)
-                    }}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    {option}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+   <main className="min-h-screen text-gray-800 relative">
+        <Header setShowLoginModal={setShowLoginModal} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+  
+        <h1 className="font-montserrat text-gray-400 px-10 py-6">Kõik Tooted</h1>
+  
+  <div className="flex justify-between items-center px-10 mb-4 text-sm">
+    <div>
+  {loading ? (
+    <p>Laadimine...</p>
+  ) : (
+    <>
+      {/* Desktop kuvab infot toodete arvu kohta ainult siis, kui on tooteid */}
+      {totalItems > 0 ? (
+        <div className="hidden md:block">
+          <strong>Kuvatakse {start} – {end}</strong> {totalItems.toLocaleString()} tootest
         </div>
-
-        <div className="flex gap-8">
-          <Filters
-            brands={brands}
-            categories={categories}
-            sizes={sizes}
-            filters={filters}
-            selectedBrands={selectedBrands}
-            selectedCategories={selectedCategories}
-            selectedSizes={selectedSizes}
-            selectedFilters={selectedFilters}
-            minPrice={minPrice}
-            maxPrice={maxPrice}
-            toggleBrand={brand => {
-              setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand])
-              setCurrentPage(1)
-            }}
-            toggleCategory={cat => {
-              setSelectedCategories(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])
-              setCurrentPage(1)
-            }}
-            toggleSize={size => {
-              setSelectedSizes(prev => prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size])
-              setCurrentPage(1)
-            }}
-            toggleFilter={filter => {
-              setSelectedFilters(prev => prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter])
-              setCurrentPage(1)
-            }}
-            setMinPrice={setMinPrice}
-            setMaxPrice={setMaxPrice}
-            customSizes={customSizes}
-            setCustomSizes={setCustomSizes}
-          />
-
-          <section className="flex-1 flex flex-col gap-4">
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-    {currentItems.map(product => (
-      <ProductCard
-        key={product.id}
-        id={product.id}
-        brand={product.brand}
-        price={product.price}
-        images={product.image || []}
-      />
-    ))}
-  </div>
-
-            <div className="flex gap-4 mt-4 items-center justify-center text-sm">
-              <button
-                onClick={goToPrevPage}
-                disabled={currentPage === 1}
-                className="border border-gray-300 px-3 py-1 rounded disabled:opacity-50"
-              >
-                Eelmine
-              </button>
-              <span>{start} – {end} / {totalItems.toLocaleString()}</span>
-              <button
-                onClick={goToNextPage}
-                disabled={currentPage === totalPages}
-                className="border border-gray-300 px-3 py-1 rounded disabled:opacity-50"
-              >
-                Järgmine
-              </button>
-            </div>
-          </section>
-        </div>
-      </>
-    )}
-
-          {!loading && products.length === 0 && showEmptyState && (
-
-      <div className="flex flex-col items-center justify-center gap-4 text-center py-10">
-        <svg width="107" height="119" viewBox="0 0 107 119" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M39.6444 29.1327C56.4669 33.2037 67.8416 34.1615 78.3183 30.7491C92.4469 26.1394 112.442 40.687 105.019 58.4076C99.3914 71.9374 97.1763 70.2612 100.05 85.8864C101.666 94.5072 92.2673 109.055 78.1986 117.077C71.7928 120.669 58.0834 120.07 50.4204 100.434C42.7575 80.7977 36.1721 80.2589 23.7199 77.3853C15.3385 75.4696 -4.89642 68.2856 1.09025 47.5717C6.17892 29.9709 22.8219 25.0618 39.6444 29.1327Z" fill="#EAD5DE"/>
-<path d="M35.5722 23.9243C35.5722 23.9243 19.5279 13.9864 28.0888 6.02414C40.0023 -5.0512 46.7672 11.951 48.0843 9.43655C49.4014 6.98202 51.7362 0.875609 58.9202 0.0973412C68.1995 -0.920393 68.6785 6.38335 70.2949 6.14388C71.9113 5.90442 83.8846 -1.93813 90.2904 7.28135C95.9178 15.4232 79.9334 23.6848 78.5565 29.9708C76.1019 41.2856 78.0775 53.0794 64.7871 56.3721C45.1508 61.341 35.5722 23.9243 35.5722 23.9243Z" fill="#EEB1C2"/>
-<path d="M47.1279 26.0794C48.5048 23.8643 56.8263 34.8798 56.7664 33.8022C56.6467 31.5272 54.6112 25.6603 56.5869 24.882C58.5625 24.1038 59.1013 35.239 59.5802 34.0416C60.0591 32.8443 61.6755 25.9596 65.507 22.4874C69.3384 18.9552 70.6555 19.8532 67.0635 24.5228C64.1301 28.4142 63.6511 36.7356 61.7952 41.7645C61.017 43.9197 65.4471 59.6646 70.2365 70.9195C73.3495 78.1634 78.8573 86.1257 76.9415 84.8685C72.4515 81.8752 64.8485 70.5603 58.3829 41.8243C58.0835 40.148 45.8707 28.1747 47.1279 26.0794Z" fill="#B4A6A6"/>
-</svg>
-
-        <h2 className="text-xl font-m font-montserrat text-gray-800">Tundub, et sa pole veel midagi oma lemmikute hulka lisanud.
-       <br/ >Ära muretse, alustamine on lihtne!</h2>
-        
-        <a
-          href="/category"
-          className="mt-10 mb-20 px-10 py-1 border font-montserrat text-black rounded-full hover:bg-gray-100 transition"
-        >
-          AVASTA&nbsp;&nbsp;<span className="text-xl">→</span>
-        </a>
-      </div>
+      ) : (
+        <div className="hidden md:block">Ei leitud ühtegi toodet.</div>
       )}
-
-    <Footer />
-  </main>
+  
+      {/* Mobiilis kuvame alati ChoisesMobile */}
+      <div className="md:hidden">
+        <ChoisesMobile
+          categories={categories}
+          sizes={sizes}
+          brands={brands}
+          filters={filters}
+          selectedCategories={selectedCategories}
+          selectedSizes={selectedSizes}
+          selectedBrands={selectedBrands}
+          selectedFilters={selectedFilters}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          toggleCategory={toggleCategory}
+          toggleSize={toggleSize}
+          toggleBrand={toggleBrand}
+          toggleFilter={toggleFilter}
+          setMinPrice={setMinPrice}
+          setMaxPrice={setMaxPrice}
+          onSaveClick={handleSave}
+          onCancelClick={handleCancel}
+        />
+      </div>
+    </>
+  )}
+  
+      {error && <p className="text-red-600 mt-2">Viga: {error}</p>}
+    </div>
+  
+    <div className="relative">
+      <button
+        onClick={() => setShowSortDropdown(prev => !prev)}
+        className="px-3 py-2 rounded flex items-center gap-2 hover:text-gray-500 hover:transition"
+      >
+        Sordi: {sortOption} <ChevronDown size={16} />
+      </button>
+      {showSortDropdown && (
+        <ul className="absolute right-0 mt-1 w-35 bg-white shadow-md z-50">
+          {['Uusim', 'Populaarseim', 'Madalaim hind', 'Kõrgeim hind'].map(option => (
+            <li
+              key={option}
+              onClick={() => {
+                setSortOption(option)
+                setShowSortDropdown(false)
+                setCurrentPage(1)
+              }}
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            >
+              {option}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+  
+  
+        <div className="flex gap-8">
+          <div className="hidden md:block">
+         <Choises
+    brands={brands}
+    categories={categories}
+    sizes={sizes}
+    filters={filters}               // korrektselt plural
+    selectedBrands={selectedBrands}
+    selectedCategories={selectedCategories}
+    selectedSizes={selectedSizes}
+    selectedFilters={selectedFilters}
+    minPrice={minPrice}
+    maxPrice={maxPrice}
+    toggleBrand={toggleBrand}
+    toggleCategory={toggleCategory}
+    toggleSize={toggleSize}
+    toggleFilter={toggleFilter}
+    setMinPrice={setMinPrice}
+    setMaxPrice={setMaxPrice}
+    customSizes={customSizes}
+    setCustomSizes={setCustomSizes}
+  />
+  
+  </div>
+  
+     
+  
+  
+          <section className="flex-1 mb-10 grid grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-6 sm:px-3 md:px-0">
+    {loading ? (
+      <p className="col-span-full text-center text-gray-500">Laadimine...</p>
+    ) : currentItems.length > 0 ? (
+      currentItems.map((item) => (
+        <div key={item.id} className="transform scale-90 sm:scale-95 md:scale-100">
+          <ProductCard
+            id={item.id.toString()}
+            brand={item.brand}
+            filter={item.filter}
+            price={item.price}
+            images={item.image}
+          />
+        </div>
+      ))
+    ) : (
+      <p className="col-span-full text-center text-gray-500">Ei leitud ühtegi toodet.</p>
+    )}
+  </section>
+  
+  
+  
+        </div>
+  
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-6 pb-10">
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Eelmine
+            </button>
+            <span>Leht {currentPage} / {totalPages}</span>
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Järgmine
+            </button>
+          </div>
+        )}
+  
+        <Footer />
+      </main>
 )
 
 }

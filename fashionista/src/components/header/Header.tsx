@@ -150,7 +150,7 @@ useEffect(() => {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="z-50 relative flex items-center justify-between px-6 py-3 bg-[#FE9BD4]">
+      <div className="z-50 relative border-b flex items-center justify-between px-6 py-3 bg-[#FE9BD4]">
       <div className="flex items-center w-1/3">
   {/* Väike ekraan – hamburger menu nupp */}
 <button
@@ -294,7 +294,7 @@ useEffect(() => {
         <nav
   className={`hidden sm:flex transition-transform duration-300 ease-in-out transform ${
     showNav ? 'translate-y-0' : '-translate-y-full'
-  } z-20 border-t border-b border-gray-600 px-6 py-4 text-sm font-semibold text-gray-700 space-x-6 font-montserrat bg-[#F1ECE6]`}
+  } z-20 border-b border-gray-600 px-6 py-4 text-sm font-semibold text-gray-700 space-x-6 font-montserrat bg-[#F1ECE6]`}
 >
            <DropdownMenu label="UUS" title="UUS" links={[
             { label: 'Uus 1', href: '#' },

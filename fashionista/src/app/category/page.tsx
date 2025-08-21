@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import ProductCard from '@/components/ui/ProductCard'
-import Filters from '@/components/Choises'
+import Choises from '@/components/category/Choises'
 import Header from '@/components/header/Header'
 import LoginModal from '@/components/LoginModal'
 import Footer from '@/components/Footer'
 import { ChevronDown } from 'lucide-react'
 import { supabase } from '../../../lib/supabaseClient'
 import { LS_KEYS } from '../../../lib/constants/localStorageKeys'
-
+import ChoisesMobile from '@/components/category/ChoisesMobile'
 
 
 type Product = {
@@ -54,6 +54,7 @@ export default function ListingsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [sortOption, setSortOption] = useState('Uusim')
   const [showSortDropdown, setShowSortDropdown] = useState(false)
+  
 
   const itemsPerPage = 20
 
@@ -145,7 +146,23 @@ useEffect(() => {
 
 
 
+  // Nupuvajutuste handlerid
+const handleSave = () => {
+  console.log('Salvestatud valikud:', {
+    selectedCategories,
+    selectedSizes,
+    selectedBrands,
+    selectedFilters,
+    minPrice,
+    maxPrice,
+  });
 
+
+}
+  const handleCancel = () => {
+    // tee midagi tühistamisel - nt sulge akordion, tühjenda valikud vms
+    
+  }
 
   // Arvuta kategooriad ja suurused saadud toodete põhjal
   const categories = Array.from(new Set(products.map(item => item.category)))
@@ -251,49 +268,81 @@ const sortedListings = [...filteredListings].sort((a, b) => {
 
       <h1 className="font-montserrat text-gray-400 px-10 py-6">Kõik Tooted</h1>
 
-      <div className="flex justify-between items-center px-10 mb-4 text-sm">
-        <div>
-          {loading ? (
-            <p>Laadimine...</p>
-          ) : totalItems > 0 ? (
-            <>
-              <strong>Kuvatakse {start} – {end}</strong> {totalItems.toLocaleString()} tootest
-            </>
-          ) : (
-            <>Ei leitud ühtegi toodet.</>
-          )}
-          {error && <p className="text-red-600 mt-2">Viga: {error}</p>}
-        </div>
-
-        <div className="relative">
-          <button
-            onClick={() => setShowSortDropdown(prev => !prev)}
-            className="px-3 py-2 rounded flex items-center gap-2 hover:text-gray-500 hover:transition"
-          >
-            Sordi: {sortOption} <ChevronDown size={16} />
-          </button>
-          {showSortDropdown && (
-            <ul className="absolute right-0 mt-1 w-35 bg-white shadow-md z-50">
-              {['Uusim', 'Populaarseim', 'Madalaim hind', 'Kõrgeim hind'].map(option => (
-                <li
-                  key={option}
-                  onClick={() => {
-                    setSortOption(option)
-                    setShowSortDropdown(false)
-                    setCurrentPage(1)
-                  }}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  {option}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+<div className="flex justify-between items-center px-10 mb-4 text-sm">
+  <div>
+{loading ? (
+  <p>Laadimine...</p>
+) : (
+  <>
+    {/* Desktop kuvab infot toodete arvu kohta ainult siis, kui on tooteid */}
+    {totalItems > 0 ? (
+      <div className="hidden md:block">
+        <strong>Kuvatakse {start} – {end}</strong> {totalItems.toLocaleString()} tootest
       </div>
+    ) : (
+      <div className="hidden md:block">Ei leitud ühtegi toodet.</div>
+    )}
+
+    {/* Mobiilis kuvame alati ChoisesMobile */}
+    <div className="md:hidden">
+      <ChoisesMobile
+        categories={categories}
+        sizes={sizes}
+        brands={brands}
+        filters={filters}
+        selectedCategories={selectedCategories}
+        selectedSizes={selectedSizes}
+        selectedBrands={selectedBrands}
+        selectedFilters={selectedFilters}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        toggleCategory={toggleCategory}
+        toggleSize={toggleSize}
+        toggleBrand={toggleBrand}
+        toggleFilter={toggleFilter}
+        setMinPrice={setMinPrice}
+        setMaxPrice={setMaxPrice}
+        onSaveClick={handleSave}
+        onCancelClick={handleCancel}
+      />
+    </div>
+  </>
+)}
+
+    {error && <p className="text-red-600 mt-2">Viga: {error}</p>}
+  </div>
+
+  <div className="relative">
+    <button
+      onClick={() => setShowSortDropdown(prev => !prev)}
+      className="px-3 py-2 rounded flex items-center gap-2 hover:text-gray-500 hover:transition"
+    >
+      Sordi: {sortOption} <ChevronDown size={16} />
+    </button>
+    {showSortDropdown && (
+      <ul className="absolute right-0 mt-1 w-35 bg-white shadow-md z-50">
+        {['Uusim', 'Populaarseim', 'Madalaim hind', 'Kõrgeim hind'].map(option => (
+          <li
+            key={option}
+            onClick={() => {
+              setSortOption(option)
+              setShowSortDropdown(false)
+              setCurrentPage(1)
+            }}
+            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+          >
+            {option}
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</div>
+
 
       <div className="flex gap-8">
-       <Filters
+        <div className="hidden md:block">
+       <Choises
   brands={brands}
   categories={categories}
   sizes={sizes}
@@ -314,26 +363,33 @@ const sortedListings = [...filteredListings].sort((a, b) => {
   setCustomSizes={setCustomSizes}
 />
 
+</div>
+
+   
 
 
-        <section className="flex-1 mb-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {loading ? (
-            <p className="col-span-full text-center text-gray-500">Laadimine...</p>
-          ) : currentItems.length > 0 ? (
-            currentItems.map((item) => (
-              <ProductCard
-                key={item.id}
-                id={item.id.toString()}
-                brand={item.brand}
-                filter={item.filter}
-                price={item.price}
-                images={item.image}
-              />
-            ))
-          ) : (
-            <p className="col-span-full text-center text-gray-500">Ei leitud ühtegi toodet.</p>
-          )}
-        </section>
+        <section className="flex-1 mb-10 grid grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-6 sm:px-3 md:px-0">
+  {loading ? (
+    <p className="col-span-full text-center text-gray-500">Laadimine...</p>
+  ) : currentItems.length > 0 ? (
+    currentItems.map((item) => (
+      <div key={item.id} className="transform scale-90 sm:scale-95 md:scale-100">
+        <ProductCard
+          id={item.id.toString()}
+          brand={item.brand}
+          filter={item.filter}
+          price={item.price}
+          images={item.image}
+        />
+      </div>
+    ))
+  ) : (
+    <p className="col-span-full text-center text-gray-500">Ei leitud ühtegi toodet.</p>
+  )}
+</section>
+
+
+
       </div>
 
       {totalPages > 1 && (
