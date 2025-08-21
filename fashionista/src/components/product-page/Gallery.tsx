@@ -13,6 +13,7 @@ export default function Gallery({ images }: GalleryProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const modalScrollRef = useRef<HTMLDivElement>(null); // alati kutsuda, mitte tingimuslikult
 
   // Kui selectedIndex muutub, kerime horisontaalselt õigele pildile
   useEffect(() => {
@@ -35,6 +36,14 @@ export default function Gallery({ images }: GalleryProps) {
       }
     }
   };
+useEffect(() => {
+  if (modalOpen && modalScrollRef.current && isMobile) {
+    modalScrollRef.current.scrollTo({
+      left: selectedIndex * modalScrollRef.current.clientWidth,
+      behavior: 'smooth',
+    });
+  }
+}, [modalOpen, selectedIndex, isMobile]);
 
  // Jälgi ekraani laiust
 useEffect(() => {
@@ -54,7 +63,7 @@ useEffect(() => {
     trackMouse: true,
   });
 
-  if (images.length === 0) return null;
+
 
   const prevImage = () => {
     setSelectedIndex((i) => (i === 0 ? images.length - 1 : i - 1));
@@ -66,6 +75,7 @@ useEffect(() => {
 
 
 
+ if (images.length === 0) return null;
 
 
 return (
@@ -190,15 +200,14 @@ return (
 
       {/* MODALI GALERII */}
       <div
-        ref={scrollRef}
-        onScroll={onScroll}
-        className={`${
-          isMobile
-            ? 'flex w-full h-full overflow-x-auto scroll-smooth snap-x snap-mandatory'
-            : 'w-full h-full flex items-center justify-center'
-        }`}
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
+  ref={modalScrollRef}
+  onScroll={isMobile ? onScroll : undefined}
+  className={isMobile 
+    ? 'flex w-full h-full overflow-x-auto scroll-smooth snap-x snap-mandatory' 
+    : 'w-full h-full flex items-center justify-center'}
+  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+>
+
         {isMobile ? (
           images.map((img, i) => (
             <div
@@ -210,14 +219,13 @@ return (
               }}
             >
               <Image
-                src={img}
-                alt={`Suur pilt ${i + 1}`}
-                fill
-                className={`object-contain rounded ${
-                  selectedIndex === i ? '' : 'opacity-70'
-                }`}
-                draggable={false}
-              />
+  src={img}
+  alt={`Suur pilt ${i + 1}`}
+  fill
+  className="object-contain rounded"
+  draggable={false}
+/>
+
             </div>
           ))
         ) : (
