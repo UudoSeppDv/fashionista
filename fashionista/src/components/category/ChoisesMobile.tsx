@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import SizeModal from '../SizeModal'
+import React, { useState } from 'react'
+import SizeModal from './SizeModal';
 
 
 type ChoisesProps = {
@@ -16,6 +16,7 @@ type ChoisesProps = {
   minPrice: string
   maxPrice: string
   toggleCategory: (category: string) => void
+  setSelectedSizes: (sizes: string[]) => void;
   toggleSize: (size: string) => void
   toggleBrand: (brand: string) => void
   toggleFilter: (filter: string) => void
@@ -32,6 +33,7 @@ export default function ChoisesModal({
   filters,
   selectedCategories,
   selectedSizes,
+  setSelectedSizes,
   selectedBrands,
   selectedFilters,
   minPrice,
@@ -64,12 +66,6 @@ export default function ChoisesModal({
   function localToggleCategory(category: string) {
     setLocalSelectedCategories((prev) =>
       prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
-    )
-  }
-
-  function localToggleSize(size: string) {
-    setLocalSelectedSizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
     )
   }
 
@@ -158,20 +154,8 @@ export default function ChoisesModal({
     setModalOpen(false)
   }
 
-useEffect(() => {
-  // Kõigepealt eemaldame need, mis olid valitud, aga nüüd mitte
-  selectedSizes.forEach((size) => {
-    if (!localSelectedSizes.includes(size)) {
-      toggleSize(size);
-    }
-  });
-  // Lisame need, mis nüüd valitud, aga vanemal polnud
-  localSelectedSizes.forEach((size) => {
-    if (!selectedSizes.includes(size)) {
-      toggleSize(size);
-    }
-  });
-}, [localSelectedSizes, selectedSizes, toggleSize]);
+
+
 
 const [openSections, setOpenSections] = useState<string[]>([]);
 
@@ -291,7 +275,7 @@ function AccordionSection({
                 <div>
               {selectedSizes.length > 0 && (
                 <div className="border border-gray-400 rounded-full  text-sm px-2 py-1 mb-2 inline-block">
-                  Riided: {selectedSizes.join(', ')}
+                  Suurus: {selectedSizes.join(', ')}
                 </div>
               )}
             
@@ -310,10 +294,10 @@ function AccordionSection({
                 {sizeModalOpen && (
 <SizeModal
   sizes={sizes}
-  initialSizes={localSelectedSizes}   // <-- LOKAALNE KOOPIA
+  initialSizes={selectedSizes}   // <-- võtab alati ülemisest state'ist
   onSave={(newSizes) => {
-    setLocalSelectedSizes(newSizes)   // <-- Uuendame ainult lokaalselt
-    setSizeModalOpen(false)
+    setSelectedSizes(newSizes);   // uuendab jagatud state'i
+    setSizeModalOpen(false);
   }}
   onClose={() => setSizeModalOpen(false)}
 />
@@ -402,8 +386,8 @@ function AccordionSection({
                 <label key={size} className="flex items-center gap-2 py-1">
                   <input
                     type="checkbox"
-                    checked={localSelectedSizes.includes(size)}
-                    onChange={() => localToggleSize(size)}
+                    checked={selectedSizes.includes(size)}
+                    onChange={() => toggleSize(size)}
                     className="w-5 h-5 border border-gray-800 appearance-none checked:bg-[#F8C6DF] checked:transition-all duration-200 cursor-pointer relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-black after:text-sm after:opacity-0 checked:after:opacity-100"
                   />
                   {size}

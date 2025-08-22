@@ -49,13 +49,19 @@ export default function ListingsPage() {
   const [minPrice, setMinPrice] = useState<string>('')
   const [maxPrice, setMaxPrice] = useState<string>('')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([])
+
   const [customSizes, setCustomSizes] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [sortOption, setSortOption] = useState('Uusim')
   const [showSortDropdown, setShowSortDropdown] = useState(false)
   
+const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
 
+  const toggleSize = (size: string) => {
+    setSelectedSizes(prev =>
+      prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
+    );
+  };
   const itemsPerPage = 20
 
 
@@ -205,12 +211,7 @@ const toggleFilter = (filter: string) => {
   setCurrentPage(1)
 }
 
-  const toggleSize = (size: string) => {
-    setSelectedSizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
-    )
-    setCurrentPage(1)
-  }
+
 
   const customSizesArray = customSizes
     .split(',')
@@ -292,6 +293,7 @@ const sortedListings = [...filteredListings].sort((a, b) => {
         filters={filters}
         selectedCategories={selectedCategories}
         selectedSizes={selectedSizes}
+        setSelectedSizes={setSelectedSizes}
         selectedBrands={selectedBrands}
         selectedFilters={selectedFilters}
         minPrice={minPrice}
@@ -346,6 +348,7 @@ const sortedListings = [...filteredListings].sort((a, b) => {
   brands={brands}
   categories={categories}
   sizes={sizes}
+  setSelectedSizes={setSelectedSizes}
   filters={filters}               // korrektselt plural
   selectedBrands={selectedBrands}
   selectedCategories={selectedCategories}

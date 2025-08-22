@@ -3,7 +3,7 @@
 
 import React from 'react'
 import { useState } from 'react';
-import SizeModal from '../SizeModal';
+import SizeModal from './SizeModal';
 
 type ChoisesProps = {
   categories: string[]
@@ -18,6 +18,7 @@ type ChoisesProps = {
   maxPrice: string
   toggleCategory: (category: string) => void
   toggleSize: (size: string) => void
+  setSelectedSizes: (sizes: string[]) => void;
   toggleBrand: (brand: string) => void
   toggleFilter: (filter: string) => void
   setMinPrice: (value: string) => void
@@ -34,6 +35,7 @@ export default function Choises({
   filters,
   selectedCategories,
   selectedSizes,
+  setSelectedSizes,
   selectedBrands,
   selectedFilters,
   minPrice,
@@ -49,7 +51,10 @@ export default function Choises({
 
 
 
-  const [modalOpen, setModalOpen] = useState(false);
+
+
+
+  const [sizeModalOpen, setSizeModalOpen] = useState(false)
 
 
   return (
@@ -69,13 +74,13 @@ export default function Choises({
     <div>
   {selectedSizes.length > 0 && (
     <div className="border border-gray-400 rounded-full  text-sm px-2 py-1 mb-2 inline-block">
-      Riided: {selectedSizes.join(', ')}
+      Suurus: {selectedSizes.join(', ')}
     </div>
   )}
 
   <div className="flex justify-center">
     <button
-      onClick={() => setModalOpen(true)}
+      onClick={() => setSizeModalOpen(true)}
       className="text-sm font-semibold rounded-full border px-10 py-2 hover:bg-gray-100 transition"
     >
       {selectedSizes.length > 0 ? 'MUUDA MINU SUURUSED' : 'LISA MINU SUURUSED'}
@@ -85,23 +90,18 @@ export default function Choises({
 
 
     {/* Suuruste valiku modaal */}
-    {modalOpen && (
-      <SizeModal
-        sizes={sizes}
-        initialSizes={selectedSizes}
-        onSave={(newSizes) => {
-          // Lisa uued suurused
-          newSizes.forEach((size) => {
-            if (!selectedSizes.includes(size)) toggleSize(size)
-          })
-          // Eemalda tühistatud suurused
-          selectedSizes.forEach((size) => {
-            if (!newSizes.includes(size)) toggleSize(size)
-          })
-          setModalOpen(false)
-        }}
-        onClose={() => setModalOpen(false)}
-      />
+    {sizeModalOpen && (
+<SizeModal
+  sizes={sizes}
+  initialSizes={selectedSizes}   // <-- võtab alati ülemisest state'ist
+  onSave={(newSizes) => {
+    setSelectedSizes(newSizes);   // uuendab jagatud state'i
+    setSizeModalOpen(false);
+  }}
+  onClose={() => setSizeModalOpen(false)}
+/>
+
+    
     )}
   </div>
 </aside>
@@ -205,20 +205,21 @@ export default function Choises({
         ))}
 
         <h2 className="font-bold mt-6 mb-2">SUURUSED</h2>
-        {sizes.map((size) => (
-          <label
-            key={size}
-            className="font-montserrat flex items-start gap-4 mb-2 cursor-pointer"
-          >
-            <input
-              type="checkbox"
-              checked={selectedSizes.includes(size)}
-              onChange={() => toggleSize(size)}
-              className="w-5 h-5 border border-gray-800 appearance-none checked:bg-[#F8C6DF] checked:transition-all duration-200 cursor-pointer relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-black after:text-sm after:opacity-0 checked:after:opacity-100"
-            />
-            {size}
-          </label>
-        ))}
+{sizes.map((size) => (
+  <label
+    key={size}
+    className="font-montserrat flex items-start gap-4 mb-2 cursor-pointer"
+  >
+    <input
+      type="checkbox"
+      checked={selectedSizes.includes(size)} // kontrollib, kas size on valitud
+      onChange={() => toggleSize(size)}     // toggle valik
+      className="w-5 h-5 border border-gray-800 appearance-none checked:bg-[#F8C6DF] checked:transition-all duration-200 cursor-pointer relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-black after:text-sm after:opacity-0 checked:after:opacity-100"
+    />
+    {size}
+  </label>
+))}
+
       </aside>
     </div>
   )

@@ -13,6 +13,7 @@ type Product = {
   description: string;
   category: string;
   filter: string;
+  size: string | null;
   price: number | string;
   images: string[];
   user_id: string;
@@ -36,6 +37,7 @@ type SupabaseProductResponse = {
   category: string | null;
   filter: string | null;
   price: number | string | null;
+  size: string | null;
   images: string[] | null;
   user_id: string | null;
   location?: string | null;
@@ -47,6 +49,7 @@ type SupabaseProductResponse = {
     sold_products_count?: number | null;
   } | null;
 };
+
 
 function normalizeProductData(data: SupabaseProductResponse): Product {
   return {
@@ -60,9 +63,11 @@ function normalizeProductData(data: SupabaseProductResponse): Product {
     images: data.images ?? [],
     user_id: data.user_id ?? '',
     location: data.location ?? null,
+    size: data.size ?? '', // nüüd juba olemas tüübile
     public_users: data.public_users ?? undefined,
   };
 }
+
 
 export default function ProductPage() {
   const params = useParams();

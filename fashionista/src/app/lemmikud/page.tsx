@@ -324,6 +324,7 @@ useEffect(() => {
         <ChoisesMobile
           categories={categories}
           sizes={sizes}
+          setSelectedSizes={setSelectedSizes}
           brands={brands}
           filters={filters}
           selectedCategories={selectedCategories}
@@ -382,6 +383,7 @@ useEffect(() => {
     brands={brands}
     categories={categories}
     sizes={sizes}
+    setSelectedSizes={setSelectedSizes}
     filters={filters}               // korrektselt plural
     selectedBrands={selectedBrands}
     selectedCategories={selectedCategories}

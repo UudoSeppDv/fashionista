@@ -143,12 +143,13 @@ async function handleSubmit(e: React.FormEvent) {
 
   {/* Kirjeldus */}
   <textarea
-    value={description}
-    onChange={(e) => setDescription(e.target.value)}
-    placeholder="Kirjelda toodet võimalikult täpselt"
-    className="w-full border p-2 h-24 mb-4"
-  />
-
+  value={description}
+  onChange={(e) => setDescription(e.target.value)}
+  placeholder={`Kirjelda toodet võimalikult täpselt${
+    size === 'Muu' ? ' (sisesta jalanõu täpne suurus)' : ''
+  }`}
+  className="w-full border p-2 h-24 mb-4"
+/>
     {/* Brand */}
   <input
     type="text"
@@ -212,19 +213,26 @@ async function handleSubmit(e: React.FormEvent) {
 
     {/* Suurus (valikuline) */}
     <select
-      value={size}
-      onChange={(e) => setSize(e.target.value)}
-      className="border p-2"
-    >
-      
-      <option value="">Suurus (valikuline)</option>
-      <option value="XS">XS</option>
-      <option value="S">S</option>
-      <option value="M">M</option>
-      <option value="L">L</option>
-      <option value="XL">XL</option>
-      <option value="XXL">XXL</option>
-    </select>
+  value={size}
+  onChange={(e) => setSize(e.target.value)}
+  className="border p-2"
+>
+  <option value="">
+    {filter === 'Jalanõud' ? 'Jalanõu suurus' : 'Suurus (valikuline)'}
+  </option>
+
+  {filter === 'Jalanõud'
+    ? [
+        ...Array.from({ length: 12 }, (_, i) => 35 + i), // 35–46
+        'Muu'
+      ].map(n => (
+        <option key={n} value={n}>{n}</option>
+      ))
+    : ['XS','S','M','L','XL','XXL'].map(s => (
+        <option key={s} value={s}>{s}</option>
+      ))
+  }
+</select>
 
     {/* Kogus */}
     <select

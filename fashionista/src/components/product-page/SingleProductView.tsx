@@ -20,6 +20,7 @@ export type Product = {
   category: string;
   filter: string;
   price: number | string;
+  size: string | null;
   images: string[];
   user_id: string;
   location?: string | null;
@@ -227,12 +228,18 @@ const user = product.public_users
 
 </div>
 
-          <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600">
   <span>{product.location}</span>
   <span className="block font-bold text-gray-800 mt-1">
     {product.description || 'Kirjeldus puudub'}
   </span>
+  {product.size && (
+    <span className="block text-gray-700 mt-1">
+      Suurus: {product.size}
+    </span>
+  )}
 </div>
+
 
 
 
