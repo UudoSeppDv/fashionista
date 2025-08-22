@@ -153,86 +153,71 @@ const HelpPage: React.FC = () => {
             )
         );
 
-  return (
-    <div style={{ display: "flex", flexDirection: "column", fontFamily: "Montserrat", height: "100vh" }}>
-      {/* Ülemine riba: pilt vasakul + otsing paremal */}
-      <div style={{ display: "flex", height: "300px", borderBottom: "1px solid #ccc" }}>
-        {/* Pilt vasakul */}
-       <div style={{ flex: 1, position: "relative", height: "100vh" }}>
-  <Image
-    src="/images/help-image.jpg"
-    alt="Abi"
-    fill
-    style={{
-      objectFit: "cover",     // täidab kogu ala
-      objectPosition: "left", // hoiab vasaku külje alati nähtaval
-    }}
-    priority
-  />
-</div>
+return (
+  <div className="flex flex-col font-montserrat min-h-screen">
+    {/* Ülemine ala */}
+    <div className="relative w-full border-b h-[300px] sm:h-[400px] md:h-[500px] lg:h-[400px] flex">
+      {/* Pilt */}
+      <div className="relative w-full sm:w-1/3 h-full">
+        <Image
+          src="/images/help-image.jpg"
+          alt="Abi"
+          fill
+          style={{ objectFit: "cover", objectPosition: "center" }}
+          priority
+        />
+      </div>
 
+      {/* Otsing ja pealkiri suurtele ekraanidele */}
+      <div className="hidden sm:flex sm:w-2/3 flex-col justify-center items-center relative p-6">
+        <h1 className="text-3xl font-semibold mb-6 text-center">Kuidas saame sind aidata?</h1>
+        <div className="w-full max-w-md relative">
+          <input
+            type="text"
+            placeholder="🔍 Otsi..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-5 py-3 bg-white rounded-full border border-gray-300 text-sm outline-none
+                       shadow-md focus:border-pink-300 focus:ring-1 focus:ring-pink-200"
+          />
+          {filteredTopics.length > 0 && (
+            <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-gray-300
+                            rounded-md shadow-lg max-h-64 overflow-y-auto z-50">
+              {filteredTopics.map((topic) => (
+                <div
+                  key={topic.title + topic.categoryName}
+                  onClick={() => {
+                    setSelectedCategory(
+                      categories.find((c) => c.name === topic.categoryName) || categories[0]
+                    );
+                    setSelectedTopic(topic);
+                    setSearchTerm("");
+                  }}
+                  className="p-3 cursor-pointer border-b border-gray-100 hover:bg-pink-50"
+                >
+                  <div className="font-bold">{topic.title}</div>
+                  <div className="text-xs text-gray-600">{topic.categoryName}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
-        {/* Otsing paremal */}
-        
-<div
-  style={{
-    width: "600px",
-    display: "flex",
-    flexDirection: "column", // et tekst oleks otsingu kohal
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-    padding: "20px",
-    textAlign: "center",
-  }}
->
-  {/* Suur pealkiri */}
-  <h1
-    style={{
-      fontSize: "28px",
-      fontWeight: "600",
-      marginBottom: "20px",
-      color: "#333",
-    }}
-  >
-    Kuidas saame sind aidata?
-  </h1>
-
-  {/* Otsingukast */}
+{/* Väikeste ekraanide pealkiri ja otsing pildi peal */}
+<div className="absolute left-1/2 top-[75%] transform -translate-x-1/2 sm:hidden text-center px-4 z-10">
+  <h1 className="text-white text-2xl font-semibold mb-4">Kuidas saame sind aidata?</h1>
   <input
     type="text"
     placeholder="🔍 Otsi..."
     value={searchTerm}
     onChange={(e) => setSearchTerm(e.target.value)}
-    style={{
-      padding: "12px 18px",
-      borderRadius: "25px",
-      border: "1px solid #ccc",
-      width: "100%",
-      fontSize: "14px",
-      outline: "none",
-    }}
+    className="w-[90vw] bg-white px-5 py-3 rounded-full border border-gray-300 text-sm outline-none
+               shadow-md focus:border-pink-300 focus:ring-1 focus:ring-pink-200"
   />
-
-  {/* Dropdown otsingutulemused */}
   {filteredTopics.length > 0 && (
-<div
-  style={{
-    position: "absolute",
-    top: "205px", // nihutasin allapoole, sest pealkiri on lisatud
-    right: "20px",
-    left: "20px",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-    maxHeight: "260px",
-    overflowY: "auto",
-    zIndex: 100,
-    textAlign: "left", // <-- õige property
-  }}
->
-
+    <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-gray-300
+                    rounded-md shadow-lg max-h-64 overflow-y-auto z-20">
       {filteredTopics.map((topic) => (
         <div
           key={topic.title + topic.categoryName}
@@ -243,94 +228,75 @@ const HelpPage: React.FC = () => {
             setSelectedTopic(topic);
             setSearchTerm("");
           }}
-          style={{
-            padding: "12px",
-            cursor: "pointer",
-            borderBottom: "1px solid #eee",
-          }}
+          className="p-3 cursor-pointer border-b border-gray-100 hover:bg-pink-50"
         >
-          <div style={{ fontWeight: "bold" }}>{topic.title}</div>
-          <div style={{ fontSize: "12px", color: "#666" }}>{topic.categoryName}</div>
+          <div className="font-bold">{topic.title}</div>
+          <div className="text-xs text-gray-600">{topic.categoryName}</div>
         </div>
       ))}
     </div>
   )}
 </div>
 
-      </div>
-
-      {/* Alumine ala: vasakul teemad, paremal sisu */}
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        {/* Vasak külgriba teemadega */}
-        <div
-          style={{
-            width: "260px",
-            borderRight: "1px solid #ccc",
-            padding: "15px",
-            overflowY: "auto",
-            backgroundColor: "#fafafa",
-          }}
-        >
-          {selectedCategory.topics.map((topic) => (
-            <div
-              key={topic.title}
-              onClick={() => setSelectedTopic(topic)}
-              style={{
-                padding: "10px",
-                marginBottom: "6px",
-                cursor: "pointer",
-                borderRadius: "6px",
-                backgroundColor:
-                  topic.title === selectedTopic.title ? "#ffe6e6" : "transparent",
-                transition: "background 0.2s",
-              }}
-            >
-              {topic.title}
-            </div>
-          ))}
-        </div>
-
-        {/* Paremal põhisisu */}
-        <div style={{ flex: 1, padding: "30px", overflowY: "auto" }}>
-          {/* Kategooriate nupud */}
-          <div style={{ marginBottom: "25px" }}>
-            {categories.map((cat) => (
-              <button
-                key={cat.name}
-                onClick={() => {
-                  setSelectedCategory(cat);
-                  setSelectedTopic(cat.topics[0]);
-                  setSearchTerm("");
-                }}
-                style={{
-                  marginRight: "10px",
-                  padding: "8px 18px",
-                  border: "1px solid #ccc",
-                  borderRadius: "25px",
-                  backgroundColor:
-                    cat.name === selectedCategory.name ? "#f4c2c2" : "#fff",
-                  cursor: "pointer",
-                  transition: "background 0.2s",
-                }}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-
-          {/* Valitud teema */}
-          <h2 style={{ marginBottom: "20px" }}>{selectedTopic.title}</h2>
-          <ol style={{ paddingLeft: "20px" }}>
-            {selectedTopic.content.map((point, idx) => (
-              <li key={idx} style={{ marginBottom: "12px", lineHeight: "1.6" }}>
-                {point}
-              </li>
-            ))}
-          </ol>
-        </div>
-      </div>
     </div>
-  );
+<div className="mb-6 flex flex-wrap gap-2 items-center justify-center mt-10">
+  {categories.map((cat) => (
+    <button
+      key={cat.name}
+      onClick={() => {
+        setSelectedCategory(cat);
+        setSelectedTopic(cat.topics[0]);
+        setSearchTerm("");
+      }}
+      className={`px-4 py-2 rounded-full border transition-colors ${
+        cat.name === selectedCategory.name
+          ? "bg-pink-200 border-pink-400"
+          : "bg-white border-gray-300"
+      }`}
+    >
+      {cat.name}
+    </button>
+  ))}
+</div>
+
+    {/* Alumine ala: vasakul teemad, paremal sisu */}
+<div className="flex flex-1 overflow-hidden justify-center mb-10">
+  <div className="flex w-full max-w-5xl overflow-hidden">
+    {/* Vasak külgriba */}
+    <div className="w-64 p-4 overflow-y-auto border">
+      {selectedCategory.topics.map((topic) => (
+        <div
+          key={topic.title}
+          onClick={() => setSelectedTopic(topic)}
+          className={`p-2 mb-2 cursor-pointer transition-colors ${
+            topic.title === selectedTopic.title
+              ? "font-bold"
+              : "bg-transparent"
+          }`}
+        >
+          {topic.title}
+        </div>
+      ))}
+    </div>
+
+    {/* Parem sisu */}
+    <div className="flex-1 p-6 overflow-y-auto">
+      {/* Valitud teema sisu */}
+      <h2 className="text-xl font-semibold mb-4">{selectedTopic.title}</h2>
+      <ol className="pl-5 space-y-2">
+        {selectedTopic.content.map((point, idx) => (
+          <li key={idx} className="leading-6">
+            {point}
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</div>
+
+  </div>
+);
+
 };
 
 export default HelpPage;
